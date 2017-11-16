@@ -1,0 +1,15 @@
+spring:
+  rabbitmq:
+    host: localhost
+    username: rengu
+    password: rengu
+    virtual-host: /OMS
+  datasource:
+    url: jdbc:mysql://localhost:3306/OperationsManagementSuiteDB
+    username: rengu
+    password: rengu
+    driver-class-name: com.mysql.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+debug: true

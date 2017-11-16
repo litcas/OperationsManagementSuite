@@ -1,0 +1,5 @@
+spring:
+  profiles:
+    active: debug
+server:
+  display-name: Operations Management Suite
