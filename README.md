@@ -1,5 +1,9 @@
 # OperationsManagementSuite项目说明
 
+## 下载地址
+
+点击[这里](https://github.com/MagnyCopper/OperationsManagementSuite/releases/latest)下载最新版本。
+
 ## 开发环境配置说明
 
 ### MySQL安装配置
