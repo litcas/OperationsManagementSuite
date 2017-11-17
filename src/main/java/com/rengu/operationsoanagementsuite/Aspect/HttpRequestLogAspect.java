@@ -1,7 +1,8 @@
 package com.rengu.operationsoanagementsuite.Aspect;
 
-import com.rengu.operationsoanagementsuite.Entity.HttpRequestLogEntity;
-import com.rengu.operationsoanagementsuite.Repository.HttpRequestLogRepository;
+import com.rengu.operationsoanagementsuite.Entity.RequestLogEntity;
+import com.rengu.operationsoanagementsuite.Repository.RequestLogRepository;
+import com.rengu.operationsoanagementsuite.Utils.RequestUtils;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
@@ -18,29 +19,33 @@ import javax.servlet.http.HttpServletRequest;
 @Aspect
 @Component
 public class HttpRequestLogAspect {
+    // 引入日志记录类
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-    private final HttpRequestLogRepository httpRequestLogRepository;
+
+    private final RequestLogRepository requestLogRepository;
 
     @Autowired
-    public HttpRequestLogAspect(HttpRequestLogRepository httpRequestLogRepository) {
-        this.httpRequestLogRepository = httpRequestLogRepository;
+    public HttpRequestLogAspect(RequestLogRepository requestLogRepository) {
+        this.requestLogRepository = requestLogRepository;
     }
 
     @Pointcut("execution ( public * com.rengu.operationsoanagementsuite.Controller..*(..))")
-    public void HttpRequestLogAspect() {
+    public void HttpRequestAspect() {
     }
 
-    @Before("HttpRequestLogAspect()")
+    @Before("HttpRequestAspect()")
     public void doBefore(JoinPoint joinPoint) {
         ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         HttpServletRequest httpServletRequest = servletRequestAttributes.getRequest();
         // 创建请求日志实体
-        HttpRequestLogEntity httpRequestLogEntity = new HttpRequestLogEntity();
-        httpRequestLogEntity.setIp(httpServletRequest.getRemoteAddr());
-        httpRequestLogEntity.setUrl(httpServletRequest.getRequestURI());
-        httpRequestLogEntity.setHttpMethod(httpServletRequest.getMethod());
-        httpRequestLogEntity.setClassMethod(joinPoint.getSignature().getDeclaringTypeName() + "." + joinPoint.getSignature().getName());
-        httpRequestLogEntity.setArgs(httpServletRequest.getParameterMap().toString());
-        httpRequestLogRepository.save(httpRequestLogEntity);
+        RequestLogEntity requestLogEntity = new RequestLogEntity();
+        requestLogEntity.setRequestType(RequestUtils.HTTP);
+        requestLogEntity.setIp(httpServletRequest.getRemoteAddr());
+        requestLogEntity.setUrl(httpServletRequest.getRequestURI());
+        requestLogEntity.setRequestMethod(httpServletRequest.getMethod());
+        requestLogEntity.setResponseMethod(joinPoint.getSignature().getDeclaringTypeName() + "." + joinPoint.getSignature().getName());
+        requestLogRepository.save(requestLogEntity);
+        // 日志输出请求记录
+        logger.info(requestLogEntity.toString());
     }
 }

@@ -4,7 +4,10 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import java.util.*;
 
 @Entity
@@ -18,7 +21,7 @@ public class UserEntity implements UserDetails {
     private boolean credentialsNonExpired = true;
     private boolean enabled = true;
     private Date createTime = new Date();
-    @ManyToMany(cascade = CascadeType.REFRESH, fetch = FetchType.EAGER)
+    @ManyToMany(cascade = CascadeType.REFRESH)
     private List<RoleEntity> roles;
 
     /**
