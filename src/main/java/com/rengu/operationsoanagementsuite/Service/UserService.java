@@ -57,6 +57,19 @@ public class UserService implements UserDetailsService {
         return userRepository.save(userEntity);
     }
 
+    // 删除用户
+    @Transactional
+    public UserEntity deleteUser(String userId) {
+        // 先查寻id是否存在对应的用户
+        UserEntity userEntity = userRepository.findOne(userId);
+        if (userEntity == null) {
+            throw new CustomizeException(ResponseCodeEnum.QUERYFAILED);
+        }
+        // 删除用户信息
+        userRepository.delete(userId);
+        return userEntity;
+    }
+
     //根据用户Id查询用户
     @Transactional
     public UserEntity getUser(String userId) {

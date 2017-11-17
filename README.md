@@ -31,6 +31,14 @@
 * 建立虚拟主机路径"/OMS"
 * 分配rengu用户使用"/OMS"虚拟主机的权限。
 
+## 接口说明
+
+### 用户表
+* 查询所有用户 < GET > http://localhost:port/users
+* 根据Id获取用户 < GET > http://localhost:port/users/{userId}
+* 保存用户 < POST > http://localhost:port/users
+* 根据id删除用户 < DELETE > http://localhost:port/users/{userId}
+
 ## 更新日志
 
 ### 0.0.1-SNAPSHOT (2017年11月14日)
@@ -53,7 +61,7 @@
 * 重构ResponseUtils中生成请求响应对象的方法。
 * 修改请求记录日志表结构增加请求类型字段
 * 对工程做了一些清理和整理工作
-
 * 实现用户注册接口，(注册用户默认为USER角色，检查是否已经注册的用户)
 * 实现查询所有用户信息接口
 * 实现根据用户id查询用户信息接口
+* 实现根据用户id删除

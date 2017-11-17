@@ -28,13 +28,22 @@ public class UserController {
         return ResponseUtils.ok(ResponseUtils.HTTPRESPONSE, loginUser, userEntity);
     }
 
+    // 删除用户
+    @DeleteMapping(value = "/{userId}")
+    public ResponseEntity deleteUser(@AuthenticationPrincipal UserEntity loginUser, @PathVariable String userId) {
+        UserEntity userEntity = userService.deleteUser(userId);
+        return ResponseUtils.ok(ResponseUtils.HTTPRESPONSE, loginUser, userEntity);
+    }
+
     // todo 限制该接口只能通过管理员身份访问
+    // 查询所有用户信息
     @GetMapping
     public ResponseEntity getUsers(@AuthenticationPrincipal UserEntity loginUser) {
         List<UserEntity> userEntityList = userService.getUsers();
         return ResponseUtils.ok(ResponseUtils.HTTPRESPONSE, loginUser, userEntityList);
     }
 
+    //更具id查询用户信息
     @GetMapping(value = "/{userId}")
     public ResponseEntity getUser(@AuthenticationPrincipal UserEntity loginUser, @PathVariable String userId) {
         UserEntity userEntity = userService.getUser(userId);
