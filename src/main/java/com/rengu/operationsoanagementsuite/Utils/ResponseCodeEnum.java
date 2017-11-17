@@ -2,7 +2,9 @@ package com.rengu.operationsoanagementsuite.Utils;
 
 public enum ResponseCodeEnum {
     OK(200, "OK"),
-    InternalServerError(500, "Internal Server Error");
+    USERREGISTERED(599, "User Registered"),
+    QUERYFAILED(598, "Query Failed");
+
     private int stateCode;
     private String message;
 

@@ -28,9 +28,9 @@ public class CustomizeErrorController extends BasicErrorController {
         body.put("id", UUID.randomUUID().toString());
         body.put("username", null);
         body.put("createTime", errorAttributes.get("timestamp"));
+        body.put("data", errorAttributes.get("message"));
         body.put("stateCode", errorAttributes.get("status"));
         body.put("message", errorAttributes.get("error"));
-        body.put("data", errorAttributes.get("message"));
         return new ResponseEntity<>(body, status);
     }
 }

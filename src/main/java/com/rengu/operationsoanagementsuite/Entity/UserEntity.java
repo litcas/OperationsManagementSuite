@@ -1,13 +1,11 @@
 package com.rengu.operationsoanagementsuite.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.ManyToMany;
+import javax.persistence.*;
 import java.util.*;
 
 @Entity
@@ -15,13 +13,15 @@ public class UserEntity implements UserDetails {
     @Id
     private String id = UUID.randomUUID().toString();
     private String username;
+    @JsonIgnore
     private String password;
     private boolean accountNonExpired = true;
     private boolean accountNonLocked = true;
     private boolean credentialsNonExpired = true;
     private boolean enabled = true;
     private Date createTime = new Date();
-    @ManyToMany(cascade = CascadeType.REFRESH)
+    @JsonIgnore
+    @ManyToMany(cascade = CascadeType.REFRESH, fetch = FetchType.EAGER)
     private List<RoleEntity> roles;
 
     /**
