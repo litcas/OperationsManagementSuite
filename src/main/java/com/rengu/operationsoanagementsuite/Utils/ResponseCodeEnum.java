@@ -2,8 +2,10 @@ package com.rengu.operationsoanagementsuite.Utils;
 
 public enum ResponseCodeEnum {
     OK(200, "OK"),
-    USERREGISTERED(599, "User Registered"),
-    QUERYFAILED(598, "Query Failed");
+    QUERYFAILED(599, "Query Failed"),
+    DELETEFAILED(598, "Delete Failed"),
+    UPDATEFAILED(597, "Update Failed"),
+    SAVEFAILED(596, "Save Failed");
 
     private int stateCode;
     private String message;

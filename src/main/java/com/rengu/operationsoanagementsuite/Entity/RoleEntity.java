@@ -1,5 +1,6 @@
 package com.rengu.operationsoanagementsuite.Entity;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import java.util.Date;
@@ -9,6 +10,7 @@ import java.util.UUID;
 public class RoleEntity {
     @Id
     private String id = UUID.randomUUID().toString();
+    @Column(unique = true, nullable = false)
     private String role;
     private Date createTime = new Date();
 

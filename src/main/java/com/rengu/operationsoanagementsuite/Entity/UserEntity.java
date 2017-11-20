@@ -12,8 +12,10 @@ import java.util.*;
 public class UserEntity implements UserDetails {
     @Id
     private String id = UUID.randomUUID().toString();
+    @Column(unique = true, nullable = false)
     private String username;
     @JsonIgnore
+    @Column(unique = true, nullable = false)
     private String password;
     private boolean accountNonExpired = true;
     private boolean accountNonLocked = true;

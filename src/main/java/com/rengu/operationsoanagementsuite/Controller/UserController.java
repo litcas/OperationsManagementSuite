@@ -49,4 +49,11 @@ public class UserController {
         UserEntity userEntity = userService.getUser(userId);
         return ResponseUtils.ok(ResponseUtils.HTTPRESPONSE, loginUser, userEntity);
     }
+
+    // 为指定用户绑定指定角色
+    @PutMapping(value = "/{userId}/roles/{roleId}")
+    public ResponseEntity assignRoleToUser(@AuthenticationPrincipal UserEntity loginUser, @PathVariable String userId, @PathVariable String roleId) {
+        UserEntity userEntity = userService.assignRoleToUser(userId, roleId);
+        return ResponseUtils.ok(ResponseUtils.HTTPRESPONSE, loginUser, userEntity);
+    }
 }

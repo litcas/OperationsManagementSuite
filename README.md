@@ -38,6 +38,7 @@
 * 根据Id获取用户 < GET > http://localhost:port/users/{userId}
 * 保存用户 < POST > http://localhost:port/users
 * 根据id删除用户 < DELETE > http://localhost:port/users/{userId}
+* 为角色绑定用户 <PUT> http://localhost:port/users/{userId}/roles/{roleId}
 
 ### 角色表
 * 查询所有角色 < GET > http://localhost:port/roles
@@ -73,3 +74,8 @@
 #### 2017年11月20日
 * 实现查询所有角色信息接口
 * 实现根据角色Id查询角色信息
+
+* 实现为用户绑定角色接口
+* 使用注解的方式配置表字段不能为空，不能重复
+* 实现在服务器启动时初始化数据库数据
+* 增加出现异常时的提示性文字

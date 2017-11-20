@@ -34,7 +34,7 @@ public class RoleController {
     // 更绝角色id查询角色信息
     @GetMapping(value = "/{roleId}")
     public ResponseEntity getRole(@AuthenticationPrincipal UserEntity loginUser, @PathVariable String roleId) {
-        RoleEntity roleEntity = roleService.getRole(roleId);
+        RoleEntity roleEntity = roleService.getRoleById(roleId);
         return ResponseUtils.ok(ResponseUtils.HTTPRESPONSE, loginUser, roleEntity);
     }
 }
