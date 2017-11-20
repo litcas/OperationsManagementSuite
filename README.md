@@ -39,6 +39,10 @@
 * 保存用户 < POST > http://localhost:port/users
 * 根据id删除用户 < DELETE > http://localhost:port/users/{userId}
 
+### 角色表
+* 查询所有角色 < GET > http://localhost:port/roles
+* 根据Id获取角色 < GET > http://localhost:port/roles/{roleId}
+
 ## 更新日志
 
 ### 0.0.1-SNAPSHOT (2017年11月14日)
@@ -65,3 +69,7 @@
 * 实现查询所有用户信息接口
 * 实现根据用户id查询用户信息接口
 * 实现根据用户id删除
+
+#### 2017年11月20日
+* 实现查询所有角色信息接口
+* 实现根据角色Id查询角色信息
