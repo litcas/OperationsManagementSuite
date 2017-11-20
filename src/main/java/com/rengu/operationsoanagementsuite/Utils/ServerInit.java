@@ -6,7 +6,6 @@ import com.rengu.operationsoanagementsuite.Entity.UserEntity;
 import com.rengu.operationsoanagementsuite.Repository.RoleRepository;
 import com.rengu.operationsoanagementsuite.Repository.UserRepository;
 import com.rengu.operationsoanagementsuite.Service.RoleService;
-import com.rengu.operationsoanagementsuite.Service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +21,6 @@ import java.util.List;
 @Order(value = 2)
 public class ServerInit implements CommandLineRunner {
 
-    private final UserService userService;
     private final RoleService roleService;
     private final ServerConfiguration serverConfiguration;
     private final RoleRepository roleRepository;
@@ -31,8 +29,7 @@ public class ServerInit implements CommandLineRunner {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
-    public ServerInit(UserService userService, RoleService roleService, ServerConfiguration serverConfiguration, RoleRepository roleRepository, UserRepository userRepository) {
-        this.userService = userService;
+    public ServerInit(RoleService roleService, ServerConfiguration serverConfiguration, RoleRepository roleRepository, UserRepository userRepository) {
         this.roleService = roleService;
         this.serverConfiguration = serverConfiguration;
         this.roleRepository = roleRepository;
@@ -66,7 +63,8 @@ public class ServerInit implements CommandLineRunner {
             userEntity.setPassword(serverConfiguration.getDefultPassword());
             List<RoleEntity> roleEntityList = new ArrayList<>();
             roleEntityList.add(roleService.getRoleByRole(serverConfiguration.getDefultAdminRole()));
-            userService.saveUser(userEntity);
+            userEntity.setRoles(roleEntityList);
+            userRepository.save(userEntity);
         }
     }
 }
