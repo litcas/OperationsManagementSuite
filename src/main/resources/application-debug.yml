@@ -1,9 +1,4 @@
 spring:
-  rabbitmq:
-    host: localhost
-    username: rengu
-    password: rengu
-    virtual-host: /OMS
   datasource:
     url: jdbc:mysql://localhost:3306/OperationsManagementSuiteDB
     username: rengu

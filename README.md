@@ -15,22 +15,9 @@
   GRANT ALL ON *.* TO 'rengu'@'%';
   ```
 * 建立名为OperationsManagementSuiteDB的数据库。
-
-### RabbitMQ安装配置
-
-* 安装RabbitMQ及其依赖Erlang。
-* 配置RabbitMQ的Web管理页面，在\RabbitMQ Server\rabbitmq_server-x-x-x\sbin目录下执行
-  ```
-  rabbitmq-plugins enable rabbitmq_management
-  ```
-* 访问RabbitMQ的Web管理页面
-  ```
-  http://localhost:15672（默认的用户名密码为guest-guest）
-  ```
-* 建立用户设置用户名和密码均为rengu。
-* 建立虚拟主机路径"/OMS"
-* 分配rengu用户使用"/OMS"虚拟主机的权限。
-
+    ```
+    CREATE DATABASE OperationsManagementSuiteDB;
+    ```
 ## 接口说明
 
 ### 用户表
