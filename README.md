@@ -21,15 +21,19 @@
 ## 接口说明
 
 ### 用户表
-* 查询所有用户 < GET > http://localhost:port/users
-* 根据Id获取用户 < GET > http://localhost:port/users/{userId}
-* 保存用户 < POST > http://localhost:port/users
-* 根据id删除用户 < DELETE > http://localhost:port/users/{userId}
-* 为角色绑定用户 <PUT> http://localhost:port/users/{userId}/roles/{roleId}
+* 查询所有用户 < GET > http://IP:port/users
+* 根据Id获取用户 < GET > http://IP:port/users/{userId}
+* 保存用户 < POST > http://IP:port/users
+* 根据id删除用户 < DELETE > http://IP:port/users/{userId}
+* 为角色绑定用户 <PUT> http://IP:port/users/{userId}/roles/{roleId}
 
 ### 角色表
-* 查询所有角色 < GET > http://localhost:port/roles
-* 根据Id获取角色 < GET > http://localhost:port/roles/{roleId}
+* 查询所有角色 < GET > http://IP:port/roles
+* 根据Id获取角色 < GET > http://IP:port/roles/{roleId}
+
+### 系统表
+* 获取服务器运行系统信息 < GET > http://IP:port/system/info
+* 获取服务器配置信息 < GET > http://IP:port/system/serverconfiguration
 
 ## 更新日志
 
@@ -69,4 +73,5 @@
 * 实现获取系统信息接口。
 
 #### 2017年11月23日
-* 修复了用户表急加载角色表外键的问题。
+* 实现获取服务器配置信息接口
+* 修改获取服务器信息的接口路径
