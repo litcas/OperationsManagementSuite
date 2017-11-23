@@ -23,7 +23,7 @@ public class UserEntity implements UserDetails {
     private boolean enabled = true;
     private Date createTime = new Date();
     @JsonIgnore
-    @ManyToMany(cascade = CascadeType.REFRESH, fetch = FetchType.EAGER)
+    @ManyToMany(cascade = CascadeType.REFRESH)
     private List<RoleEntity> roles;
 
     /**
