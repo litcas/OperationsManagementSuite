@@ -56,7 +56,7 @@ public class UserService implements UserDetailsService {
         if (roleEntity != null) {
             List<RoleEntity> roleEntityList = new ArrayList<>();
             roleEntityList.add(roleEntity);
-            userEntity.setRoles(roleEntityList);
+            userEntity.setRoleEntities(roleEntityList);
         }
         return userRepository.save(userEntity);
     }
@@ -106,7 +106,7 @@ public class UserService implements UserDetailsService {
             logger.info("用户名或密码信息错误，更新失败。");
             throw new CustomizeException(ResponseCodeEnum.UPDATEFAILED);
         }
-        userEntity.getRoles().add(roleEntity);
+        userEntity.getRoleEntities().add(roleEntity);
         return userRepository.save(userEntity);
     }
 

@@ -24,7 +24,7 @@ public class UserEntity implements UserDetails {
     private Date createTime = new Date();
     @JsonIgnore
     @ManyToMany(cascade = CascadeType.REFRESH, fetch = FetchType.EAGER)
-    private List<RoleEntity> roles;
+    private List<RoleEntity> roleEntities;
 
     /**
      * Returns the authorities granted to the user. Cannot return <code>null</code>.
@@ -34,7 +34,7 @@ public class UserEntity implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<GrantedAuthority> grantedAuthorityList = new ArrayList<>();
-        for (RoleEntity roleEntity : roles) {
+        for (RoleEntity roleEntity : roleEntities) {
             grantedAuthorityList.add(new SimpleGrantedAuthority(roleEntity.getRole()));
         }
         return grantedAuthorityList;
@@ -110,11 +110,11 @@ public class UserEntity implements UserDetails {
         this.createTime = createTime;
     }
 
-    public List<RoleEntity> getRoles() {
-        return roles;
+    public List<RoleEntity> getRoleEntities() {
+        return roleEntities;
     }
 
-    public void setRoles(List<RoleEntity> roles) {
-        this.roles = roles;
+    public void setRoleEntities(List<RoleEntity> roleEntities) {
+        this.roleEntities = roleEntities;
     }
 }

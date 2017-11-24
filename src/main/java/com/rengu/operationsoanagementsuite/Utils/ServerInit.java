@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ClassUtils;
 
 import javax.transaction.Transactional;
 import java.util.ArrayList;
@@ -46,6 +47,8 @@ public class ServerInit implements CommandLineRunner {
     @Transactional
     public void run(String... args) throws Exception {
         // 服务启动后执行一些初始化的工作
+        // 初始化服务器根路径
+        serverConfiguration.setLocalPath(ClassUtils.getDefaultClassLoader().getResource("").getPath());
         // 初始化角色
         if (roleRepository.findByRole(serverConfiguration.getDefultUserRole()) == null) {
             logger.info("系统默认角色信息'" + serverConfiguration.getDefultUserRole() + "'不存在，系统自动创建。");
@@ -63,7 +66,7 @@ public class ServerInit implements CommandLineRunner {
             userEntity.setPassword(serverConfiguration.getDefultPassword());
             List<RoleEntity> roleEntityList = new ArrayList<>();
             roleEntityList.add(roleService.getRoleByRole(serverConfiguration.getDefultAdminRole()));
-            userEntity.setRoles(roleEntityList);
+            userEntity.setRoleEntities(roleEntityList);
             userRepository.save(userEntity);
         }
     }
