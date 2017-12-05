@@ -1,6 +1,5 @@
 package com.rengu.operationsoanagementsuite.Entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,18 +11,16 @@ import java.util.*;
 public class UserEntity implements UserDetails {
     @Id
     private String id = UUID.randomUUID().toString();
-    @Column(unique = true, nullable = false)
+    @Column(unique = true)
     private String username;
-    @JsonIgnore
-    @Column(unique = true, nullable = false)
+    @Column(unique = true)
     private String password;
     private boolean accountNonExpired = true;
     private boolean accountNonLocked = true;
     private boolean credentialsNonExpired = true;
     private boolean enabled = true;
     private Date createTime = new Date();
-    @JsonIgnore
-    @ManyToMany(cascade = CascadeType.REFRESH, fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER)
     private List<RoleEntity> roleEntities;
 
     /**

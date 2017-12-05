@@ -5,8 +5,6 @@ import com.rengu.operationsoanagementsuite.Entity.RoleEntity;
 import com.rengu.operationsoanagementsuite.Entity.UserEntity;
 import com.rengu.operationsoanagementsuite.Repository.RoleRepository;
 import com.rengu.operationsoanagementsuite.Repository.UserRepository;
-import com.rengu.operationsoanagementsuite.Utils.CustomizeException;
-import com.rengu.operationsoanagementsuite.Utils.ResponseCodeEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +12,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 
 import javax.transaction.Transactional;
 import java.util.ArrayList;
@@ -37,19 +36,19 @@ public class UserService implements UserDetailsService {
 
     //  保存用户
     @Transactional
-    public UserEntity saveUser(UserEntity userArgs) {
-        //  检查是否输入用户名密码
-        if (userArgs.getUsername().isEmpty() || userArgs.getPassword().isEmpty()) {
-            logger.info("用户名或密码信息错误，保存失败。");
-            throw new CustomizeException(ResponseCodeEnum.SAVEFAILED);
-        }
-        // 检查用户名是否已存在
-        if (userRepository.findByUsername(userArgs.getUsername()) != null) {
-            logger.info("用户信息名称 = '" + userArgs.getUsername() + "'已存在，保存失败。");
-            throw new CustomizeException(ResponseCodeEnum.SAVEFAILED);
-        }
+    public UserEntity saveUser(UserEntity userArgs) throws MissingServletRequestParameterException {
         UserEntity userEntity = new UserEntity();
+        // 检查是否有用户名
+        if (userArgs.getUsername() == null) {
+            logger.info("请求参数解析异常：user.username不存在，保存失败。");
+            throw new MissingServletRequestParameterException("user.username", "String");
+        }
         userEntity.setUsername(userArgs.getUsername());
+        //检查是否有密码
+        if (userArgs.getPassword() == null) {
+            logger.info("请求参数解析异常：user.password不存在，保存失败。");
+            throw new MissingServletRequestParameterException("user.password", "String");
+        }
         userEntity.setPassword(userArgs.getPassword());
         // 绑定默认角色
         RoleEntity roleEntity = roleRepository.findByRole(serverConfiguration.getDefultUserRole());
@@ -63,49 +62,45 @@ public class UserService implements UserDetailsService {
 
     // 删除用户
     @Transactional
-    public UserEntity deleteUser(String userId) {
-        // 先查寻id是否存在对应的用户
-        UserEntity userEntity = userRepository.findOne(userId);
-        if (userEntity == null) {
-            logger.info("用户信息Id = '" + userId + "'不存在，删除失败。");
-            throw new CustomizeException(ResponseCodeEnum.DELETEFAILED);
+    public void deleteUser(String userId) throws MissingServletRequestParameterException {
+        if (userId == null) {
+            logger.info("请求参数解析异常：user.id不存在，删除失败。");
+            throw new MissingServletRequestParameterException("user.id", "String");
         }
-        // 删除用户信息
         userRepository.delete(userId);
-        return userEntity;
     }
 
     //根据用户Id查询用户
     @Transactional
-    public UserEntity getUser(String userId) {
-        UserEntity userEntity = userRepository.findOne(userId);
-        if (userEntity == null) {
-            logger.info("用户信息Id = '" + userId + "'不存在，查询失败。");
-            throw new CustomizeException(ResponseCodeEnum.QUERYFAILED);
+    public UserEntity getUser(String userId) throws MissingServletRequestParameterException {
+        if (userId == null) {
+            logger.info("请求参数解析异常：user.id不存在，查询失败。");
+            throw new MissingServletRequestParameterException("user.id", "String");
         }
+        UserEntity userEntity = userRepository.findOne(userId);
         return userEntity;
     }
 
-    // 查询所有用户
+    // todo 管理员权限：查询所有用户信息
     @Transactional
     public List<UserEntity> getUsers() {
         List<UserEntity> userEntityList = userRepository.findAll();
-        if (userEntityList == null) {
-            logger.info("查询所有用户信息失败");
-            throw new CustomizeException(ResponseCodeEnum.QUERYFAILED);
-        }
         return userEntityList;
     }
 
     // 用户绑定角色
     @Transactional
-    public UserEntity assignRoleToUser(String userId, String roleId) {
-        UserEntity userEntity = userRepository.findOne(userId);
-        RoleEntity roleEntity = roleRepository.findOne(roleId);
-        if (userEntity == null || roleEntity == null) {
-            logger.info("用户名或密码信息错误，更新失败。");
-            throw new CustomizeException(ResponseCodeEnum.UPDATEFAILED);
+    public UserEntity assignRoleToUser(String userId, String roleId) throws MissingServletRequestParameterException {
+        if (userId == null) {
+            logger.info("请求参数解析异常：user.id不存在，更新失败。");
+            throw new MissingServletRequestParameterException("user.id", "String");
         }
+        UserEntity userEntity = userRepository.findOne(userId);
+        if (roleId == null) {
+            logger.info("请求参数解析异常：role.id不存在，更新失败。");
+            throw new MissingServletRequestParameterException("role.id", "String");
+        }
+        RoleEntity roleEntity = roleRepository.findOne(roleId);
         userEntity.getRoleEntities().add(roleEntity);
         return userRepository.save(userEntity);
     }

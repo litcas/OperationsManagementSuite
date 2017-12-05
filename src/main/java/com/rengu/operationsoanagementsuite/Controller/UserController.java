@@ -2,10 +2,12 @@ package com.rengu.operationsoanagementsuite.Controller;
 
 import com.rengu.operationsoanagementsuite.Entity.UserEntity;
 import com.rengu.operationsoanagementsuite.Service.UserService;
-import com.rengu.operationsoanagementsuite.Utils.ResponseEntity;
-import com.rengu.operationsoanagementsuite.Utils.ResponseUtils;
+import com.rengu.operationsoanagementsuite.Utils.ResultEntity;
+import com.rengu.operationsoanagementsuite.Utils.ResultUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,46 +16,41 @@ import java.util.List;
 @RequestMapping(value = "/users")
 public class UserController {
 
-    private final UserService userService;
-
     @Autowired
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
+    private UserService userService;
 
     // 新建用户
     @PostMapping
-    public ResponseEntity saveUser(@AuthenticationPrincipal UserEntity loginUser, UserEntity userArgs) {
+    public ResultEntity saveUser(@AuthenticationPrincipal UserEntity loginUser, UserEntity userArgs) throws MissingServletRequestParameterException {
         UserEntity userEntity = userService.saveUser(userArgs);
-        return ResponseUtils.ok(ResponseUtils.HTTPRESPONSE, loginUser, userEntity);
+        return ResultUtils.init(HttpStatus.CREATED, ResultUtils.HTTPRESPONSE, loginUser, userEntity);
     }
 
     // 删除用户
     @DeleteMapping(value = "/{userId}")
-    public ResponseEntity deleteUser(@AuthenticationPrincipal UserEntity loginUser, @PathVariable String userId) {
-        UserEntity userEntity = userService.deleteUser(userId);
-        return ResponseUtils.ok(ResponseUtils.HTTPRESPONSE, loginUser, userEntity);
+    public ResultEntity deleteUser(@AuthenticationPrincipal UserEntity loginUser, @PathVariable String userId) throws MissingServletRequestParameterException {
+        userService.deleteUser(userId);
+        return ResultUtils.init(HttpStatus.NO_CONTENT, ResultUtils.HTTPRESPONSE, loginUser, null);
     }
 
-    // todo 限制该接口只能通过管理员身份访问
     // 查询所有用户信息
     @GetMapping
-    public ResponseEntity getUsers(@AuthenticationPrincipal UserEntity loginUser) {
+    public ResultEntity getUsers(@AuthenticationPrincipal UserEntity loginUser) {
         List<UserEntity> userEntityList = userService.getUsers();
-        return ResponseUtils.ok(ResponseUtils.HTTPRESPONSE, loginUser, userEntityList);
+        return ResultUtils.init(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, userEntityList);
     }
 
     //更具id查询用户信息
     @GetMapping(value = "/{userId}")
-    public ResponseEntity getUser(@AuthenticationPrincipal UserEntity loginUser, @PathVariable String userId) {
+    public ResultEntity getUser(@AuthenticationPrincipal UserEntity loginUser, @PathVariable String userId) throws MissingServletRequestParameterException {
         UserEntity userEntity = userService.getUser(userId);
-        return ResponseUtils.ok(ResponseUtils.HTTPRESPONSE, loginUser, userEntity);
+        return ResultUtils.init(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, userEntity);
     }
 
     // 为指定用户绑定指定角色
     @PutMapping(value = "/{userId}/roles/{roleId}")
-    public ResponseEntity assignRoleToUser(@AuthenticationPrincipal UserEntity loginUser, @PathVariable String userId, @PathVariable String roleId) {
+    public ResultEntity assignRoleToUser(@AuthenticationPrincipal UserEntity loginUser, @PathVariable String userId, @PathVariable String roleId) throws MissingServletRequestParameterException {
         UserEntity userEntity = userService.assignRoleToUser(userId, roleId);
-        return ResponseUtils.ok(ResponseUtils.HTTPRESPONSE, loginUser, userEntity);
+        return ResultUtils.init(HttpStatus.NO_CONTENT, ResultUtils.HTTPRESPONSE, loginUser, userEntity);
     }
 }

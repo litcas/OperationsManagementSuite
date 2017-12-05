@@ -10,7 +10,7 @@ import java.util.UUID;
 public class RoleEntity {
     @Id
     private String id = UUID.randomUUID().toString();
-    @Column(unique = true, nullable = false)
+    @Column(unique = true)
     private String role;
     private Date createTime = new Date();
 

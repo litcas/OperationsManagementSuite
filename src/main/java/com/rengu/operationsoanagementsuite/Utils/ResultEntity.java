@@ -1,20 +1,26 @@
 package com.rengu.operationsoanagementsuite.Utils;
 
+import org.springframework.http.HttpStatus;
+
 import java.util.Date;
 import java.util.UUID;
 
-public class ResponseEntity<T> {
+public class ResultEntity<T> {
+
     private String id = UUID.randomUUID().toString();
-    private String username;
     private Date createTime = new Date();
-    private String responseType;
-    private int stateCode;
+    private String username;
+    private String type;
+    private int code;
     private String message;
     private T data;
 
-    public ResponseEntity(ResponseCodeEnum responseCodeEnum) {
-        this.stateCode = responseCodeEnum.getStateCode();
-        this.message = responseCodeEnum.getMessage();
+    public ResultEntity() {
+    }
+
+    public ResultEntity(HttpStatus status) {
+        this.code = status.value();
+        this.message = status.getReasonPhrase();
     }
 
     public String getId() {
@@ -25,14 +31,6 @@ public class ResponseEntity<T> {
         this.id = id;
     }
 
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
     public Date getCreateTime() {
         return createTime;
     }
@@ -41,20 +39,28 @@ public class ResponseEntity<T> {
         this.createTime = createTime;
     }
 
-    public String getResponseType() {
-        return responseType;
+    public String getUsername() {
+        return username;
     }
 
-    public void setResponseType(String responseType) {
-        this.responseType = responseType;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
-    public int getStateCode() {
-        return stateCode;
+    public String getType() {
+        return type;
     }
 
-    public void setStateCode(int stateCode) {
-        this.stateCode = stateCode;
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public int getCode() {
+        return code;
+    }
+
+    public void setCode(int code) {
+        this.code = code;
     }
 
     public String getMessage() {
