@@ -5,8 +5,6 @@ import com.rengu.operationsoanagementsuite.Entity.UserEntity;
 import com.rengu.operationsoanagementsuite.Service.ComponentService;
 import com.rengu.operationsoanagementsuite.Utils.ResultEntity;
 import com.rengu.operationsoanagementsuite.Utils.ResultUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -23,9 +21,6 @@ import java.security.NoSuchAlgorithmException;
 @RestController
 @RequestMapping(value = "/components")
 public class ComponentController {
-
-    // 引入日志记录类
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
     @Autowired
     private ComponentService componentService;
 

@@ -37,7 +37,7 @@ public class ComponentFileService {
             // 将缓存文件复制到库文件夹下
             // todo 库路径改为自动获取jar包的运行目录
             String libPath = "/Users/hanchangming/Desktop/test/";
-            File file = new File(libPath + componentEntity.getName() + componentEntity.getVersion() + "/" + multipartFile.getOriginalFilename());
+            File file = new File(libPath + componentEntity.getName() + "-" + componentEntity.getVersion() + "/" + multipartFile.getOriginalFilename());
             FileUtils.copyFile(cacheFile, file);
             // 获取文件扩展名
             ComponentFileEntity componentFileEntity = new ComponentFileEntity();

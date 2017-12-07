@@ -25,6 +25,8 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         // 关闭CSRF
         http.csrf().disable();
+        // 启用CORS
+        http.cors();
         // 关闭Session鉴权
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         // 启用http basic验证
