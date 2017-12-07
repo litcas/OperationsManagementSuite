@@ -19,7 +19,9 @@ public class ComponentEntity {
     private String description;
     private boolean latest;
     @OneToMany
-    private List<UserEntity> owner;
+    private List<UserEntity> userEntities;
+    @OneToMany
+    private List<ComponentFileEntity> componentFileEntities;
 
     public String getId() {
         return id;
@@ -69,11 +71,19 @@ public class ComponentEntity {
         this.latest = latest;
     }
 
-    public List<UserEntity> getOwner() {
-        return owner;
+    public List<UserEntity> getUserEntities() {
+        return userEntities;
     }
 
-    public void setOwner(List<UserEntity> owner) {
-        this.owner = owner;
+    public void setUserEntities(List<UserEntity> userEntities) {
+        this.userEntities = userEntities;
+    }
+
+    public List<ComponentFileEntity> getComponentFileEntities() {
+        return componentFileEntities;
+    }
+
+    public void setComponentFileEntities(List<ComponentFileEntity> componentFileEntities) {
+        this.componentFileEntities = componentFileEntities;
     }
 }

@@ -14,7 +14,6 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ClassUtils;
 
-import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,20 +21,17 @@ import java.util.List;
 @Order(value = 2)
 public class ServerInit implements CommandLineRunner {
 
-    private final RoleService roleService;
-    private final ServerConfiguration serverConfiguration;
-    private final RoleRepository roleRepository;
-    private final UserRepository userRepository;
     // 引入日志记录类
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-
     @Autowired
-    public ServerInit(RoleService roleService, ServerConfiguration serverConfiguration, RoleRepository roleRepository, UserRepository userRepository) {
-        this.roleService = roleService;
-        this.serverConfiguration = serverConfiguration;
-        this.roleRepository = roleRepository;
-        this.userRepository = userRepository;
-    }
+    private RoleService roleService;
+    @Autowired
+    private ServerConfiguration serverConfiguration;
+    @Autowired
+    private RoleRepository roleRepository;
+    @Autowired
+    private UserRepository userRepository;
+
 
     /**
      * Callback used to run the bean.
@@ -44,7 +40,6 @@ public class ServerInit implements CommandLineRunner {
      * @throws Exception on error
      */
     @Override
-    @Transactional
     public void run(String... args) throws Exception {
         // 服务启动后执行一些初始化的工作
         // 初始化服务器根路径

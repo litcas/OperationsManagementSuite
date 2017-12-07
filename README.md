@@ -10,10 +10,10 @@
 
 * 安装MySQL数据库。
 * 建立数据库用户，并分配权限。
-  ```
-  CREATE USER 'rengu'@'%' IDENTIFIED BY 'rengu';
-  GRANT ALL ON *.* TO 'rengu'@'%';
-  ```
+    ```
+    CREATE USER 'rengu'@'%' IDENTIFIED BY 'rengu';
+    GRANT ALL ON *.* TO 'rengu'@'%';
+    ```
 * 建立名为OperationsManagementSuiteDB的数据库。
     ```
     CREATE DATABASE OperationsManagementSuiteDB;
@@ -34,6 +34,9 @@
 ### 系统表
 * 获取服务器运行系统信息 < GET > http://IP:port/system/info
 * 获取服务器配置信息 < GET > http://IP:port/system/serverconfiguration
+
+### 组件表
+* 新增组件 < POST > http://IP:port/components
 
 ## 更新日志
 
@@ -83,3 +86,10 @@
 * 整理统一异常处理逻辑，修改异常捕获方法。
 * 更新了返回结果实体类，返回结果生成方法等。
 * 创建组件软件表结构。
+
+#### 2017年12月6日
+* 修复了在返回错误结果时，有时会产生Jackson由于循环引用导致序列化失败的问题。
+* 修复了保存组件时可以重复保存同名组件的问题。
+* 添加了commons-io、commons-compress工具类依赖。
+* 添加组件文件表结构
+* 实现是浏览器文件上传，解析，生成组件文件记录，组件实体文件及联保存组件实体文件

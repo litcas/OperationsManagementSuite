@@ -25,7 +25,10 @@ public class CustomizeErrorController implements ErrorController {
     @RequestMapping(value = PATH)
     public ResultEntity error(HttpServletRequest request, HttpServletResponse response) {
         Throwable throwable = getError(request);
-        return ResultUtils.init(HttpStatus.valueOf(response.getStatus()), ResultUtils.ERROR, throwable);
+        if (throwable == null) {
+            return ResultUtils.init(HttpStatus.valueOf(response.getStatus()), ResultUtils.ERROR, null);
+        }
+        return ResultUtils.init(HttpStatus.valueOf(response.getStatus()), ResultUtils.ERROR, throwable.getMessage());
     }
 
     @Override
