@@ -21,22 +21,23 @@
 ## 接口说明
 
 ### 用户表
-* 查询所有用户 < GET > http://IP:port/users
-* 根据Id获取用户 < GET > http://IP:port/users/{userId}
-* 保存用户 < POST > http://IP:port/users
-* 根据id删除用户 < DELETE > http://IP:port/users/{userId}
-* 为角色绑定用户 <PUT> http://IP:port/users/{userId}/roles/{roleId}
+* 查询所有用户（管理员） < GET > http://IP:8080/users
+* 查询用户 < GET > http://IP:8080/users/{userId}
+* 保存用户 < POST > http://IP:8080/users（username、password）
+* 删除用户 < DELETE > http://IP:8080/users/{userId}
+* 绑定角色（管理员） <PUT> http://IP:8080/users/{userId}/roles/{roleId}
 
 ### 角色表
-* 查询所有角色 < GET > http://IP:port/roles
-* 根据Id获取角色 < GET > http://IP:port/roles/{roleId}
+* 查询所有角色（管理员） < GET > http://IP:8080/roles
+* 查询角色 < GET > http://IP:8080/roles/{roleId}
 
 ### 系统表
-* 获取服务器运行系统信息 < GET > http://IP:port/system/info
-* 获取服务器配置信息 < GET > http://IP:port/system/serverconfiguration
+* 查询系统信息 < GET > http://IP:8080/system/info
+* 查询系统配置信息 < GET > http://IP:8080/system/serverconfiguration
 
 ### 组件表
-* 新增组件 < POST > http://IP:port/components
+* 新增组件 < POST > http://IP:8080/components（name、componentfile）
+* 查询组件 < GET > http://IP:8080/components
 
 ## 更新日志
 
@@ -97,3 +98,6 @@
 #### 2017年12月7日
 * 在组件实体文件入库时，使用"-"连接组件名称和版本号。
 * 实现允许响应跨域访问的配置类。
+* 修改ReadMe文件的格式
+* 解决MySQL中文乱码问题
+* 实现用户和管理员的接口权限分离功能

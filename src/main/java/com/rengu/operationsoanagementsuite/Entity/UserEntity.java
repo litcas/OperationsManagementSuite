@@ -11,15 +11,14 @@ import java.util.*;
 public class UserEntity implements UserDetails {
     @Id
     private String id = UUID.randomUUID().toString();
+    private Date createTime = new Date();
     @Column(unique = true)
     private String username;
-    @Column(unique = true)
     private String password;
     private boolean accountNonExpired = true;
     private boolean accountNonLocked = true;
     private boolean credentialsNonExpired = true;
     private boolean enabled = true;
-    private Date createTime = new Date();
     @ManyToMany(fetch = FetchType.EAGER)
     private List<RoleEntity> roleEntities;
 

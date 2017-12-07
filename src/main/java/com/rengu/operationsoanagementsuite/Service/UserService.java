@@ -77,15 +77,12 @@ public class UserService implements UserDetailsService {
             logger.info("请求参数解析异常：user.id不存在，查询失败。");
             throw new MissingServletRequestParameterException("user.id", "String");
         }
-        UserEntity userEntity = userRepository.findOne(userId);
-        return userEntity;
+        return userRepository.findOne(userId);
     }
 
-    // todo 管理员权限：查询所有用户信息
     @Transactional
     public List<UserEntity> getUsers() {
-        List<UserEntity> userEntityList = userRepository.findAll();
-        return userEntityList;
+        return userRepository.findAll();
     }
 
     // 用户绑定角色

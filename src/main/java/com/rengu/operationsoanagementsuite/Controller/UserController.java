@@ -6,6 +6,7 @@ import com.rengu.operationsoanagementsuite.Utils.ResultEntity;
 import com.rengu.operationsoanagementsuite.Utils.ResultUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.*;
@@ -34,6 +35,7 @@ public class UserController {
     }
 
     // 查询所有用户信息
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping
     public ResultEntity getUsers(@AuthenticationPrincipal UserEntity loginUser) {
         List<UserEntity> userEntityList = userService.getUsers();
@@ -48,6 +50,7 @@ public class UserController {
     }
 
     // 为指定用户绑定指定角色
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping(value = "/{userId}/roles/{roleId}")
     public ResultEntity assignRoleToUser(@AuthenticationPrincipal UserEntity loginUser, @PathVariable String userId, @PathVariable String roleId) throws MissingServletRequestParameterException {
         UserEntity userEntity = userService.assignRoleToUser(userId, roleId);

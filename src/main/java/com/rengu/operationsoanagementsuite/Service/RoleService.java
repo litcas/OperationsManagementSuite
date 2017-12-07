@@ -18,11 +18,9 @@ public class RoleService {
     @Autowired
     private RoleRepository roleRepository;
 
-    // todo 管理员权限：查询所有角色信息
     @Transactional
     public List<RoleEntity> getRoles() {
-        List<RoleEntity> roleEntityList = roleRepository.findAll();
-        return roleEntityList;
+        return roleRepository.findAll();
     }
 
     // 根据角色id查询角色信息
@@ -32,8 +30,7 @@ public class RoleService {
             logger.info("请求参数解析异常：role.id不存在，查询失败。");
             throw new MissingServletRequestParameterException("role.id", "String");
         }
-        RoleEntity roleEntity = roleRepository.findOne(roleId);
-        return roleEntity;
+        return roleRepository.findOne(roleId);
     }
 
     // 根据角色名称查询角色信息
@@ -43,8 +40,7 @@ public class RoleService {
             logger.info("请求参数解析异常：role.name不存在，查询失败。");
             throw new MissingServletRequestParameterException("role.name", "String");
         }
-        RoleEntity roleEntity = roleRepository.findByRole(role);
-        return roleEntity;
+        return roleRepository.findByRole(role);
     }
 
     //保存角色信息

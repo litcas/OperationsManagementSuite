@@ -1,7 +1,6 @@
 package com.rengu.operationsoanagementsuite.Service;
 
 import com.rengu.operationsoanagementsuite.Entity.ComponentEntity;
-import com.rengu.operationsoanagementsuite.Entity.ComponentFileEntity;
 import com.rengu.operationsoanagementsuite.Entity.UserEntity;
 import com.rengu.operationsoanagementsuite.Repository.ComponentRepository;
 import org.slf4j.Logger;
@@ -61,10 +60,8 @@ public class ComponentService {
         List<UserEntity> userEntities = new ArrayList<>();
         userEntities.add(loginUser);
         componentEntity.setUserEntities(userEntities);
-        // 生成组件文件集合
-        List<ComponentFileEntity> componentFileEntityList = componentFileService.saveComponentFile(multipartFiles, componentEntity);
         // 设置组件文件关联
-        componentEntity.setComponentFileEntities(componentFileEntityList);
+        componentEntity.setComponentFileEntities(componentFileService.saveComponentFile(multipartFiles, componentEntity));
         return componentRepository.save(componentEntity);
     }
 
@@ -72,5 +69,10 @@ public class ComponentService {
     private boolean hasComponent(String componentName) {
         List<ComponentEntity> componentEntityList = componentRepository.findByName(componentName);
         return componentEntityList.size() > 0;
+    }
+
+    // 查询所有组件
+    public List<ComponentEntity> getComponents() {
+        return componentRepository.findAll();
     }
 }
