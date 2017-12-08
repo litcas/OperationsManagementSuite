@@ -1,5 +1,6 @@
 package com.rengu.operationsoanagementsuite.Configuration;
 
+import org.apache.commons.io.FileUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -11,8 +12,8 @@ public class ServerConfiguration {
     private String defultAdminRole = "ADMIN";
     private String defultUserName = "admin";
     private String defultPassword = "admin";
-
-    private String localPath = "";
+    // 默认设置为系统缓存目录
+    private String libraryPath = FileUtils.getTempDirectoryPath();
 
     public String getDefultUserRole() {
         return defultUserRole;
@@ -46,11 +47,11 @@ public class ServerConfiguration {
         this.defultPassword = defultPassword;
     }
 
-    public String getLocalPath() {
-        return localPath;
+    public String getLibraryPath() {
+        return libraryPath;
     }
 
-    public void setLocalPath(String localPath) {
-        this.localPath = localPath;
+    public void setLibraryPath(String libraryPath) {
+        this.libraryPath = libraryPath;
     }
 }

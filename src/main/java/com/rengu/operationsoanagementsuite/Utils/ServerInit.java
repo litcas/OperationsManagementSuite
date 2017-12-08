@@ -42,8 +42,13 @@ public class ServerInit implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         // 服务启动后执行一些初始化的工作
-        // 初始化服务器根路径
-        serverConfiguration.setLocalPath(ClassUtils.getDefaultClassLoader().getResource("").getPath());
+        logger.info(ClassUtils.getDefaultClassLoader().getResource("").getPath());
+        String libraryPath = ClassUtils.getDefaultClassLoader().getResource("").getPath();
+        // 调试环境获取组件库路径
+        if (libraryPath.endsWith("/target/classes/")) {
+            libraryPath = libraryPath.replace("classes/", "");
+            serverConfiguration.setLibraryPath(libraryPath);
+        }
         // 初始化角色
         if (roleRepository.findByRole(serverConfiguration.getDefultUserRole()) == null) {
             logger.info("系统默认角色信息'" + serverConfiguration.getDefultUserRole() + "'不存在，系统自动创建。");

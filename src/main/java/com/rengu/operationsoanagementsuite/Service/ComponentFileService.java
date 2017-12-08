@@ -1,5 +1,6 @@
 package com.rengu.operationsoanagementsuite.Service;
 
+import com.rengu.operationsoanagementsuite.Configuration.ServerConfiguration;
 import com.rengu.operationsoanagementsuite.Entity.ComponentEntity;
 import com.rengu.operationsoanagementsuite.Entity.ComponentFileEntity;
 import com.rengu.operationsoanagementsuite.Repository.ComponentFileRepository;
@@ -25,6 +26,8 @@ public class ComponentFileService {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     @Autowired
     private ComponentFileRepository componentFileRepository;
+    @Autowired
+    private ServerConfiguration serverConfiguration;
 
     @Transactional
     public List<ComponentFileEntity> saveComponentFile(MultipartFile[] multipartFiles, ComponentEntity componentEntity) throws IOException, NoSuchAlgorithmException {
@@ -35,9 +38,7 @@ public class ComponentFileService {
             // 将文件输出到缓存文件夹
             FileUtils.copyInputStreamToFile(multipartFile.getInputStream(), cacheFile);
             // 将缓存文件复制到库文件夹下
-            // todo 库路径改为自动获取jar包的运行目录
-            String libPath = "/Users/hanchangming/Desktop/test/";
-            File file = new File(libPath + componentEntity.getName() + "-" + componentEntity.getVersion() + "/" + multipartFile.getOriginalFilename());
+            File file = new File(serverConfiguration.getLibraryPath() + componentEntity.getName() + "-" + componentEntity.getVersion() + "/" + multipartFile.getOriginalFilename());
             FileUtils.copyFile(cacheFile, file);
             // 获取文件扩展名
             ComponentFileEntity componentFileEntity = new ComponentFileEntity();
