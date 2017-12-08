@@ -35,4 +35,11 @@ public class ComponentController {
         List<ComponentEntity> componentEntityList = componentService.getComponents();
         return ResultUtils.init(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, componentEntityList);
     }
+
+    // 更新组件
+    @PutMapping(value = "/{componentId}")
+    public ResultEntity updategetComponents(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "componentId") String componentId) throws IOException {
+        ComponentEntity componentEntity = componentService.updategetComponents(componentId);
+        return ResultUtils.init(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, componentEntity);
+    }
 }

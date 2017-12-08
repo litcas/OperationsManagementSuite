@@ -17,7 +17,7 @@ public class ComponentEntity {
     private String name;
     private String version;
     private String description;
-    private boolean latest;
+    private boolean latest = false;
     @OneToMany
     private List<UserEntity> userEntities;
     @OneToMany

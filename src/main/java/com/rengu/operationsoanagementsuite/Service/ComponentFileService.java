@@ -1,9 +1,9 @@
 package com.rengu.operationsoanagementsuite.Service;
 
-import com.rengu.operationsoanagementsuite.Configuration.ServerConfiguration;
 import com.rengu.operationsoanagementsuite.Entity.ComponentEntity;
 import com.rengu.operationsoanagementsuite.Entity.ComponentFileEntity;
 import com.rengu.operationsoanagementsuite.Repository.ComponentFileRepository;
+import com.rengu.operationsoanagementsuite.Utils.ComponentUtils;
 import com.rengu.operationsoanagementsuite.Utils.Tools;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -27,7 +27,7 @@ public class ComponentFileService {
     @Autowired
     private ComponentFileRepository componentFileRepository;
     @Autowired
-    private ServerConfiguration serverConfiguration;
+    private ComponentUtils componentUtils;
 
     @Transactional
     public List<ComponentFileEntity> saveComponentFile(MultipartFile[] multipartFiles, ComponentEntity componentEntity) throws IOException, NoSuchAlgorithmException {
@@ -38,7 +38,7 @@ public class ComponentFileService {
             // 将文件输出到缓存文件夹
             FileUtils.copyInputStreamToFile(multipartFile.getInputStream(), cacheFile);
             // 将缓存文件复制到库文件夹下
-            File file = new File(serverConfiguration.getLibraryPath() + componentEntity.getName() + "-" + componentEntity.getVersion() + "/" + multipartFile.getOriginalFilename());
+            File file = new File(componentUtils.getLibraryPath(componentEntity) + multipartFile.getOriginalFilename());
             FileUtils.copyFile(cacheFile, file);
             // 获取文件扩展名
             ComponentFileEntity componentFileEntity = new ComponentFileEntity();

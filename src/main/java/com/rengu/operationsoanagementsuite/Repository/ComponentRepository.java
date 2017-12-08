@@ -8,5 +8,8 @@ import java.util.List;
 
 @Repository
 public interface ComponentRepository extends JpaRepository<ComponentEntity, String> {
+
     List<ComponentEntity> findByName(String componentName);
+
+    ComponentEntity findByNameAndLatest(String componentName, boolean isLatest);
 }

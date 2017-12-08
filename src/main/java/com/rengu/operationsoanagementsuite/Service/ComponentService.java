@@ -2,9 +2,13 @@ package com.rengu.operationsoanagementsuite.Service;
 
 import com.rengu.operationsoanagementsuite.Entity.ComponentEntity;
 import com.rengu.operationsoanagementsuite.Entity.UserEntity;
+import com.rengu.operationsoanagementsuite.Exception.CustomizeException;
 import com.rengu.operationsoanagementsuite.Repository.ComponentRepository;
+import com.rengu.operationsoanagementsuite.Utils.ComponentUtils;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -12,10 +16,13 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
+import java.io.File;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class ComponentService {
@@ -26,6 +33,8 @@ public class ComponentService {
     private ComponentRepository componentRepository;
     @Autowired
     private ComponentFileService componentFileService;
+    @Autowired
+    private ComponentUtils componentUtils;
 
     // 新建组件
     @Transactional
@@ -36,7 +45,7 @@ public class ComponentService {
             throw new MissingServletRequestParameterException("component.name", "String");
         }
         // 检查组件是否存在
-        if (hasComponent(componentArgs.getName())) {
+        if (componentRepository.findByName(componentArgs.getName()).size() > 0) {
             logger.info("名称为：" + componentArgs.getName() + "的组件已存在，保存失败。");
             throw new DataIntegrityViolationException("名称为：" + componentArgs.getName() + "的组件已存在，保存失败。");
         }
@@ -65,14 +74,37 @@ public class ComponentService {
         return componentRepository.save(componentEntity);
     }
 
-    // 检查是否存在该名称的组件
-    private boolean hasComponent(String componentName) {
-        List<ComponentEntity> componentEntityList = componentRepository.findByName(componentName);
-        return componentEntityList.size() > 0;
-    }
-
     // 查询所有组件
     public List<ComponentEntity> getComponents() {
         return componentRepository.findAll();
     }
+
+    // 更新组件信息
+    @Transactional
+    public ComponentEntity updategetComponents(String componentId) throws IOException {
+        if (componentRepository.findOne(componentId) == null) {
+            logger.info("请求参数不正确：id = " + componentId + "的组件不存在，更新失败。");
+            throw new CustomizeException("请求参数不正确：id = " + componentId + "的组件不存在，更新失败。");
+        }
+        // 查询需要修改的组件
+        ComponentEntity modifyComponentEntity = componentRepository.findOne(componentId);
+        // 查询需要修改的组件的最新版本号
+        ComponentEntity latestComponentEntity = componentRepository.findByNameAndLatest(modifyComponentEntity.getName(), true);
+        // 复制需要修改的组件对象
+        ComponentEntity componentEntity = new ComponentEntity();
+        BeanUtils.copyProperties(modifyComponentEntity, componentEntity);
+        // 更新基础信息
+        componentEntity.setId(UUID.randomUUID().toString());
+        componentEntity.setCreateTime(new Date());
+        componentEntity.setLatest(true);
+        componentEntity.setVersion(componentUtils.versionUpdate(latestComponentEntity));
+        File entityFile = new File(componentUtils.getLibraryPath(componentEntity));
+        // 复制组件实体文件到新目录
+        FileUtils.copyDirectory(new File(componentUtils.getLibraryPath(modifyComponentEntity)), entityFile);
+        // 取消最新版本指针
+        latestComponentEntity.setLatest(false);
+//        componentRepository.save(latestComponentEntity);
+        return componentEntity;
+    }
+
 }

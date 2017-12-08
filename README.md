@@ -20,22 +20,22 @@
     ```
 ## 接口说明
 
-### 用户表
+### 用户接口
 * 查询所有用户（管理员） < GET > http://IP:8080/users
 * 查询用户 < GET > http://IP:8080/users/{userId}
 * 保存用户 < POST > http://IP:8080/users（username、password）
 * 删除用户 < DELETE > http://IP:8080/users/{userId}
 * 绑定角色（管理员） <PUT> http://IP:8080/users/{userId}/roles/{roleId}
 
-### 角色表
+### 角色接口
 * 查询所有角色（管理员） < GET > http://IP:8080/roles
 * 查询角色 < GET > http://IP:8080/roles/{roleId}
 
-### 系统表
+### 系统接口
 * 查询系统信息 < GET > http://IP:8080/system/info
 * 查询系统配置信息 < GET > http://IP:8080/system/serverconfiguration
 
-### 组件表
+### 组件接口
 * 新增组件 < POST > http://IP:8080/components（name、componentfile）
 * 查询组件 < GET > http://IP:8080/components
 
@@ -101,6 +101,9 @@
 * 修改ReadMe文件的格式
 * 解决MySQL中文乱码问题
 * 实现用户和管理员的接口权限分离功能
-
 * 实现在调试环境下获取target目录作为组件文件存放位置
 * 修复了角色名称不正确导致的接口权限分配失败的问题。
+
+* 修复了不同平台下路径分隔符不一致的问题。
+* 实现了更新组件，组织组件信息，版本号更新，原始组件文件复制到新目录下。
+* 组件库内组件名和版本号连接符变为可配置

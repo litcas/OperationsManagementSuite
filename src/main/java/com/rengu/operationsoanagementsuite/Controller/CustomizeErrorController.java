@@ -28,7 +28,7 @@ public class CustomizeErrorController implements ErrorController {
         if (throwable == null) {
             return ResultUtils.init(HttpStatus.valueOf(response.getStatus()), ResultUtils.ERROR, null);
         }
-        return ResultUtils.init(HttpStatus.valueOf(response.getStatus()), ResultUtils.ERROR, throwable.getMessage());
+        return ResultUtils.init(HttpStatus.valueOf(response.getStatus()), ResultUtils.ERROR, throwable);
     }
 
     @Override

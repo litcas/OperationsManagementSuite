@@ -14,6 +14,10 @@ public class ServerConfiguration {
     private String defultPassword = "admin";
     // 默认设置为系统缓存目录
     private String libraryPath = FileUtils.getTempDirectoryPath();
+    // 版本号迭代步进
+    private int stepper = 5;
+    // 组件名称与版本号分隔符
+    private String nameSeparator = "-";
 
     public String getDefultUserRole() {
         return defultUserRole;
@@ -53,5 +57,21 @@ public class ServerConfiguration {
 
     public void setLibraryPath(String libraryPath) {
         this.libraryPath = libraryPath;
+    }
+
+    public int getStepper() {
+        return stepper;
+    }
+
+    public void setStepper(int stepper) {
+        this.stepper = stepper;
+    }
+
+    public String getNameSeparator() {
+        return nameSeparator;
+    }
+
+    public void setNameSeparator(String nameSeparator) {
+        this.nameSeparator = nameSeparator;
     }
 }
