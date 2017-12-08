@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "rengu.config")
 public class ServerConfiguration {
     // todo 修改为从配置文件获取属性值
-    private String defultUserRole = "USER";
-    private String defultAdminRole = "ADMIN";
+    private String defultUserRole = "ROLE_USER";
+    private String defultAdminRole = "ROLE_ADMIN";
     private String defultUserName = "admin";
     private String defultPassword = "admin";
     // 默认设置为系统缓存目录
