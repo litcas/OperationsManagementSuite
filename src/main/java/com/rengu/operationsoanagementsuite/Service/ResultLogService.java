@@ -27,7 +27,6 @@ public class ResultLogService {
         resultLogEntity.setUsername(resultEntity.getUsername());
         resultLogEntity.setType(resultEntity.getType());
         resultLogEntity.setRequestUrl(httpServletRequest.getRequestURI());
-        resultLogEntity.setData(resultEntity.getData().toString());
         resultLogRepository.save(resultLogEntity);
     }
 }

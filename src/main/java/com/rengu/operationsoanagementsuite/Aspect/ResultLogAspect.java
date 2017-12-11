@@ -12,17 +12,17 @@ import org.springframework.stereotype.Component;
 
 @Aspect
 @Component
-public class HttpRequestLogAspect {
+public class ResultLogAspect {
     // 引入日志记录类
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     @Autowired
     private ResultLogService resultLogService;
 
     @Pointcut("execution ( public * com.rengu.operationsoanagementsuite.Controller..*(..))")
-    public void HttpRequestAspect() {
+    public void ResultLogAspect() {
     }
 
-    @AfterReturning(returning = "result", pointcut = "HttpRequestAspect()")
+    @AfterReturning(returning = "result", pointcut = "ResultLogAspect()")
     public void doAfterReturning(ResultEntity result) {
         resultLogService.saveResultLog(result);
     }

@@ -17,7 +17,6 @@ public class ResultLogEntity {
     private String type;
     private int code;
     private String message;
-    private String data;
 
     public String getId() {
         return id;
@@ -89,13 +88,5 @@ public class ResultLogEntity {
 
     public void setMessage(String message) {
         this.message = message;
-    }
-
-    public String getData() {
-        return data;
-    }
-
-    public void setData(String data) {
-        this.data = data;
     }
 }
