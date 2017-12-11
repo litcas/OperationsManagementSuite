@@ -89,4 +89,19 @@ public class ResultLogEntity {
     public void setMessage(String message) {
         this.message = message;
     }
+
+    @Override
+    public String toString() {
+        return "ResultLogEntity{" +
+                "id='" + id + '\'' +
+                ", createTime=" + createTime +
+                ", hostIP='" + hostIP + '\'' +
+                ", requestMethod='" + requestMethod + '\'' +
+                ", requestUrl='" + requestUrl + '\'' +
+                ", username='" + username + '\'' +
+                ", type='" + type + '\'' +
+                ", code=" + code +
+                ", message='" + message + '\'' +
+                '}';
+    }
 }

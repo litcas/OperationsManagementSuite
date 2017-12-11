@@ -21,23 +21,26 @@
 ## 接口说明
 
 ### 用户接口
-* 查询所有用户（管理员） < GET > http://IP:8080/users
-* 查询用户 < GET > http://IP:8080/users/{userId}
-* 保存用户 < POST > http://IP:8080/users（username、password）
-* 删除用户 < DELETE > http://IP:8080/users/{userId}
-* 绑定角色（管理员） <PUT> http://IP:8080/users/{userId}/roles/{roleId}
+* 查询所有用户（管理员） < GET > http://localhost:8080/users
+* 查询用户 < GET > http://localhost:8080/users/{userId}
+* 保存用户 < POST > http://localhost:8080/users
+* 删除用户 < DELETE > http://localhost:8080/users/{userId}
+* 绑定角色（管理员） <PUT> http://localhost:8080/users/{userId}/roles/{roleId}
 
 ### 角色接口
-* 查询所有角色（管理员） < GET > http://IP:8080/roles
-* 查询角色 < GET > http://IP:8080/roles/{roleId}
+* 查询所有角色（管理员） < GET > http://localhost:8080/roles
+* 查询角色 < GET > http://localhost:8080/roles/{roleId}
 
 ### 系统接口
-* 查询系统信息 < GET > http://IP:8080/system/info
-* 查询系统配置信息 < GET > http://IP:8080/system/serverconfiguration
+* 查询系统信息 < GET > http://localhost:8080/system/info
+* 查询系统配置信息 < GET > http://localhost:8080/system/serverconfiguration
 
 ### 组件接口
-* 新增组件 < POST > http://IP:8080/components（name、componentfile）
-* 查询组件 < GET > http://IP:8080/components
+* 新增组件 < POST > http://localhost:8080/components
+* 删除组件 <DELETE> http://localhost:8080/components/{componentId}
+* 修改组件 <PUT> http://localhost:8080/components/{componentId}
+* 查询所有组件 < GET > http://localhost:8080/components
+* 查询组件 < GET > http://localhost:8080/components/{componentId}
 
 ## 更新日志
 
@@ -110,3 +113,9 @@
 
 #### 2017年12月11日
 * 修复了记录返回日志时消息长度超过限制的问题。
+* 实现保存组件时将组件的实体文件保存至指定位置。
+
+* 除去没有用的打印信息。
+* 实现删除组件接口。
+* 实现根据id查询组件信息接口。
+* 实现查询组件接口的动态组合查询条件功能。

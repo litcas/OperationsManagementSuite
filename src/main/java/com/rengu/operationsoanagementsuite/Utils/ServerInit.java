@@ -42,25 +42,24 @@ public class ServerInit implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         // 服务启动后执行一些初始化的工作
-        logger.info(ClassUtils.getDefaultClassLoader().getResource("").getPath());
-        String libraryPath = ClassUtils.getDefaultClassLoader().getResource("").getPath();
         // 调试环境获取组件库路径
+        String libraryPath = ClassUtils.getDefaultClassLoader().getResource("").getPath();
         if (libraryPath.endsWith("/target/classes/")) {
             libraryPath = libraryPath.replace("classes/", "");
             serverConfiguration.setLibraryPath(libraryPath);
         }
         // 初始化角色
         if (roleRepository.findByRole(serverConfiguration.getDefultUserRole()) == null) {
-            logger.info("系统默认角色信息'" + serverConfiguration.getDefultUserRole() + "'不存在，系统自动创建。");
+            logger.info("默认角色信息'" + serverConfiguration.getDefultUserRole() + "'不存在，自动创建。");
             roleService.saveRole(serverConfiguration.getDefultUserRole());
         }
         if (roleRepository.findByRole(serverConfiguration.getDefultAdminRole()) == null) {
-            logger.info("系统默认角色信息'" + serverConfiguration.getDefultAdminRole() + "'不存在，系统自动创建。");
+            logger.info("默认角色信息'" + serverConfiguration.getDefultAdminRole() + "'不存在，自动创建。");
             roleService.saveRole(serverConfiguration.getDefultAdminRole());
         }
         //初始化管理员用户
         if (userRepository.findByUsername(serverConfiguration.getDefultUserName()) == null) {
-            logger.info("系统默认用户信息'" + serverConfiguration.getDefultUserName() + "'不存在，系统自动创建。");
+            logger.info("默认用户信息'" + serverConfiguration.getDefultUserName() + "'不存在，自动创建。");
             UserEntity userEntity = new UserEntity();
             userEntity.setUsername(serverConfiguration.getDefultUserName());
             userEntity.setPassword(serverConfiguration.getDefultPassword());
