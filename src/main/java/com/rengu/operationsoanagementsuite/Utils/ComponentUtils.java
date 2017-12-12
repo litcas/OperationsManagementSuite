@@ -17,7 +17,6 @@ public class ComponentUtils {
         String[] strings = componentEntity.getVersion().split("\\.");
         int intNum = Integer.parseInt(strings[0]);
         int floatNum = Integer.parseInt(strings[1]) + 1;
-
         intNum = intNum + (int) Math.floor(floatNum / serverConfiguration.getStepper());
         floatNum = floatNum % serverConfiguration.getStepper();
         return intNum + "." + floatNum;

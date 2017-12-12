@@ -4,7 +4,6 @@ import com.rengu.operationsoanagementsuite.Entity.ComponentEntity;
 import com.rengu.operationsoanagementsuite.Entity.ComponentFileEntity;
 import com.rengu.operationsoanagementsuite.Exception.CustomizeException;
 import com.rengu.operationsoanagementsuite.Repository.ComponentFileRepository;
-import com.rengu.operationsoanagementsuite.Utils.ComponentUtils;
 import com.rengu.operationsoanagementsuite.Utils.Tools;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -28,8 +27,6 @@ public class ComponentFileService {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     @Autowired
     private ComponentFileRepository componentFileRepository;
-    @Autowired
-    private ComponentUtils componentUtils;
 
     @Transactional
     public List<ComponentFileEntity> addComponentFile(String[] addFilePath, MultipartFile[] multipartFiles, ComponentEntity componentEntity) throws IOException, NoSuchAlgorithmException, MissingServletRequestParameterException {
@@ -58,7 +55,7 @@ public class ComponentFileService {
             // 将文件输出到缓存文件夹
             FileUtils.copyInputStreamToFile(multipartFile.getInputStream(), cacheFile);
             // 将缓存文件复制到库文件夹下
-            File file = new File(componentUtils.getLibraryPath(componentEntity) + filePath + multipartFile.getOriginalFilename());
+            File file = new File(componentEntity.getFilePath() + filePath + multipartFile.getOriginalFilename());
             FileUtils.copyFile(cacheFile, file);
             // 获取文件扩展名
             ComponentFileEntity componentFileEntity = new ComponentFileEntity();

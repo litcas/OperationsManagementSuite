@@ -14,8 +14,10 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ClassUtils;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Component
 @Order(value = 2)
@@ -43,10 +45,9 @@ public class ServerInit implements CommandLineRunner {
     public void run(String... args) throws Exception {
         // 服务启动后执行一些初始化的工作
         // 调试环境获取组件库路径
-        String libraryPath = ClassUtils.getDefaultClassLoader().getResource("").getPath();
+        String libraryPath = Objects.requireNonNull(ClassUtils.getDefaultClassLoader().getResource("")).getPath();
         if (libraryPath.endsWith("/target/classes/")) {
-            libraryPath = libraryPath.replace("classes/", "");
-            serverConfiguration.setLibraryPath(libraryPath);
+            serverConfiguration.setLibraryPath(libraryPath.replace("classes/", serverConfiguration.getLibraryFolderName() + File.separatorChar));
         }
         // 初始化角色
         if (roleRepository.findByRole(serverConfiguration.getDefultUserRole()) == null) {

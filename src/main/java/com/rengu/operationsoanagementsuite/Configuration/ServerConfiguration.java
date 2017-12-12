@@ -18,6 +18,8 @@ public class ServerConfiguration {
     private int stepper = 5;
     // 组件名称与版本号分隔符
     private String nameSeparator = "-";
+    // 组件实体存放目录名称
+    private String libraryFolderName = "ComponentLibraries";
 
     public String getDefultUserRole() {
         return defultUserRole;
@@ -73,5 +75,13 @@ public class ServerConfiguration {
 
     public void setNameSeparator(String nameSeparator) {
         this.nameSeparator = nameSeparator;
+    }
+
+    public String getLibraryFolderName() {
+        return libraryFolderName;
+    }
+
+    public void setLibraryFolderName(String libraryFolderName) {
+        this.libraryFolderName = libraryFolderName;
     }
 }

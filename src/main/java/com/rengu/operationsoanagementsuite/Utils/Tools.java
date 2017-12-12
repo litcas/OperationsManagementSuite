@@ -1,5 +1,7 @@
 package com.rengu.operationsoanagementsuite.Utils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -18,5 +20,12 @@ public class Tools {
         messageDigest.update(mappedByteBuffer);
         BigInteger bigInteger = new BigInteger(1, messageDigest.digest());
         return bigInteger.toString(16);
+    }
+
+    // 序列化对象到Json文件中
+    public static File writeJsonToFile(Object object, File jsonFile) throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.writerWithDefaultPrettyPrinter().writeValue(jsonFile, object);
+        return jsonFile;
     }
 }

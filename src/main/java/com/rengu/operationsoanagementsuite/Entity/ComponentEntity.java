@@ -21,6 +21,7 @@ public class ComponentEntity {
     private String version;
     private String description;
     private boolean latest;
+    private String filePath;
     @OneToMany
     private List<UserEntity> userEntities;
     @OneToMany
@@ -72,6 +73,14 @@ public class ComponentEntity {
 
     public void setLatest(boolean latest) {
         this.latest = latest;
+    }
+
+    public String getFilePath() {
+        return filePath;
+    }
+
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
     }
 
     public List<UserEntity> getUserEntities() {

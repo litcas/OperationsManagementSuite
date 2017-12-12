@@ -5,21 +5,19 @@ import com.rengu.operationsoanagementsuite.Entity.UserEntity;
 import com.rengu.operationsoanagementsuite.Exception.CustomizeException;
 import com.rengu.operationsoanagementsuite.Repository.ComponentRepository;
 import com.rengu.operationsoanagementsuite.Utils.ComponentUtils;
+import com.rengu.operationsoanagementsuite.Utils.CompressUtils;
+import com.rengu.operationsoanagementsuite.Utils.Tools;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 import javax.transaction.Transactional;
 import java.io.File;
 import java.io.IOException;
@@ -43,28 +41,23 @@ public class ComponentService {
 
     // 新建组件
     @Transactional
-    public ComponentEntity saveComponent(UserEntity loginUser, ComponentEntity componentArgs, String[] addFilePath, MultipartFile[] multipartFiles) throws MissingServletRequestParameterException, IOException, NoSuchAlgorithmException {
+    public ComponentEntity saveComponent(UserEntity loginUser, ComponentEntity componentEntity, String[] addFilePath, MultipartFile[] multipartFiles) throws MissingServletRequestParameterException, IOException, NoSuchAlgorithmException {
         // 检查组件名称参数是否存在
-        if (componentArgs.getName() == null) {
+        if (componentEntity.getName() == null) {
             logger.info("请求参数解析异常：component.name不存在，保存失败。");
             throw new MissingServletRequestParameterException("component.name", "String");
         }
         // 检查组件是否存在
-        if (componentRepository.findByName(componentArgs.getName()).size() > 0) {
-            logger.info("名称为：" + componentArgs.getName() + "的组件已存在，保存失败。");
-            throw new DataIntegrityViolationException("名称为：" + componentArgs.getName() + "的组件已存在，保存失败。");
+        if (componentRepository.findByName(componentEntity.getName()).size() > 0) {
+            logger.info("名称为：" + componentEntity.getName() + "的组件已存在，保存失败。");
+            throw new DataIntegrityViolationException("名称为：" + componentEntity.getName() + "的组件已存在，保存失败。");
         }
-        ComponentEntity componentEntity = new ComponentEntity();
-        // 设置组件名称
-        componentEntity.setName(componentArgs.getName());
         // 设置为最新版本
         componentEntity.setLatest(true);
         // 设置默认版本号
         componentEntity.setVersion("1.0");
-        // 设置组件描述（非必须）
-        if (componentArgs.getDescription() != null) {
-            componentEntity.setDescription(componentArgs.getDescription());
-        }
+        // 设置组件存放路径
+        componentEntity.setFilePath(componentUtils.getLibraryPath(componentEntity));
         // 设置组件文件关联
         componentEntity.setComponentFileEntities(componentFileService.addComponentFile(addFilePath, multipartFiles, componentEntity));
         // 设置组件的拥有者为当前登录用户
@@ -107,15 +100,16 @@ public class ComponentService {
         ComponentEntity latestComponentEntity = componentRepository.findByNameAndLatest(modifyComponentEntity.getName(), true);
         // 复制需要修改的组件对象
         ComponentEntity componentEntity = new ComponentEntity();
+        // 复制组件属性
         BeanUtils.copyProperties(modifyComponentEntity, componentEntity);
         // 更新基础信息
         componentEntity.setId(UUID.randomUUID().toString());
         componentEntity.setCreateTime(new Date());
         componentEntity.setLatest(true);
         componentEntity.setVersion(componentUtils.versionUpdate(latestComponentEntity));
-        File entityFile = new File(componentUtils.getLibraryPath(componentEntity));
+        componentEntity.setFilePath(componentUtils.getLibraryPath(componentEntity));
         // 复制组件实体文件到新目录
-        FileUtils.copyDirectory(new File(componentUtils.getLibraryPath(modifyComponentEntity)), entityFile);
+        FileUtils.copyDirectory(new File(modifyComponentEntity.getFilePath()), new File(componentEntity.getFilePath()));
         // 取消最新版本指针
         latestComponentEntity.setLatest(false);
 //        componentRepository.save(latestComponentEntity);
@@ -133,16 +127,44 @@ public class ComponentService {
 
     // 查询所有组件
     public List<ComponentEntity> getComponents(ComponentEntity componentArgs) {
-        return componentRepository.findAll(new Specification<ComponentEntity>() {
-            @Override
-            public Predicate toPredicate(Root<ComponentEntity> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
-                List<Predicate> predicateList = new ArrayList<>();
-                if (componentArgs.getName() != null) {
-                    predicateList.add(cb.like(root.get("name"), componentArgs.getName()));
-                }
-                predicateList.add(cb.equal(root.get("latest"), componentArgs.isLatest()));
-                return cb.and(predicateList.toArray(new Predicate[predicateList.size()]));
+        return componentRepository.findAll((root, query, cb) -> {
+            List<Predicate> predicateList = new ArrayList<>();
+            if (componentArgs.getName() != null) {
+                predicateList.add(cb.like(root.get("name"), componentArgs.getName()));
             }
+            predicateList.add(cb.equal(root.get("latest"), componentArgs.isLatest()));
+            return cb.and(predicateList.toArray(new Predicate[predicateList.size()]));
         });
+    }
+
+    // 导入组件实现
+    public List<ComponentEntity> importComponents() {
+        List<ComponentEntity> componentEntityList = new ArrayList<>();
+        return componentEntityList;
+    }
+
+    // 导出组件实现
+    public File exportComponents(String componentId) throws MissingServletRequestParameterException, IOException {
+        if (componentId == null) {
+            logger.info("请求参数不正确：component.id不存在，导出失败。");
+            throw new MissingServletRequestParameterException("component.id", "String");
+        }
+        if (!componentRepository.exists(componentId)) {
+            logger.info("请求参数不正确：id = " + componentId + "的组件不存在，导出失败。");
+            throw new CustomizeException("请求参数不正确：id = " + componentId + "的组件不存在，导出失败。");
+        }
+        ComponentEntity componentEntity = componentRepository.findOne(componentId);
+        // 在系统缓存文件中建立操作目录
+        String id = UUID.randomUUID().toString();
+        String tempFolderPath = FileUtils.getTempDirectoryPath() + id + File.separatorChar;
+        new File(tempFolderPath).mkdirs();
+        // 1.生成组件信息的json描述文件到缓存文件夹。
+        Tools.writeJsonToFile(componentEntity, new File(tempFolderPath + componentEntity.getName() + ".json"));
+        // 2.复制组件的实体文件到缓存文件夹。
+        FileUtils.copyDirectory(new File(componentEntity.getFilePath()), new File(tempFolderPath + new File(componentEntity.getFilePath()).getName()));
+        // 3.压缩并提供下载连接。
+        // todo 目前压缩文件中不支持存在空文件夹
+        String zipFilePath = FileUtils.getTempDirectoryPath() + id + ".zip";
+        return CompressUtils.compressToZip(tempFolderPath, zipFilePath);
     }
 }
