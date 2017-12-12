@@ -1,5 +1,7 @@
 package com.rengu.operationsoanagementsuite.Entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -10,9 +12,10 @@ import java.util.UUID;
 public class RoleEntity {
     @Id
     private String id = UUID.randomUUID().toString();
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date createTime = new Date();
     @Column(unique = true)
     private String role;
-    private Date createTime = new Date();
 
     public String getId() {
         return id;

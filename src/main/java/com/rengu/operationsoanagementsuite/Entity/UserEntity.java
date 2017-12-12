@@ -1,5 +1,6 @@
 package com.rengu.operationsoanagementsuite.Entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -11,6 +12,7 @@ import java.util.*;
 public class UserEntity implements UserDetails {
     @Id
     private String id = UUID.randomUUID().toString();
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime = new Date();
     @Column(unique = true)
     private String username;

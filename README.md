@@ -38,9 +38,11 @@
 ### 组件接口
 * 新增组件 < POST > http://localhost:8080/components
 * 删除组件 <DELETE> http://localhost:8080/components/{componentId}
-* 修改组件 <PUT> http://localhost:8080/components/{componentId}
-* 查询所有组件 < GET > http://localhost:8080/components
+* 修改组件 <PATCH> http://localhost:8080/components/{componentId}
 * 查询组件 < GET > http://localhost:8080/components/{componentId}
+* 搜索组件 < GET > http://localhost:8080/components
+* 导入组件 < POST > http://localhost:8080/components
+* 导出组件 < GET > http://localhost:8080/components/{componentId}
 
 ## 更新日志
 
@@ -114,8 +116,10 @@
 #### 2017年12月11日
 * 修复了记录返回日志时消息长度超过限制的问题。
 * 实现保存组件时将组件的实体文件保存至指定位置。
-
 * 除去没有用的打印信息。
 * 实现删除组件接口。
 * 实现根据id查询组件信息接口。
 * 实现查询组件接口的动态组合查询条件功能。
+
+#### 2017年12月12日
+* 修复了请求的返回结果中时间为时间戳的问题。
