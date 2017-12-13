@@ -24,6 +24,6 @@ public class ComponentUtils {
 
     // 获取组件实体文件库路径
     public String getLibraryPath(ComponentEntity componentEntity) {
-        return serverConfiguration.getLibraryPath() + componentEntity.getName() + serverConfiguration.getNameSeparator() + componentEntity.getVersion() + File.separatorChar;
+        return serverConfiguration.getLibraryPath() + componentEntity.getName() + serverConfiguration.getNameSeparator() + componentEntity.getVersion() + File.separator;
     }
 }

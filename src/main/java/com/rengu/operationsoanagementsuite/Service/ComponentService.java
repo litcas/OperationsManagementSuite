@@ -20,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.persistence.criteria.Predicate;
 import javax.transaction.Transactional;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -138,9 +139,8 @@ public class ComponentService {
     }
 
     // 导入组件实现
-    public List<ComponentEntity> importComponents() {
-        List<ComponentEntity> componentEntityList = new ArrayList<>();
-        return componentEntityList;
+    public List<ComponentEntity> importComponents(MultipartFile[] multipartFiles) {
+        return new ArrayList<>();
     }
 
     // 导出组件实现
@@ -156,13 +156,16 @@ public class ComponentService {
         ComponentEntity componentEntity = componentRepository.findOne(componentId);
         // 在系统缓存文件中建立操作目录
         String id = UUID.randomUUID().toString();
-        String tempFolderPath = FileUtils.getTempDirectoryPath() + id + File.separatorChar;
-        new File(tempFolderPath).mkdirs();
+        String tempFolderPath = FileUtils.getTempDirectoryPath() + id + File.separator;
+        if (!new File(tempFolderPath).mkdirs()) {
+            logger.info("在路径：" + tempFolderPath + "无法正确生成缓存文件夹，导出失败");
+            throw new FileNotFoundException("在路径：" + tempFolderPath + "无法正确生成缓存文件夹，导出失败");
+        }
         // 1.生成组件信息的json描述文件到缓存文件夹。
         Tools.writeJsonToFile(componentEntity, new File(tempFolderPath + componentEntity.getName() + ".json"));
         // 2.复制组件的实体文件到缓存文件夹。
         FileUtils.copyDirectory(new File(componentEntity.getFilePath()), new File(tempFolderPath + new File(componentEntity.getFilePath()).getName()));
-        // 3.压缩并提供下载连接。
+        // 3.压缩文件(以uuid命名)
         // todo 目前压缩文件中不支持存在空文件夹
         String zipFilePath = FileUtils.getTempDirectoryPath() + id + ".zip";
         return CompressUtils.compressToZip(tempFolderPath, zipFilePath);

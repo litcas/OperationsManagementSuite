@@ -5,6 +5,7 @@ import com.rengu.operationsoanagementsuite.Entity.UserEntity;
 import com.rengu.operationsoanagementsuite.Service.ComponentService;
 import com.rengu.operationsoanagementsuite.Utils.ResultEntity;
 import com.rengu.operationsoanagementsuite.Utils.ResultUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,9 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.security.NoSuchAlgorithmException;
-import java.util.List;
 
 @RestController
 @RequestMapping(value = "/components")
@@ -59,9 +58,8 @@ public class ComponentController {
 
     // 导入组件
     @PostMapping(value = "/import")
-    public ResultEntity importComponents(@AuthenticationPrincipal UserEntity loginUser) {
-        List<ComponentEntity> componentEntityList = componentService.importComponents();
-        return ResultUtils.init(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, componentEntityList);
+    public ResultEntity importComponents(@AuthenticationPrincipal UserEntity loginUser, MultipartFile[] multipartFiles) {
+        return ResultUtils.init(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, componentService.importComponents(multipartFiles));
     }
 
     // 导出组件
@@ -70,15 +68,11 @@ public class ComponentController {
         // 获取导出文件
         File exportComponents = componentService.exportComponents(componentId);
         // 设置请求相关信息
-        httpServletResponse.setHeader("content-type", "application/octet-stream");
-        httpServletResponse.setContentType("application/octet-stream");
         httpServletResponse.setHeader("Content-Disposition", "attachment;filename=" + exportComponents.getName());
-        // 生成下载文件
-        FileInputStream fileInputStream = new FileInputStream(exportComponents);
-        OutputStream outputStream = httpServletResponse.getOutputStream();
-        IOUtils.copy(fileInputStream, outputStream);
-        fileInputStream.close();
-        outputStream.close();
+        httpServletResponse.setHeader("Content-Length", String.valueOf(FileUtils.sizeOf(exportComponents)));
+        // 获取文件流
+        IOUtils.copy(new FileInputStream(exportComponents), httpServletResponse.getOutputStream());
+        httpServletResponse.flushBuffer();
         return ResultUtils.init(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, exportComponents.getAbsolutePath());
     }
 }
