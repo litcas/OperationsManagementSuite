@@ -5,7 +5,6 @@ import com.rengu.operationsoanagementsuite.Entity.UserEntity;
 import com.rengu.operationsoanagementsuite.Service.ComponentService;
 import com.rengu.operationsoanagementsuite.Utils.ResultEntity;
 import com.rengu.operationsoanagementsuite.Utils.ResultUtils;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,6 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URLConnection;
 import java.security.NoSuchAlgorithmException;
 
 @RestController
@@ -64,15 +64,20 @@ public class ComponentController {
 
     // 导出组件
     @GetMapping(value = "/export/{componentId}")
-    public ResultEntity exportComponents(@AuthenticationPrincipal UserEntity loginUser, HttpServletResponse httpServletResponse, @PathVariable(value = "componentId") String componentId) throws MissingServletRequestParameterException, IOException {
+    public void exportComponents(@AuthenticationPrincipal UserEntity loginUser, HttpServletResponse httpServletResponse, @PathVariable(value = "componentId") String componentId) throws MissingServletRequestParameterException, IOException {
         // 获取导出文件
         File exportComponents = componentService.exportComponents(componentId);
         // 设置请求相关信息
-        httpServletResponse.setHeader("Content-Disposition", "attachment;filename=" + exportComponents.getName());
-        httpServletResponse.setHeader("Content-Length", String.valueOf(FileUtils.sizeOf(exportComponents)));
-        // 获取文件流
+        //判断文件类型
+        String mimeType = URLConnection.guessContentTypeFromName(exportComponents.getName());
+        if (mimeType == null) {
+            mimeType = "application/octet-stream";
+        }
+        httpServletResponse.setContentType(mimeType);
+        httpServletResponse.setHeader("Content-Disposition", "attachment;filename=" + new String(exportComponents.getName().getBytes("utf-8"), "ISO8859-1"));
+        httpServletResponse.setContentLengthLong(exportComponents.length());
+        // 文件流输出
         IOUtils.copy(new FileInputStream(exportComponents), httpServletResponse.getOutputStream());
         httpServletResponse.flushBuffer();
-        return ResultUtils.init(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, exportComponents.getAbsolutePath());
     }
 }

@@ -167,7 +167,7 @@ public class ComponentService {
         FileUtils.copyDirectory(new File(componentEntity.getFilePath()), new File(tempFolderPath + new File(componentEntity.getFilePath()).getName()));
         // 3.压缩文件(以uuid命名)
         // todo 目前压缩文件中不支持存在空文件夹
-        String zipFilePath = FileUtils.getTempDirectoryPath() + id + ".zip";
+        String zipFilePath = FileUtils.getTempDirectoryPath() + "导出组件" + ".zip";
         return CompressUtils.compressToZip(tempFolderPath, zipFilePath);
     }
 }
