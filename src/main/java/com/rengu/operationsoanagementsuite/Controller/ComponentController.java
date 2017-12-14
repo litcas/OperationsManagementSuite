@@ -41,7 +41,7 @@ public class ComponentController {
 
     // 更新组件
     @PatchMapping(value = "/{componentId}")
-    public ResultEntity updategetComponents(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "componentId") String componentId, ComponentEntity componentArgs) throws MissingServletRequestParameterException {
+    public ResultEntity updateComponents(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "componentId") String componentId, ComponentEntity componentArgs) throws MissingServletRequestParameterException {
         return ResultUtils.init(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, componentService.updateComponents(componentId, componentArgs));
     }
 

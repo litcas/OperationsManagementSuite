@@ -5,7 +5,6 @@ import com.rengu.operationsoanagementsuite.Entity.ComponentEntity;
 import com.rengu.operationsoanagementsuite.Entity.UserEntity;
 import com.rengu.operationsoanagementsuite.Exception.CustomizeException;
 import com.rengu.operationsoanagementsuite.Repository.ComponentRepository;
-import com.rengu.operationsoanagementsuite.Utils.ComponentUtils;
 import com.rengu.operationsoanagementsuite.Utils.CompressUtils;
 import com.rengu.operationsoanagementsuite.Utils.Tools;
 import net.lingala.zip4j.exception.ZipException;
@@ -41,8 +40,6 @@ public class ComponentService {
     @Autowired
     private ComponentFileService componentFileService;
     @Autowired
-    private ComponentUtils componentUtils;
-    @Autowired
     private ServerConfiguration serverConfiguration;
 
     // 新建组件
@@ -63,7 +60,7 @@ public class ComponentService {
             logger.info("名称为：" + componentEntity.getName() + "版本号：" + componentEntity.getVersion() + "的组件已存在，保存失败。");
             throw new DataIntegrityViolationException("名称为：" + componentEntity.getName() + "版本号：" + componentEntity.getVersion() + "的组件已存在，保存失败。");
         }
-        componentEntity = componentUtils.componentInit(componentEntity, loginUser);
+        componentEntity = componentInit(componentEntity, loginUser);
         // 设置组件文件关联
         componentEntity.setComponentFileEntities(componentFileService.addComponentFile(addFilePath, multipartFiles, componentEntity));
         // 设置组件大小
@@ -167,7 +164,7 @@ public class ComponentService {
                 throw new CustomizeException("组件名称为：" + componentEntity.getName() + "版本号：" + componentEntity.getVersion() + "已存在，导入失败。");
             } else {
                 // 组件库不存在该名称的组件
-                componentEntity = componentUtils.componentInit(componentEntity, loginUser);
+                componentEntity = componentInit(componentEntity, loginUser);
                 componentEntity.setComponentFileEntities(componentFileService.addComponentFile(componentEntity, decompressFile));
                 // 设置组件大小
                 componentEntity.setSize(FileUtils.sizeOf(new File(componentEntity.getFilePath())));
@@ -204,5 +201,23 @@ public class ComponentService {
         // 3.压缩文件
         String zipFilePath = FileUtils.getTempDirectoryPath() + serverConfiguration.getExportFileName() + ".zip";
         return CompressUtils.compressToZip(tempFolderPath, zipFilePath);
+    }
+
+    // 获取组件实体文件库路径
+    private String getLibraryPath(ComponentEntity componentEntity) {
+        return serverConfiguration.getLibraryPath() + componentEntity.getName() + serverConfiguration.getNameSeparator() + componentEntity.getVersion() + File.separator;
+    }
+
+    // 组件对象初始化
+    private ComponentEntity componentInit(ComponentEntity componentEntity, UserEntity loginUser) {
+        componentEntity.setFilePath(getLibraryPath(componentEntity));
+        componentEntity.setDeleted(false);
+        // 设置组件的拥有者为当前登录用户
+        if (loginUser != null) {
+            List<UserEntity> userEntities = new ArrayList<>();
+            userEntities.add(loginUser);
+            componentEntity.setUserEntities(userEntities);
+        }
+        return componentEntity;
     }
 }

@@ -18,7 +18,7 @@ public class ResultLogAspect {
     @Autowired
     private ResultLogService resultLogService;
 
-    @Pointcut("execution ( public * com.rengu.operationsoanagementsuite.Controller..*(..))")
+    @Pointcut(value = "execution ( public * com.rengu.operationsoanagementsuite.Controller..*(..))")
     public void ResultLogAspect() {
     }
 

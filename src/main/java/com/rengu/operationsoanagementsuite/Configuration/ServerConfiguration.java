@@ -16,8 +16,6 @@ public class ServerConfiguration {
     private String libraryPath = FileUtils.getTempDirectoryPath();
     // 组件实体存放目录名称
     private String libraryFolderName = "ComponentLibraries";
-    // 版本号迭代步进
-    private int stepper = 5;
     // 组件名称与版本号分隔符
     private String nameSeparator = "-";
     // 导出部分字段修改，会导致无法导入
@@ -74,14 +72,6 @@ public class ServerConfiguration {
 
     public void setLibraryFolderName(String libraryFolderName) {
         this.libraryFolderName = libraryFolderName;
-    }
-
-    public int getStepper() {
-        return stepper;
-    }
-
-    public void setStepper(int stepper) {
-        this.stepper = stepper;
     }
 
     public String getNameSeparator() {

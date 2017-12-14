@@ -44,6 +44,13 @@
 * 导入组件 < POST > http://localhost:8080/components/import
 * 导出组件 < GET > http://localhost:8080/components/export/{componentId}
 
+### 设备接口
+* 新增设备 < POST > http://localhost:8080/devices
+* 删除设备 < DELETE > http://localhost:8080/devices/{deviceId}
+* 修改设备 < PATCH > http://localhost:8080/devices/{deviceId}
+* 查询设备 < GET > http://localhost:8080/devices/{deviceId}
+* 搜索设备 < GET > http://localhost:8080/devices
+
 ## 更新日志
 
 ### 0.0.1-SNAPSHOT (2017年11月14日)
@@ -132,7 +139,8 @@
 
 #### 2017年12月14日
 * 实现了组件的导入功能
-
 * 除去版本号迭代和最新版本的概念
 * 实现组件尺寸、修后修改时间的记录
 * 由于除去版本号迭代和最新版的概念，带来的许多修改。
+
+* 实现设备的增、删、改、查功能（写的比较着急不知道有什么问题）
