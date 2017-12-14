@@ -37,12 +37,12 @@
 
 ### 组件接口
 * 新增组件 < POST > http://localhost:8080/components
-* 删除组件 <DELETE> http://localhost:8080/components/{componentId}
-* 修改组件 <PATCH> http://localhost:8080/components/{componentId}
+* 删除组件 < DELETE > http://localhost:8080/components/{componentId}
+* 修改组件 < PATCH > http://localhost:8080/components/{componentId}
 * 查询组件 < GET > http://localhost:8080/components/{componentId}
 * 搜索组件 < GET > http://localhost:8080/components
-* 导入组件 < POST > http://localhost:8080/components
-* 导出组件 < GET > http://localhost:8080/components/{componentId}
+* 导入组件 < POST > http://localhost:8080/components/import
+* 导出组件 < GET > http://localhost:8080/components/export/{componentId}
 
 ## 更新日志
 
@@ -127,6 +127,12 @@
 
 #### 2017年12月13日
 * 修复了导出组件下载时，无法获取文件大小的问题。
-
 * 修复了导出的组件为中文名称时，中文乱码的问题。
 * 添加了导出组件响应时的媒体类型。
+
+#### 2017年12月14日
+* 实现了组件的导入功能
+
+* 除去版本号迭代和最新版本的概念
+* 实现组件尺寸、修后修改时间的记录
+* 由于除去版本号迭代和最新版的概念，带来的许多修改。

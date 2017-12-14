@@ -2,28 +2,34 @@ package com.rengu.operationsoanagementsuite.Utils;
 
 import com.rengu.operationsoanagementsuite.Configuration.ServerConfiguration;
 import com.rengu.operationsoanagementsuite.Entity.ComponentEntity;
+import com.rengu.operationsoanagementsuite.Entity.UserEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class ComponentUtils {
     @Autowired
     private ServerConfiguration serverConfiguration;
 
-    // 版本号更新
-    public String versionUpdate(ComponentEntity componentEntity) {
-        String[] strings = componentEntity.getVersion().split("\\.");
-        int intNum = Integer.parseInt(strings[0]);
-        int floatNum = Integer.parseInt(strings[1]) + 1;
-        intNum = intNum + (int) Math.floor(floatNum / serverConfiguration.getStepper());
-        floatNum = floatNum % serverConfiguration.getStepper();
-        return intNum + "." + floatNum;
+    // 获取组件实体文件库路径
+    private String getLibraryPath(ComponentEntity componentEntity) {
+        return serverConfiguration.getLibraryPath() + componentEntity.getName() + serverConfiguration.getNameSeparator() + componentEntity.getVersion() + File.separator;
     }
 
-    // 获取组件实体文件库路径
-    public String getLibraryPath(ComponentEntity componentEntity) {
-        return serverConfiguration.getLibraryPath() + componentEntity.getName() + serverConfiguration.getNameSeparator() + componentEntity.getVersion() + File.separator;
+    // 组件对象初始化
+    public ComponentEntity componentInit(ComponentEntity componentEntity, UserEntity loginUser) {
+        componentEntity.setFilePath(getLibraryPath(componentEntity));
+        componentEntity.setDeleted(false);
+        // 设置组件的拥有者为当前登录用户
+        if (loginUser != null) {
+            List<UserEntity> userEntities = new ArrayList<>();
+            userEntities.add(loginUser);
+            componentEntity.setUserEntities(userEntities);
+        }
+        return componentEntity;
     }
 }

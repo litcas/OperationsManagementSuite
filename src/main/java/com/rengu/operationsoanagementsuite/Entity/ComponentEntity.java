@@ -16,12 +16,15 @@ public class ComponentEntity {
     private String id = UUID.randomUUID().toString();
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime = new Date();
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date lastModified;
+    private boolean deleted = false;
     @Column(nullable = false)
     private String name;
     private String version;
     private String description;
-    private boolean latest;
     private String filePath;
+    private long size;
     @OneToMany
     private List<UserEntity> userEntities;
     @OneToMany
@@ -41,6 +44,22 @@ public class ComponentEntity {
 
     public void setCreateTime(Date createTime) {
         this.createTime = createTime;
+    }
+
+    public Date getLastModified() {
+        return lastModified;
+    }
+
+    public void setLastModified(Date lastModified) {
+        this.lastModified = lastModified;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 
     public String getName() {
@@ -67,20 +86,20 @@ public class ComponentEntity {
         this.description = description;
     }
 
-    public boolean isLatest() {
-        return latest;
-    }
-
-    public void setLatest(boolean latest) {
-        this.latest = latest;
-    }
-
     public String getFilePath() {
         return filePath;
     }
 
     public void setFilePath(String filePath) {
         this.filePath = filePath;
+    }
+
+    public long getSize() {
+        return size;
+    }
+
+    public void setSize(long size) {
+        this.size = size;
     }
 
     public List<UserEntity> getUserEntities() {

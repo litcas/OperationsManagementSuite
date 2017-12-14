@@ -14,12 +14,19 @@ public class ServerConfiguration {
     private String defultPassword = "admin";
     // 默认设置为系统缓存目录
     private String libraryPath = FileUtils.getTempDirectoryPath();
+    // 组件实体存放目录名称
+    private String libraryFolderName = "ComponentLibraries";
     // 版本号迭代步进
     private int stepper = 5;
     // 组件名称与版本号分隔符
     private String nameSeparator = "-";
-    // 组件实体存放目录名称
-    private String libraryFolderName = "ComponentLibraries";
+    // 导出部分字段修改，会导致无法导入
+    // 组件导出压缩包文件名
+    private String exportFileName = "exportcomponent";
+    // 组件导出描述文件名称（xxx.json）
+    private String exportDescriptionFileName = "description";
+    // 组件导出实体文件夹名称
+    private String exportComponentFileName = "componentFiles";
 
     public String getDefultUserRole() {
         return defultUserRole;
@@ -61,6 +68,14 @@ public class ServerConfiguration {
         this.libraryPath = libraryPath;
     }
 
+    public String getLibraryFolderName() {
+        return libraryFolderName;
+    }
+
+    public void setLibraryFolderName(String libraryFolderName) {
+        this.libraryFolderName = libraryFolderName;
+    }
+
     public int getStepper() {
         return stepper;
     }
@@ -77,11 +92,27 @@ public class ServerConfiguration {
         this.nameSeparator = nameSeparator;
     }
 
-    public String getLibraryFolderName() {
-        return libraryFolderName;
+    public String getExportFileName() {
+        return exportFileName;
     }
 
-    public void setLibraryFolderName(String libraryFolderName) {
-        this.libraryFolderName = libraryFolderName;
+    public void setExportFileName(String exportFileName) {
+        this.exportFileName = exportFileName;
+    }
+
+    public String getExportDescriptionFileName() {
+        return exportDescriptionFileName;
+    }
+
+    public void setExportDescriptionFileName(String exportDescriptionFileName) {
+        this.exportDescriptionFileName = exportDescriptionFileName;
+    }
+
+    public String getExportComponentFileName() {
+        return exportComponentFileName;
+    }
+
+    public void setExportComponentFileName(String exportComponentFileName) {
+        this.exportComponentFileName = exportComponentFileName;
     }
 }

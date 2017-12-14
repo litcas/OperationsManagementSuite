@@ -5,6 +5,7 @@ import com.rengu.operationsoanagementsuite.Entity.UserEntity;
 import com.rengu.operationsoanagementsuite.Service.ComponentService;
 import com.rengu.operationsoanagementsuite.Utils.ResultEntity;
 import com.rengu.operationsoanagementsuite.Utils.ResultUtils;
+import net.lingala.zip4j.exception.ZipException;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -40,8 +41,8 @@ public class ComponentController {
 
     // 更新组件
     @PatchMapping(value = "/{componentId}")
-    public ResultEntity updategetComponents(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "componentId") String componentId) throws IOException {
-        return ResultUtils.init(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, componentService.updategetComponents(componentId));
+    public ResultEntity updategetComponents(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "componentId") String componentId, ComponentEntity componentArgs) throws MissingServletRequestParameterException {
+        return ResultUtils.init(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, componentService.updateComponents(componentId, componentArgs));
     }
 
     // 查询组件
@@ -58,13 +59,13 @@ public class ComponentController {
 
     // 导入组件
     @PostMapping(value = "/import")
-    public ResultEntity importComponents(@AuthenticationPrincipal UserEntity loginUser, MultipartFile[] multipartFiles) {
-        return ResultUtils.init(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, componentService.importComponents(multipartFiles));
+    public ResultEntity importComponents(@AuthenticationPrincipal UserEntity loginUser, @RequestParam(value = "importComponents") MultipartFile[] multipartFiles) throws IOException, MissingServletRequestParameterException, ZipException, NoSuchAlgorithmException {
+        return ResultUtils.init(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, componentService.importComponents(loginUser, multipartFiles));
     }
 
     // 导出组件
     @GetMapping(value = "/export/{componentId}")
-    public void exportComponents(@AuthenticationPrincipal UserEntity loginUser, HttpServletResponse httpServletResponse, @PathVariable(value = "componentId") String componentId) throws MissingServletRequestParameterException, IOException {
+    public void exportComponents(HttpServletResponse httpServletResponse, @PathVariable(value = "componentId") String componentId) throws MissingServletRequestParameterException, IOException {
         // 获取导出文件
         File exportComponents = componentService.exportComponents(componentId);
         // 设置请求相关信息

@@ -23,9 +23,14 @@ public class Tools {
     }
 
     // 序列化对象到Json文件中
-    public static File writeJsonToFile(Object object, File jsonFile) throws IOException {
+    public static void writeJsonFile(Object object, File jsonFile) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.writerWithDefaultPrettyPrinter().writeValue(jsonFile, object);
-        return jsonFile;
+    }
+
+    // 读取Json文件
+    public static <T> T readJsonFile(File jsonFile, Class<T> classType) throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.readValue(jsonFile, classType);
     }
 }

@@ -1,5 +1,6 @@
 package com.rengu.operationsoanagementsuite.Service;
 
+import com.rengu.operationsoanagementsuite.Configuration.ServerConfiguration;
 import com.rengu.operationsoanagementsuite.Entity.ComponentEntity;
 import com.rengu.operationsoanagementsuite.Entity.ComponentFileEntity;
 import com.rengu.operationsoanagementsuite.Exception.CustomizeException;
@@ -19,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @Service
@@ -27,6 +29,8 @@ public class ComponentFileService {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     @Autowired
     private ComponentFileRepository componentFileRepository;
+    @Autowired
+    private ServerConfiguration serverConfiguration;
 
     @Transactional
     public List<ComponentFileEntity> addComponentFile(String[] addFilePath, MultipartFile[] multipartFiles, ComponentEntity componentEntity) throws IOException, NoSuchAlgorithmException, MissingServletRequestParameterException {
@@ -58,6 +62,25 @@ public class ComponentFileService {
             File file = new File(componentEntity.getFilePath() + filePath + multipartFile.getOriginalFilename());
             FileUtils.copyFile(cacheFile, file);
             // 获取文件扩展名
+            ComponentFileEntity componentFileEntity = new ComponentFileEntity();
+            componentFileEntity.setName(file.getName());
+            componentFileEntity.setMD5(Tools.getFileMD5(file));
+            componentFileEntity.setType(FilenameUtils.getExtension(file.getName()));
+            componentFileEntity.setSize(FileUtils.sizeOf(file));
+            componentFileEntity.setPath(file.getPath());
+            componentFileEntityList.add(componentFileEntity);
+            componentFileRepository.save(componentFileEntity);
+        }
+        return componentFileEntityList;
+    }
+
+    @Transactional
+    public List<ComponentFileEntity> addComponentFile(ComponentEntity componentEntity, File srcDir) throws IOException, NoSuchAlgorithmException {
+        File componentFile = new File(srcDir.getAbsolutePath() + File.separatorChar + serverConfiguration.getExportComponentFileName());
+        FileUtils.copyDirectory(componentFile, new File(componentEntity.getFilePath()));
+        Collection<File> fileCollection = FileUtils.listFiles(new File(componentEntity.getFilePath()), null, true);
+        List<ComponentFileEntity> componentFileEntityList = new ArrayList<>();
+        for (File file : fileCollection) {
             ComponentFileEntity componentFileEntity = new ComponentFileEntity();
             componentFileEntity.setName(file.getName());
             componentFileEntity.setMD5(Tools.getFileMD5(file));
