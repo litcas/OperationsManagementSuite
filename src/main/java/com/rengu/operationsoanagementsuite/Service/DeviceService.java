@@ -77,7 +77,7 @@ public class DeviceService {
             throw new CustomizeException("请求参数不正确：id为：" + deviceId + "的设备不存在，更新失败。");
         }
         DeviceEntity deviceEntity = deviceRepository.findOne(deviceId);
-        BeanUtils.copyProperties(deviceArgs, deviceEntity, "id");
+        BeanUtils.copyProperties(deviceArgs, deviceEntity, "id", "createTime");
         deviceEntity.setLastModified(new Date());
         return deviceRepository.save(deviceEntity);
     }
