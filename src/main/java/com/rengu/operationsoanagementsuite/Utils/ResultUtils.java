@@ -10,13 +10,18 @@ public class ResultUtils {
     public static final String ERROR = "ERROR";
 
     // 创建ResultEntity
-    public static ResultEntity resultBuilder(HttpStatus httpStatus, String type, UserEntity loginUser, Object object) {
+    private static ResultEntity resultBuilder(HttpStatus httpStatus, String type, String username, Object object) {
         ResultEntity resultEntity = new ResultEntity();
         resultEntity.setCode(httpStatus.value());
         resultEntity.setMessage(httpStatus.getReasonPhrase());
         resultEntity.setType(type);
-        resultEntity.setUsername(loginUser == null ? null : loginUser.getUsername());
+        resultEntity.setUsername(username);
         resultEntity.setData(object);
         return resultEntity;
+    }
+
+    public static ResultEntity resultBuilder(HttpStatus httpStatus, String type, UserEntity loginUser, Object object) {
+        String username = loginUser == null ? "" : loginUser.getUsername();
+        return resultBuilder(httpStatus, type, username, object);
     }
 }
