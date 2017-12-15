@@ -10,6 +10,7 @@
 ## 0.0.3 - SNAPSHOT - 2017-12-15
 ### Added
 - 实现自动生成REST API文档（使用SWAGGER2框架）。
+- 实现用户登录接口。
 ### Changed
 - 修改构建返回结果对象的实现逻辑。
 ### Fixed

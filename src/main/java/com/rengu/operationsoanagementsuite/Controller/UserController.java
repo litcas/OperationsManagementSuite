@@ -56,4 +56,9 @@ public class UserController {
         UserEntity userEntity = userService.assignRoleToUser(userId, roleId);
         return ResultUtils.resultBuilder(HttpStatus.NO_CONTENT, ResultUtils.HTTPRESPONSE, loginUser, userEntity);
     }
+
+    @GetMapping(value = "/login")
+    public ResultEntity login(@AuthenticationPrincipal UserEntity loginUser) {
+        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, loginUser);
+    }
 }
