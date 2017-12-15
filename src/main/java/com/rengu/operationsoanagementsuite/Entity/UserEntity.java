@@ -1,5 +1,7 @@
 package com.rengu.operationsoanagementsuite.Entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -11,25 +13,28 @@ import java.util.*;
 public class UserEntity implements UserDetails {
     @Id
     private String id = UUID.randomUUID().toString();
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date createTime = new Date();
+    @Column(unique = true)
     private String username;
     private String password;
     private boolean accountNonExpired = true;
     private boolean accountNonLocked = true;
     private boolean credentialsNonExpired = true;
     private boolean enabled = true;
-    private Date createTime = new Date();
-    @ManyToMany(cascade = CascadeType.REFRESH, fetch = FetchType.EAGER)
-    private List<RoleEntity> roles;
+    @ManyToMany(fetch = FetchType.EAGER)
+    private List<RoleEntity> roleEntities;
 
     /**
      * Returns the authorities granted to the user. Cannot return <code>null</code>.
      *
      * @return the authorities, sorted by natural key (never <code>null</code>)
      */
+    @JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<GrantedAuthority> grantedAuthorityList = new ArrayList<>();
-        for (RoleEntity roleEntity : roles) {
+        for (RoleEntity roleEntity : roleEntities) {
             grantedAuthorityList.add(new SimpleGrantedAuthority(roleEntity.getRole()));
         }
         return grantedAuthorityList;
@@ -105,11 +110,11 @@ public class UserEntity implements UserDetails {
         this.createTime = createTime;
     }
 
-    public List<RoleEntity> getRoles() {
-        return roles;
+    public List<RoleEntity> getRoleEntities() {
+        return roleEntities;
     }
 
-    public void setRoles(List<RoleEntity> roles) {
-        this.roles = roles;
+    public void setRoleEntities(List<RoleEntity> roleEntities) {
+        this.roleEntities = roleEntities;
     }
 }

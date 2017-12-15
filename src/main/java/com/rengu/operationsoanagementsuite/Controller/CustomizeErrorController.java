@@ -1,36 +1,43 @@
 package com.rengu.operationsoanagementsuite.Controller;
 
-import org.springframework.boot.autoconfigure.web.BasicErrorController;
-import org.springframework.boot.autoconfigure.web.DefaultErrorAttributes;
-import org.springframework.boot.autoconfigure.web.ErrorProperties;
+import com.rengu.operationsoanagementsuite.Utils.ResultEntity;
+import com.rengu.operationsoanagementsuite.Utils.ResultUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.web.ErrorAttributes;
+import org.springframework.boot.autoconfigure.web.ErrorController;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import javax.servlet.http.HttpServletResponse;
 
 @RestController
-public class CustomizeErrorController extends BasicErrorController {
+public class CustomizeErrorController implements ErrorController {
 
-    public CustomizeErrorController() {
-        super(new DefaultErrorAttributes(), new ErrorProperties());
+    private static final String PATH = "/error";
+
+    @Autowired
+    private ErrorAttributes errorAttributes;
+
+    @RequestMapping(value = PATH)
+    public ResultEntity error(HttpServletRequest request, HttpServletResponse response) {
+        Throwable throwable = getError(request);
+        if (throwable == null) {
+            return ResultUtils.init(HttpStatus.valueOf(response.getStatus()), ResultUtils.ERROR, null);
+        }
+        return ResultUtils.init(HttpStatus.valueOf(response.getStatus()), ResultUtils.ERROR, throwable.getMessage());
     }
 
     @Override
-    public ResponseEntity<Map<String, Object>> error(HttpServletRequest request) {
-        Map<String, Object> errorAttributes = getErrorAttributes(request, isIncludeStackTrace(request, MediaType.ALL));
-        HttpStatus status = getStatus(request);
-        Map<String, Object> body = new HashMap<>();
-        body.put("id", UUID.randomUUID().toString());
-        body.put("username", null);
-        body.put("createTime", errorAttributes.get("timestamp"));
-        body.put("stateCode", errorAttributes.get("status"));
-        body.put("message", errorAttributes.get("error"));
-        body.put("data", errorAttributes.get("message"));
-        return new ResponseEntity<>(body, status);
+    public String getErrorPath() {
+        return PATH;
+    }
+
+    private Throwable getError(HttpServletRequest request) {
+        RequestAttributes requestAttributes = new ServletRequestAttributes(request);
+        return errorAttributes.getError(requestAttributes);
     }
 }

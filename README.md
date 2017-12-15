@@ -10,38 +10,46 @@
 
 * 安装MySQL数据库。
 * 建立数据库用户，并分配权限。
-  ```
-  CREATE USER 'rengu'@'%' IDENTIFIED BY 'rengu';
-  GRANT ALL ON *.* TO 'rengu'@'%';
-  ```
+    ```
+    CREATE USER 'rengu'@'%' IDENTIFIED BY 'rengu';
+    GRANT ALL ON *.* TO 'rengu'@'%';
+    ```
 * 建立名为OperationsManagementSuiteDB的数据库。
+    ```
+    CREATE DATABASE OperationsManagementSuiteDB;
+    ```
+## 接口说明
 
-### RabbitMQ安装配置
+### 用户接口
+* 查询所有用户（管理员） < GET > http://localhost:8080/users
+* 查询用户 < GET > http://localhost:8080/users/{userId}
+* 新增用户 < POST > http://localhost:8080/users
+* 删除用户 < DELETE > http://localhost:8080/users/{userId}
+* 设置用户角色（管理员） <PUT> http://localhost:8080/users/{userId}/roles/{roleId}
 
-* 安装RabbitMQ及其依赖Erlang。
-* 配置RabbitMQ的Web管理页面，在\RabbitMQ Server\rabbitmq_server-x-x-x\sbin目录下执行
-  ```
-  rabbitmq-plugins enable rabbitmq_management
-  ```
-* 访问RabbitMQ的Web管理页面
-  ```
-  http://localhost:15672（默认的用户名密码为guest-guest）
-  ```
-* 建立用户设置用户名和密码均为rengu。
-* 建立虚拟主机路径"/OMS"
-* 分配rengu用户使用"/OMS"虚拟主机的权限。
+### 角色接口
+* 查询所有角色（管理员） < GET > http://localhost:8080/roles
+* 查询角色 < GET > http://localhost:8080/roles/{roleId}
+
+### 系统接口
+* 查询系统信息 < GET > http://localhost:8080/system/info
+* 查询系统配置信息 < GET > http://localhost:8080/system/serverconfiguration
+
+### 组件接口
+* 新增组件 < POST > http://localhost:8080/components
+* 删除组件 < DELETE > http://localhost:8080/components/{componentId}
+* 修改组件 < PATCH > http://localhost:8080/components/{componentId}
+* 查询组件 < GET > http://localhost:8080/components/{componentId}
+* 搜索组件 < GET > http://localhost:8080/components
+* 导入组件 < POST > http://localhost:8080/components/import
+* 导出组件 < GET > http://localhost:8080/components/export/{componentId}
+
+### 设备接口
+* 新增设备 < POST > http://localhost:8080/devices
+* 删除设备 < DELETE > http://localhost:8080/devices/{deviceId}
+* 修改设备 < PATCH > http://localhost:8080/devices/{deviceId}
+* 查询设备 < GET > http://localhost:8080/devices/{deviceId}
+* 搜索设备 < GET > http://localhost:8080/devices
 
 ## 更新日志
-
-### 0.0.1-SNAPSHOT (2017年11月14日)
-    
-* 配置```spring-boot-starter-data-jpa```连接MySQL数据库。
-* 配置```spring-boot-starter-security```实现基于HttpBasic的验证和权限管理。
-* 配置```spring-boot-starter-web```响应Http请求。
-* 配置```spring-boot-starter-amqp```实现RabbitMQ消息队列的收发消息。
-* 配置```spring-boot-starter-websocket```实现建立WebSocket通信。
-* 配置请求日志切面，将用户请求记入数据库。
-* 实现返回统一格式的请求结果。
-* 实现系统异常的统一捕获处理。
-* 实现开发版本和发布版本的配置文件分离。
-* 建立临时RabbitMQ消息队列-test
+点击[这里](https://github.com/MagnyCopper/OperationsManagementSuite/blob/dev/CHANGELOG.md)查看更新日志。
