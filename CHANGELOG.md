@@ -1,133 +1,52 @@
 # Changelog
-All notable changes to this project will be documented in this file.
-
-The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
-and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
+一体化运维平台更新日志。
 
 ## [Unreleased]
-
-## [1.0.0] - 2017-06-20
 ### Added
-- New visual identity by @tylerfortune8.
-- Version navigation.
-- Links to latest released version in previous versions.
-- "Why keep a changelog?" section.
-- "Who needs a changelog?" section.
-- "How do I make a changelog?" section.
-- "Frequently Asked Questions" section.
-- New "Guiding Principles" sub-section to "How do I make a changelog?".
-- Simplified and Traditional Chinese translations from @tianshuo.
-- German translation from @mpbzh & @Art4.
-- Italian translation from @azkidenz.
-- Swedish translation from @magol.
-- Turkish translation from @karalamalar.
-- French translation from @zapashcanon.
-- Brazilian Portugese translation from @aisamu.
-- Polish translation from @amielucha.
-- Russian translation from @aishek.
-- Czech translation from @h4vry.
-- Slovak translation from @jkostolansky.
-
 ### Changed
-- Start using "changelog" over "change log" since it's the common usage.
-- Start versioning based on the current English version at 0.3.0 to help
-translation authors keep things up-to-date.
-- Rewrite "What makes unicorns cry?" section.
-- Rewrite "Ignoring Deprecations" sub-section to clarify the ideal
-  scenario.
-- Improve "Commit log diffs" sub-section to further argument against
-  them.
-- Merge "Why can’t people just use a git log diff?" with "Commit log
-  diffs"
-- Fix typos in Simplified Chinese and Traditional Chinese translations.
-- Fix typos in Brazilian Portugese translation.
-- Fix typos in Turkish translation.
-- Fix typos in Czech translation.
-- Fix typos in Swedish translation.
-- Improve phrasing in French translation.
-- Fix phrasing and spelling in German translation.
-
-### Removed
-- Section about "changelog" vs "CHANGELOG".
-
-## [0.3.0] - 2015-12-03
-### Added
-- RU translation from @aishek.
-- pt-BR translation from @tallesl.
-- es-ES translation from @ZeliosAriex.
-
-## [0.2.0] - 2015-10-06
-### Changed
-- Remove exclusionary mentions of "open source" since this project can
-benefit both "open" and "closed" source projects equally.
-
-## [0.1.0] - 2015-10-06
-### Added
-- Answer "Should you ever rewrite a change log?".
-
-### Changed
-- Improve argument against commit logs.
-- Start following [SemVer](http://semver.org) properly.
-
-## [0.0.8] - 2015-02-17
-### Changed
-- Update year to match in every README example.
-- Reluctantly stop making fun of Brits only, since most of the world
-  writes dates in a strange way.
-
 ### Fixed
-- Fix typos in recent README changes.
-- Update outdated unreleased diff link.
-
-## [0.0.7] - 2015-02-16
-### Added
-- Link, and make it obvious that date format is ISO 8601.
-
-### Changed
-- Clarified the section on "Is there a standard change log format?".
-
-### Fixed
-- Fix Markdown links to tag comparison URL with footnote-style links.
-
-## [0.0.6] - 2014-12-12
-### Added
-- README section on "yanked" releases.
-
-## [0.0.5] - 2014-08-09
-### Added
-- Markdown links to version tags on release headings.
-- Unreleased section to gather unreleased changes and encourage note
-keeping prior to releases.
-
-## [0.0.4] - 2014-08-09
-### Added
-- Better explanation of the difference between the file ("CHANGELOG")
-and its function "the change log".
-
-### Changed
-- Refer to a "change log" instead of a "CHANGELOG" throughout the site
-to differentiate between the file and the purpose of the file — the
-logging of changes.
-
 ### Removed
-- Remove empty sections from CHANGELOG, they occupy too much space and
-create too much noise in the file. People will have to assume that the
-missing sections were intentionally left out because they contained no
-notable changes.
 
-## [0.0.3] - 2014-08-09
+## 0.0.2 - SNAPSHOT - 2017-12-15
 ### Added
-- "Why should I care?" section mentioning The Changelog podcast.
+- 实现新增设备接口< POST > http://localhost:8080/devices
+- 实现删除设备接口< DELETE > http://localhost:8080/devices/{deviceId}
+- 实现修改设备接口< PATCH > http://localhost:8080/devices/{deviceId}
+- 实现查询组件接口< GET > http://localhost:8080/devices/{deviceId}
+- 实现搜索组件接口< GET > http://localhost:8080/devices
+- 实现新增组件接口 < POST > http://localhost:8080/components
+- 实现删除组件接口 < DELETE > http://localhost:8080/components/{componentId}
+- 实现修改组件接口 < PATCH > http://localhost:8080/components/{componentId}
+- 实现查询组件接口 < GET > http://localhost:8080/components/{componentId}
+- 实现搜索组件接口 < GET > http://localhost:8080/components
+- 实现导入组件接口 < POST > http://localhost:8080/components/import
+- 实现导出组件接口 < GET > http://localhost:8080/components/export/{componentId}
+- 实现查询系统信息接口 < GET > http://localhost:8080/system/info
+- 实现查询系统配置信息接口 < GET > http://localhost:8080/system/serverconfiguration
+- 实现查询所有角色接口（管理员） < GET > http://localhost:8080/roles
+- 实现查询角色接口 < GET > http://localhost:8080/roles/{roleId}
+- 实现查询所有用户接口（管理员） < GET > http://localhost:8080/users
+- 实现查询用户接口 < GET > http://localhost:8080/users/{userId}
+- 实现新增用户接口 < POST > http://localhost:8080/users
+- 实现删除用户接口 < DELETE > http://localhost:8080/users/{userId}
+- 实现设置用户角色接口（管理员） <PUT> http://localhost:8080/users/{userId}/roles/{roleId}
+### Changed
+- 修改统一返回结果的格式。
+- 修改系统统一异常处理的实现方式。
+- 修改系统记录请求日志的实现方式。
+### Removed
+- 移除RabbitMQ消息队列的配置信息及消息接收发送模块。
+- 移除阿里巴巴数据库连接池配置。
 
-## [0.0.2] - 2014-07-10
+## 0.0.1 - SNAPSHOT - 2017-11-14
 ### Added
-- Explanation of the recommended reverse chronological release ordering.
-
-## 0.0.1 - 2014-05-31
-### Added
-- This CHANGELOG file to hopefully serve as an evolving example of a
-  standardized open source project CHANGELOG.
-- CNAME file to enable GitHub Pages custom domain
-- README now contains answers to common questions about CHANGELOGs
-- Good examples and basic guidelines, including proper date formatting.
-- Counter-examples: "What makes unicorns cry?"
+- 配置spring-boot-starter-data-jpa连接MySQL数据库。
+- 配置spring-boot-starter-security实现基于HttpBasic的验证和权限管理。
+- 配置spring-boot-starter-web响应Http请求。
+- 配置spring-boot-starter-amqp实现RabbitMQ消息队列的收发消息。
+- 配置spring-boot-starter-websocket实现建立WebSocket通信。
+- 配置请求日志切面，将用户请求记入数据库。
+- 实现返回统一格式的请求结果。
+- 实现系统异常的统一捕获处理。
+- 实现开发版本和发布版本的配置文件分离。
+- 建立临时RabbitMQ消息队列-test
