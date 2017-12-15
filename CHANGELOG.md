@@ -7,6 +7,12 @@
 ### Fixed
 ### Removed
 
+## 0.0.3 - SNAPSHOT - 2017-12-15
+### Added
+### Changed
+### Fixed
+### Removed
+
 ## 0.0.2 - SNAPSHOT - 2017-12-15
 ### Added
 - 实现新增设备接口< POST > http://localhost:8080/devices
@@ -34,6 +40,8 @@
 - 修改统一返回结果的格式。
 - 修改系统统一异常处理的实现方式。
 - 修改系统记录请求日志的实现方式。
+### Fixed
+- 修复在发布版本中无法获取组件库路径的问题。
 ### Removed
 - 移除RabbitMQ消息队列的配置信息及消息接收发送模块。
 - 移除阿里巴巴数据库连接池配置。

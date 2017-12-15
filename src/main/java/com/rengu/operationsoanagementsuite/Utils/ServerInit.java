@@ -46,8 +46,13 @@ public class ServerInit implements CommandLineRunner {
         // 服务启动后执行一些初始化的工作
         // 调试环境获取组件库路径
         String libraryPath = Objects.requireNonNull(ClassUtils.getDefaultClassLoader().getResource("")).getPath();
+        // 调试环境组件库路径
         if (libraryPath.endsWith("/target/classes/")) {
             serverConfiguration.setLibraryPath(libraryPath.replace("classes/", serverConfiguration.getLibraryFolderName() + File.separatorChar));
+        }
+        // relese环境组件库路径
+        if (libraryPath.endsWith("!/BOOT-INF/classes!/")) {
+            serverConfiguration.setLibraryPath(new File(libraryPath.replace("!/BOOT-INF/classes!/", "")).getParent() + File.separator);
         }
         // 初始化角色
         if (roleRepository.findByRole(serverConfiguration.getDefultUserRole()) == null) {
