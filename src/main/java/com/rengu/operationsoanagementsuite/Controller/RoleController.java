@@ -29,13 +29,13 @@ public class RoleController {
     @GetMapping
     public ResultEntity getRoles(@AuthenticationPrincipal UserEntity loginUser) {
         List<RoleEntity> roleEntityList = roleService.getRoles();
-        return ResultUtils.init(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, roleEntityList);
+        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, roleEntityList);
     }
 
     // 根据角色id查询角色信息
     @GetMapping(value = "/{roleId}")
     public ResultEntity getRole(@AuthenticationPrincipal UserEntity loginUser, @PathVariable String roleId) throws MissingServletRequestParameterException {
         RoleEntity roleEntity = roleService.getRoleById(roleId);
-        return ResultUtils.init(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, roleEntity);
+        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, roleEntity);
     }
 }

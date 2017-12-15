@@ -20,31 +20,31 @@ public class DeviceController {
     // 保存设备
     @PostMapping
     public ResultEntity saveDevice(@AuthenticationPrincipal UserEntity loginUser, DeviceEntity deviceEntity) throws MissingServletRequestParameterException {
-        return ResultUtils.init(HttpStatus.CREATED, ResultUtils.HTTPRESPONSE, loginUser, deviceService.saveDevice(deviceEntity));
+        return ResultUtils.resultBuilder(HttpStatus.CREATED, ResultUtils.HTTPRESPONSE, loginUser, deviceService.saveDevice(deviceEntity));
     }
 
     // 删除设备
     @DeleteMapping(value = "/{deviceId}")
     public ResultEntity deleteDevice(@AuthenticationPrincipal UserEntity loginUser, @PathVariable("deviceId") String deviceId) throws MissingServletRequestParameterException {
         deviceService.deleteDevice(deviceId);
-        return ResultUtils.init(HttpStatus.NO_CONTENT, ResultUtils.HTTPRESPONSE, loginUser, "删除id为" + deviceId + "的设备成功。");
+        return ResultUtils.resultBuilder(HttpStatus.NO_CONTENT, ResultUtils.HTTPRESPONSE, loginUser, "删除id为" + deviceId + "的设备成功。");
     }
 
     // 更新设备
     @PatchMapping(value = "/{deviceId}")
     public ResultEntity updateDevice(@AuthenticationPrincipal UserEntity loginUser, @PathVariable("deviceId") String deviceId, DeviceEntity deviceArgs) throws MissingServletRequestParameterException {
-        return ResultUtils.init(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, deviceService.updateDevice(deviceId, deviceArgs));
+        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, deviceService.updateDevice(deviceId, deviceArgs));
     }
 
     // 查询设备
     @GetMapping(value = "/{deviceId}")
     public ResultEntity getDevice(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deviceId") String deviceId) throws MissingServletRequestParameterException {
-        return ResultUtils.init(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, deviceService.getDevice(deviceId));
+        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, deviceService.getDevice(deviceId));
     }
 
     // 查询设备
     @GetMapping
-    public ResultEntity getDevice(@AuthenticationPrincipal UserEntity loginUser, DeviceEntity deviceArgs) {
-        return ResultUtils.init(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, deviceService.getDevice(deviceArgs));
+    public ResultEntity getDevices(@AuthenticationPrincipal UserEntity loginUser, DeviceEntity deviceArgs) {
+        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, deviceService.getDevices(deviceArgs));
     }
 }

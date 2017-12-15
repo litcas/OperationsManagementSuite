@@ -20,11 +20,11 @@ public class SystemController {
 
     @GetMapping(value = "/info")
     public ResultEntity getSystemInfo(@AuthenticationPrincipal UserEntity loginUser) {
-        return ResultUtils.init(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, systemService.getSystemInfo());
+        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, systemService.getSystemInfo());
     }
 
     @GetMapping(value = "/serverconfiguration")
     public ResultEntity getServerConfiguration(@AuthenticationPrincipal UserEntity loginUser) {
-        return ResultUtils.init(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, systemService.getServerConfiguration());
+        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, systemService.getServerConfiguration());
     }
 }

@@ -1,5 +1,7 @@
 package com.rengu.operationsoanagementsuite.Controller;
 
+import com.rengu.operationsoanagementsuite.Entity.UserEntity;
+import com.rengu.operationsoanagementsuite.Repository.UserRepository;
 import com.rengu.operationsoanagementsuite.Utils.ResultEntity;
 import com.rengu.operationsoanagementsuite.Utils.ResultUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,14 +23,18 @@ public class CustomizeErrorController implements ErrorController {
 
     @Autowired
     private ErrorAttributes errorAttributes;
+    @Autowired
+    private UserRepository userRepository;
 
     @RequestMapping(value = PATH)
     public ResultEntity error(HttpServletRequest request, HttpServletResponse response) {
         Throwable throwable = getError(request);
+        UserEntity loginUser = userRepository.findByUsername(request.getUserPrincipal().getName());
+        // 初始化用户信息
         if (throwable == null) {
-            return ResultUtils.init(HttpStatus.valueOf(response.getStatus()), ResultUtils.ERROR, null);
+            return ResultUtils.resultBuilder(HttpStatus.valueOf(response.getStatus()), ResultUtils.ERROR, loginUser, null);
         }
-        return ResultUtils.init(HttpStatus.valueOf(response.getStatus()), ResultUtils.ERROR, throwable.getMessage());
+        return ResultUtils.resultBuilder(HttpStatus.valueOf(response.getStatus()), ResultUtils.ERROR, loginUser, throwable.getMessage());
     }
 
     @Override

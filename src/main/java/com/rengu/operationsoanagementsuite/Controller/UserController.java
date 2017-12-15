@@ -24,14 +24,14 @@ public class UserController {
     @PostMapping
     public ResultEntity saveUser(@AuthenticationPrincipal UserEntity loginUser, UserEntity userArgs) throws MissingServletRequestParameterException {
         UserEntity userEntity = userService.saveUser(userArgs);
-        return ResultUtils.init(HttpStatus.CREATED, ResultUtils.HTTPRESPONSE, loginUser, userEntity);
+        return ResultUtils.resultBuilder(HttpStatus.CREATED, ResultUtils.HTTPRESPONSE, loginUser, userEntity);
     }
 
     // 删除用户
     @DeleteMapping(value = "/{userId}")
     public ResultEntity deleteUser(@AuthenticationPrincipal UserEntity loginUser, @PathVariable String userId) throws MissingServletRequestParameterException {
         userService.deleteUser(userId);
-        return ResultUtils.init(HttpStatus.NO_CONTENT, ResultUtils.HTTPRESPONSE, loginUser, null);
+        return ResultUtils.resultBuilder(HttpStatus.NO_CONTENT, ResultUtils.HTTPRESPONSE, loginUser, null);
     }
 
     // 查询所有用户信息
@@ -39,14 +39,14 @@ public class UserController {
     @GetMapping
     public ResultEntity getUsers(@AuthenticationPrincipal UserEntity loginUser) {
         List<UserEntity> userEntityList = userService.getUsers();
-        return ResultUtils.init(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, userEntityList);
+        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, userEntityList);
     }
 
     //更具id查询用户信息
     @GetMapping(value = "/{userId}")
     public ResultEntity getUser(@AuthenticationPrincipal UserEntity loginUser, @PathVariable String userId) throws MissingServletRequestParameterException {
         UserEntity userEntity = userService.getUser(userId);
-        return ResultUtils.init(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, userEntity);
+        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, userEntity);
     }
 
     // 为指定用户绑定指定角色
@@ -54,6 +54,6 @@ public class UserController {
     @PutMapping(value = "/{userId}/roles/{roleId}")
     public ResultEntity assignRoleToUser(@AuthenticationPrincipal UserEntity loginUser, @PathVariable String userId, @PathVariable String roleId) throws MissingServletRequestParameterException {
         UserEntity userEntity = userService.assignRoleToUser(userId, roleId);
-        return ResultUtils.init(HttpStatus.NO_CONTENT, ResultUtils.HTTPRESPONSE, loginUser, userEntity);
+        return ResultUtils.resultBuilder(HttpStatus.NO_CONTENT, ResultUtils.HTTPRESPONSE, loginUser, userEntity);
     }
 }

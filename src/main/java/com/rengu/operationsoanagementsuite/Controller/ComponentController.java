@@ -30,37 +30,37 @@ public class ComponentController {
     // 保存组件
     @PostMapping
     public ResultEntity saveComponent(@AuthenticationPrincipal UserEntity loginUser, ComponentEntity componentEntity, @RequestParam(value = "addFilePath") String[] addFilePath, @RequestParam(value = "componentfile") MultipartFile[] multipartFiles) throws MissingServletRequestParameterException, IOException, NoSuchAlgorithmException {
-        return ResultUtils.init(HttpStatus.CREATED, ResultUtils.HTTPRESPONSE, loginUser, componentService.saveComponent(loginUser, componentEntity, addFilePath, multipartFiles));
+        return ResultUtils.resultBuilder(HttpStatus.CREATED, ResultUtils.HTTPRESPONSE, loginUser, componentService.saveComponent(loginUser, componentEntity, addFilePath, multipartFiles));
     }
 
     // 删除组件
     @DeleteMapping(value = "/{componentId}")
     public ResultEntity deleteComponent(@AuthenticationPrincipal UserEntity loginUser, @PathVariable String componentId) throws MissingServletRequestParameterException {
-        return ResultUtils.init(HttpStatus.NO_CONTENT, ResultUtils.HTTPRESPONSE, loginUser, componentService.deleteComponent(componentId));
+        return ResultUtils.resultBuilder(HttpStatus.NO_CONTENT, ResultUtils.HTTPRESPONSE, loginUser, componentService.deleteComponent(componentId));
     }
 
     // 更新组件
     @PatchMapping(value = "/{componentId}")
     public ResultEntity updateComponents(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "componentId") String componentId, ComponentEntity componentArgs) throws MissingServletRequestParameterException {
-        return ResultUtils.init(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, componentService.updateComponents(componentId, componentArgs));
+        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, componentService.updateComponents(componentId, componentArgs));
     }
 
     // 查询组件
     @GetMapping(value = "/{componentId}")
     public ResultEntity getComponents(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "componentId") String componentId) throws MissingServletRequestParameterException {
-        return ResultUtils.init(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, componentService.getComponents(componentId));
+        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, componentService.getComponents(componentId));
     }
 
     // 查询组件
     @GetMapping
     public ResultEntity getComponents(@AuthenticationPrincipal UserEntity loginUser, ComponentEntity componentArgs) {
-        return ResultUtils.init(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, componentService.getComponents(componentArgs));
+        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, componentService.getComponents(componentArgs));
     }
 
     // 导入组件
     @PostMapping(value = "/import")
     public ResultEntity importComponents(@AuthenticationPrincipal UserEntity loginUser, @RequestParam(value = "importComponents") MultipartFile[] multipartFiles) throws IOException, MissingServletRequestParameterException, ZipException, NoSuchAlgorithmException {
-        return ResultUtils.init(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, componentService.importComponents(loginUser, multipartFiles));
+        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, componentService.importComponents(loginUser, multipartFiles));
     }
 
     // 导出组件

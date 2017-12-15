@@ -93,7 +93,7 @@ public class DeviceService {
     }
 
     // 查询设备
-    public List<DeviceEntity> getDevice(DeviceEntity deviceArgs) {
+    public List<DeviceEntity> getDevices(DeviceEntity deviceArgs) {
         return deviceRepository.findAll((root, query, cb) -> {
             List<Predicate> predicateList = new ArrayList<>();
             if (deviceArgs.getName() != null) {
