@@ -60,7 +60,7 @@ public class ComponentService {
             logger.info("名称为：" + componentEntity.getName() + "版本号：" + componentEntity.getVersion() + "的组件已存在，保存失败。");
             throw new DataIntegrityViolationException("名称为：" + componentEntity.getName() + "版本号：" + componentEntity.getVersion() + "的组件已存在，保存失败。");
         }
-        componentEntity = componentInit(componentEntity, loginUser);
+        componentEntity = componentInit(componentEntity);
         // 设置组件文件关联
         componentEntity.setComponentFileEntities(componentFileService.addComponentFile(addFilePath, multipartFiles, componentEntity));
         // 设置组件大小
@@ -164,7 +164,7 @@ public class ComponentService {
                 throw new CustomizeException("组件名称为：" + componentEntity.getName() + "版本号：" + componentEntity.getVersion() + "已存在，导入失败。");
             } else {
                 // 组件库不存在该名称的组件
-                componentEntity = componentInit(componentEntity, loginUser);
+                componentEntity = componentInit(componentEntity);
                 componentEntity.setComponentFileEntities(componentFileService.addComponentFile(componentEntity, decompressFile));
                 // 设置组件大小
                 componentEntity.setSize(FileUtils.sizeOf(new File(componentEntity.getFilePath())));
@@ -209,15 +209,9 @@ public class ComponentService {
     }
 
     // 组件对象初始化
-    private ComponentEntity componentInit(ComponentEntity componentEntity, UserEntity loginUser) {
+    private ComponentEntity componentInit(ComponentEntity componentEntity) {
         componentEntity.setFilePath(getLibraryPath(componentEntity));
         componentEntity.setDeleted(false);
-        // 设置组件的拥有者为当前登录用户
-        if (loginUser != null) {
-            List<UserEntity> userEntities = new ArrayList<>();
-            userEntities.add(loginUser);
-            componentEntity.setUserEntities(userEntities);
-        }
         return componentEntity;
     }
 }

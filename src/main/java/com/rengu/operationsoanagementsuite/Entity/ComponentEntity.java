@@ -26,8 +26,6 @@ public class ComponentEntity {
     private String filePath;
     private long size;
     @OneToMany
-    private List<UserEntity> userEntities;
-    @OneToMany
     private List<ComponentFileEntity> componentFileEntities;
 
     public String getId() {
@@ -100,14 +98,6 @@ public class ComponentEntity {
 
     public void setSize(long size) {
         this.size = size;
-    }
-
-    public List<UserEntity> getUserEntities() {
-        return userEntities;
-    }
-
-    public void setUserEntities(List<UserEntity> userEntities) {
-        this.userEntities = userEntities;
     }
 
     public List<ComponentFileEntity> getComponentFileEntities() {
