@@ -15,8 +15,9 @@ public class UserEntity implements UserDetails {
     private String id = UUID.randomUUID().toString();
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime = new Date();
-    @Column(unique = true)
+    @Column(nullable = false, unique = true)
     private String username;
+    @Column(nullable = false)
     private String password;
     private boolean accountNonExpired = true;
     private boolean accountNonLocked = true;
