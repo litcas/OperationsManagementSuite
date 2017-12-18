@@ -110,4 +110,9 @@ public class UserService implements UserDetailsService {
         }
         return userEntity;
     }
+
+    @Transactional
+    public UserEntity getAdminUser() {
+        return userRepository.findByUsername(serverConfiguration.getDefultUserName());
+    }
 }

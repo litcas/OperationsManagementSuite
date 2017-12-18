@@ -118,4 +118,12 @@ public class UserEntity implements UserDetails {
     public void setRoleEntities(List<RoleEntity> roleEntities) {
         this.roleEntities = roleEntities;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        UserEntity that = (UserEntity) o;
+        return Objects.equals(id, that.id);
+    }
 }
