@@ -14,7 +14,7 @@ public class ProjectEntity {
     private String id = UUID.randomUUID().toString();
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime = new Date();
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String name;
     private String description;
     @JsonIgnore

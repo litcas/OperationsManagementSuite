@@ -32,7 +32,7 @@ public class ProjectService {
             throw new CustomizeException("请求参数解析异常：project.name不存在，保存失败。");
         }
         // 检查该名称的工程是否已经存在
-        if (hasProject(projectEntity.getName())) {
+        if (hasProject(projectEntity.getName(), loginUser)) {
             logger.info("名称为：" + projectEntity.getName() + "的工程已存在，保存失败。");
             throw new CustomizeException("名称为：" + projectEntity.getName() + "的工程已存在，保存失败。");
         }
@@ -100,7 +100,7 @@ public class ProjectService {
     }
 
     // 查看工程是否存在
-    private boolean hasProject(String name) {
-        return projectRepository.findByName(name) != null;
+    private boolean hasProject(String name, UserEntity userEntity) {
+        return projectRepository.findByNameAndUserEntity(name, userEntity) != null;
     }
 }
