@@ -1,9 +1,10 @@
 package com.rengu.operationsoanagementsuite.Service;
 
-import com.rengu.operationsoanagementsuite.Entity.DeployPlanEntity;
-import com.rengu.operationsoanagementsuite.Entity.ProjectEntity;
+import com.rengu.operationsoanagementsuite.Entity.*;
 import com.rengu.operationsoanagementsuite.Exception.CustomizeException;
+import com.rengu.operationsoanagementsuite.Repository.ComponentRepository;
 import com.rengu.operationsoanagementsuite.Repository.DeployPlanRepository;
+import com.rengu.operationsoanagementsuite.Repository.DeviceRepository;
 import com.rengu.operationsoanagementsuite.Repository.ProjectRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +28,12 @@ public class DeployPlanService {
     private DeployPlanRepository deployPlanRepository;
     @Autowired
     private ProjectRepository projectRepository;
+    @Autowired
+    private DeviceRepository deviceRepository;
+    @Autowired
+    private ComponentRepository componentRepository;
+    @Autowired
+    private DeployPlanDetailService deployPlanDetailService;
 
     @Transactional
     public DeployPlanEntity saveDeployPlans(String projectId, DeployPlanEntity deployPlanEntity) {
@@ -112,7 +119,56 @@ public class DeployPlanService {
         return getDeployPlans(null, deployPlanArgs);
     }
 
+    @Transactional
+    public DeployPlanEntity AddDeployPlanDetail(String deployplanId, String deviceId, String componentId, String deployPath) {
+        if (StringUtils.isEmpty(deployplanId)) {
+            logger.info("请求参数解析异常：deployplan.id不存在，更新失败。");
+            throw new CustomizeException("请求参数解析异常：deployplan.id不存在，绑定失败。");
+        }
+        if (!deployPlanRepository.exists(deployplanId)) {
+            logger.info("请求参数不正确：id为：" + deployplanId + "的部署设计不存在，更新失败。");
+            throw new CustomizeException("请求参数不正确：id为：" + deployplanId + "的部署设计不存在，绑定失败。");
+        }
+        if (StringUtils.isEmpty(deviceId)) {
+            logger.info("请求参数解析异常：device.id不存在，更新失败。");
+            throw new CustomizeException("请求参数解析异常：deviceId.id不存在，绑定失败。");
+        }
+        if (!deviceRepository.exists(deviceId)) {
+            logger.info("请求参数不正确：id为：" + deviceId + "的设备不存在，绑定失败。");
+            throw new CustomizeException("请求参数不正确：id为：" + deviceId + "的设备不存在，绑定失败。");
+        }
+        if (StringUtils.isEmpty(componentId)) {
+            logger.info("请求参数解析异常：component.id不存在，绑定失败。");
+            throw new CustomizeException("请求参数解析异常：component.id不存在，绑定失败。");
+        }
+        if (!componentRepository.exists(componentId)) {
+            logger.info("请求参数不正确：id为：" + componentId + "的组件不存在，更绑定失败。");
+            throw new CustomizeException("请求参数不正确：id为：" + componentId + "的组件不存在，绑定失败。");
+        }
+        if (StringUtils.isEmpty(deployPath)) {
+            logger.info("请求参数解析异常：deployPath不存在，绑定失败。");
+            throw new CustomizeException("请求参数解析异常：deployPath不存在，绑定失败。");
+        }
+        DeployPlanEntity deployPlanEntity = deployPlanRepository.findOne(deployplanId);
+        DeviceEntity deviceEntity = deviceRepository.findOne(deviceId);
+        ComponentEntity componentEntity = componentRepository.findOne(componentId);
+        DeployPlanDetailEntity deployPlanDetailEntity = deployPlanDetailService.saveDeployPlanDetails(deviceEntity, componentEntity, deployPath);
+        deployPlanEntity.setDeployPlanDetailEntities(AddDeployPlanDetail(deployPlanEntity, deployPlanDetailEntity));
+        return deployPlanRepository.save(deployPlanEntity);
+    }
+
     private boolean hasDeployPlan(String name, ProjectEntity projectEntity) {
         return deployPlanRepository.findByNameAndProjectEntity(name, projectEntity) != null;
+    }
+
+    private List<DeployPlanDetailEntity> AddDeployPlanDetail(DeployPlanEntity deployPlanEntity, DeployPlanDetailEntity deployPlanDetailEntity) {
+        List<DeployPlanDetailEntity> deployPlanDetailEntities = deployPlanEntity.getDeployPlanDetailEntities();
+        if (deployPlanDetailEntities == null) {
+            deployPlanDetailEntities = new ArrayList<>();
+        }
+        if (!deployPlanDetailEntities.contains(deployPlanDetailEntity)) {
+            deployPlanDetailEntities.add(deployPlanDetailEntity);
+        }
+        return deployPlanDetailEntities;
     }
 }

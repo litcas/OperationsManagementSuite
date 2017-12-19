@@ -53,4 +53,9 @@ public class DeployPlanController {
     public ResultEntity getProjectsAdmin(@AuthenticationPrincipal UserEntity loginUser, DeployPlanEntity deployPlanArgs) {
         return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, deployPlanService.getDeployPlans(deployPlanArgs));
     }
+
+    @PutMapping(value = "/{deployplanId}/devices/{deviceId}/components/{componentId}")
+    public ResultEntity AddDeployPlanDetail(@AuthenticationPrincipal UserEntity loginUser, @PathVariable("deployplanId") String deployplanId, @PathVariable("deviceId") String deviceId, @PathVariable("componentId") String componentId, @RequestParam(value = "deployPath") String deployPath) {
+        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, deployPlanService.AddDeployPlanDetail(deployplanId, deviceId, componentId, deployPath));
+    }
 }
