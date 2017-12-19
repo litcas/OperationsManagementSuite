@@ -1,9 +1,7 @@
 package com.rengu.operationsoanagementsuite.Entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
@@ -11,17 +9,16 @@ import java.util.Date;
 import java.util.UUID;
 
 @Entity
-public class ProjectEntity {
+public class DeployPlanDetailEntity {
     @Id
     private String id = UUID.randomUUID().toString();
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime = new Date();
-    @Column(nullable = false)
-    private String name;
-    private String description;
-    @JsonIgnore
     @OneToOne
-    private UserEntity userEntity;
+    private DeviceEntity deviceEntity;
+    @OneToOne
+    private ComponentEntity componentEntity;
+    private String deployPath;
 
     public String getId() {
         return id;
@@ -39,27 +36,27 @@ public class ProjectEntity {
         this.createTime = createTime;
     }
 
-    public String getName() {
-        return name;
+    public DeviceEntity getDeviceEntity() {
+        return deviceEntity;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setDeviceEntity(DeviceEntity deviceEntity) {
+        this.deviceEntity = deviceEntity;
     }
 
-    public String getDescription() {
-        return description;
+    public ComponentEntity getComponentEntity() {
+        return componentEntity;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setComponentEntity(ComponentEntity componentEntity) {
+        this.componentEntity = componentEntity;
     }
 
-    public UserEntity getUserEntity() {
-        return userEntity;
+    public String getDeployPath() {
+        return deployPath;
     }
 
-    public void setUserEntity(UserEntity userEntity) {
-        this.userEntity = userEntity;
+    public void setDeployPath(String deployPath) {
+        this.deployPath = deployPath;
     }
 }

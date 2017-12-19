@@ -27,6 +27,10 @@ public class ProjectService {
     // 保存工程
     @Transactional
     public ProjectEntity saveProjects(ProjectEntity projectEntity, UserEntity loginUser) {
+        if (projectEntity == null) {
+            logger.info("请求参数解析异常：project不存在，保存失败。");
+            throw new CustomizeException("请求参数解析异常：project不存在，保存失败。");
+        }
         if (StringUtils.isEmpty(projectEntity.getName())) {
             logger.info("请求参数解析异常：project.name不存在，保存失败。");
             throw new CustomizeException("请求参数解析异常：project.name不存在，保存失败。");

@@ -54,5 +54,4 @@ public class ProjectController {
     public ResultEntity getProjectsAdmin(@AuthenticationPrincipal UserEntity loginUser, ProjectEntity projectArgs) {
         return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, projectService.getProjects(projectArgs));
     }
-
 }

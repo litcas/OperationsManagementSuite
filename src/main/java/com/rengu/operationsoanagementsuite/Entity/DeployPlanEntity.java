@@ -1,11 +1,9 @@
 package com.rengu.operationsoanagementsuite.Entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -22,7 +20,10 @@ public class DeployPlanEntity {
     private String name;
     private String description;
     @OneToMany
-    private List<DeviceEntity> deviceEntities;
+    private List<DeployPlanDetailEntity> deployPlanDetailEntities;
+    @JsonIgnore
+    @ManyToOne
+    private ProjectEntity projectEntity;
 
     public String getId() {
         return id;
@@ -64,11 +65,19 @@ public class DeployPlanEntity {
         this.description = description;
     }
 
-    public List<DeviceEntity> getDeviceEntities() {
-        return deviceEntities;
+    public List<DeployPlanDetailEntity> getDeployPlanDetailEntities() {
+        return deployPlanDetailEntities;
     }
 
-    public void setDeviceEntities(List<DeviceEntity> deviceEntities) {
-        this.deviceEntities = deviceEntities;
+    public void setDeployPlanDetailEntities(List<DeployPlanDetailEntity> deployPlanDetailEntities) {
+        this.deployPlanDetailEntities = deployPlanDetailEntities;
+    }
+
+    public ProjectEntity getProjectEntity() {
+        return projectEntity;
+    }
+
+    public void setProjectEntity(ProjectEntity projectEntity) {
+        this.projectEntity = projectEntity;
     }
 }
