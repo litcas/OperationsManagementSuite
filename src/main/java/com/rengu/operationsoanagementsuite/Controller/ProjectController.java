@@ -7,6 +7,7 @@ import com.rengu.operationsoanagementsuite.Utils.ResultEntity;
 import com.rengu.operationsoanagementsuite.Utils.ResultUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,4 +30,29 @@ public class ProjectController {
         projectService.deleteProjects(projectId);
         return ResultUtils.resultBuilder(HttpStatus.NO_CONTENT, ResultUtils.HTTPRESPONSE, loginUser, "Id为" + projectId + "的工程已删除。");
     }
+
+    // 修改工程
+    @PatchMapping(value = "/{projectId}")
+    public ResultEntity updateProjects(@AuthenticationPrincipal UserEntity loginUser, @PathVariable("projectId") String projectId, ProjectEntity projectArgs) {
+        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, projectService.updateProjects(projectId, projectArgs));
+    }
+
+    // 查看工程
+    @GetMapping(value = "/{projectId}")
+    public ResultEntity getProject(@AuthenticationPrincipal UserEntity loginUser, @PathVariable("projectId") String projectId) {
+        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, projectService.getProject(projectId));
+    }
+
+    // 搜索工程
+    @GetMapping
+    public ResultEntity getProjects(@AuthenticationPrincipal UserEntity loginUser, ProjectEntity projectArgs) {
+        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, projectService.getProjects(loginUser, projectArgs));
+    }
+
+    @GetMapping(value = "/admin")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResultEntity getProjectsAdmin(@AuthenticationPrincipal UserEntity loginUser, ProjectEntity projectArgs) {
+        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, projectService.getProjects(projectArgs));
+    }
+
 }

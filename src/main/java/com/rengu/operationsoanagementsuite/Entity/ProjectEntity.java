@@ -1,11 +1,9 @@
 package com.rengu.operationsoanagementsuite.Entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -19,8 +17,9 @@ public class ProjectEntity {
     @Column(nullable = false, unique = true)
     private String name;
     private String description;
-    @OneToMany
-    private List<UserEntity> userEntities;
+    @JsonIgnore
+    @OneToOne
+    private UserEntity userEntity;
     @OneToMany
     private List<DeployPlanEntity> deployPlanEntities;
 
@@ -56,12 +55,12 @@ public class ProjectEntity {
         this.description = description;
     }
 
-    public List<UserEntity> getUserEntities() {
-        return userEntities;
+    public UserEntity getUserEntity() {
+        return userEntity;
     }
 
-    public void setUserEntities(List<UserEntity> userEntities) {
-        this.userEntities = userEntities;
+    public void setUserEntity(UserEntity userEntity) {
+        this.userEntity = userEntity;
     }
 
     public List<DeployPlanEntity> getDeployPlanEntities() {
