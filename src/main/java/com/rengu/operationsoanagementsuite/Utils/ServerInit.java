@@ -59,7 +59,7 @@ public class ServerInit implements CommandLineRunner {
             UserEntity userEntity = new UserEntity();
             userEntity.setUsername(serverConfiguration.getDefultUsername());
             userEntity.setPassword(serverConfiguration.getDefultPassword());
-            userEntity.setRoleEntities(userService.addRoles(userEntity, roleService.getRoleByName(ServerConfiguration.ADMIN_ROLE_NAME)));
+            userEntity.setRoleEntities(roleService.addRoles(userEntity, roleService.getRoleByName(ServerConfiguration.ADMIN_ROLE_NAME)));
             userRepository.save(userEntity);
         }
     }
