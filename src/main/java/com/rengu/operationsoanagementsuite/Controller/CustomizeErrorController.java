@@ -1,5 +1,6 @@
 package com.rengu.operationsoanagementsuite.Controller;
 
+import com.rengu.operationsoanagementsuite.Repository.UserRepository;
 import com.rengu.operationsoanagementsuite.Utils.ResultEntity;
 import com.rengu.operationsoanagementsuite.Utils.ResultUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.security.Principal;
 
 @RestController
 public class CustomizeErrorController implements ErrorController {
@@ -21,14 +23,14 @@ public class CustomizeErrorController implements ErrorController {
 
     @Autowired
     private ErrorAttributes errorAttributes;
+    @Autowired
+    private UserRepository userRepository;
 
     @RequestMapping(value = PATH)
     public ResultEntity error(HttpServletRequest request, HttpServletResponse response) {
         Throwable throwable = getError(request);
-        if (throwable == null) {
-            return ResultUtils.init(HttpStatus.valueOf(response.getStatus()), ResultUtils.ERROR, null);
-        }
-        return ResultUtils.init(HttpStatus.valueOf(response.getStatus()), ResultUtils.ERROR, throwable.getMessage());
+        Principal principal = request.getUserPrincipal();
+        return ResultUtils.resultBuilder(HttpStatus.valueOf(response.getStatus()), ResultUtils.ERROR, principal == null ? null : userRepository.findByUsername(principal.getName()), throwable == null ? null : throwable.getMessage());
     }
 
     @Override

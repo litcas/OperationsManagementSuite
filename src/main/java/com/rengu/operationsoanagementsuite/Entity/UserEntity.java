@@ -15,8 +15,9 @@ public class UserEntity implements UserDetails {
     private String id = UUID.randomUUID().toString();
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime = new Date();
-    @Column(unique = true)
+    @Column(nullable = false, unique = true)
     private String username;
+    @Column(nullable = false)
     private String password;
     private boolean accountNonExpired = true;
     private boolean accountNonLocked = true;
@@ -35,7 +36,7 @@ public class UserEntity implements UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<GrantedAuthority> grantedAuthorityList = new ArrayList<>();
         for (RoleEntity roleEntity : roleEntities) {
-            grantedAuthorityList.add(new SimpleGrantedAuthority(roleEntity.getRole()));
+            grantedAuthorityList.add(new SimpleGrantedAuthority(roleEntity.getName()));
         }
         return grantedAuthorityList;
     }
@@ -116,5 +117,13 @@ public class UserEntity implements UserDetails {
 
     public void setRoleEntities(List<RoleEntity> roleEntities) {
         this.roleEntities = roleEntities;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        UserEntity that = (UserEntity) o;
+        return Objects.equals(id, that.id);
     }
 }

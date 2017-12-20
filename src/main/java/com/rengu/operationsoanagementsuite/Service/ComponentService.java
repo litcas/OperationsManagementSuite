@@ -2,10 +2,10 @@ package com.rengu.operationsoanagementsuite.Service;
 
 import com.rengu.operationsoanagementsuite.Configuration.ServerConfiguration;
 import com.rengu.operationsoanagementsuite.Entity.ComponentEntity;
-import com.rengu.operationsoanagementsuite.Entity.UserEntity;
 import com.rengu.operationsoanagementsuite.Exception.CustomizeException;
 import com.rengu.operationsoanagementsuite.Repository.ComponentRepository;
 import com.rengu.operationsoanagementsuite.Utils.CompressUtils;
+import com.rengu.operationsoanagementsuite.Utils.NotificationMessage;
 import com.rengu.operationsoanagementsuite.Utils.Tools;
 import net.lingala.zip4j.exception.ZipException;
 import org.apache.commons.io.FileUtils;
@@ -13,10 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.criteria.Predicate;
@@ -44,40 +42,41 @@ public class ComponentService {
 
     // 新建组件
     @Transactional
-    public ComponentEntity saveComponent(UserEntity loginUser, ComponentEntity componentEntity, String[] addFilePath, MultipartFile[] multipartFiles) throws MissingServletRequestParameterException, IOException, NoSuchAlgorithmException {
+    public ComponentEntity saveComponents(ComponentEntity componentEntity, String[] addFilePath, MultipartFile[] multipartFiles) throws IOException, NoSuchAlgorithmException {
         // 检查组件名称参数是否存在
         if (StringUtils.isEmpty(componentEntity.getName())) {
-            logger.info("请求参数解析异常：component.name不存在，保存失败。");
-            throw new MissingServletRequestParameterException("component.name", "String");
+            logger.info(NotificationMessage.COMPONENT_NAME_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.COMPONENT_NAME_NOT_FOUND);
         }
         // 检查组件版本号参数是否存在
         if (StringUtils.isEmpty(componentEntity.getVersion())) {
-            logger.info("请求参数解析异常：component.version，保存失败。");
-            throw new MissingServletRequestParameterException("component.version", "String");
+            logger.info(NotificationMessage.COMPONENT_VERSION_EXISTS);
+            throw new CustomizeException(NotificationMessage.COMPONENT_VERSION_EXISTS);
         }
         // 检查组件是否存在
         if (componentRepository.findByNameAndVersion(componentEntity.getName(), componentEntity.getVersion()) != null) {
-            logger.info("名称为：" + componentEntity.getName() + "版本号：" + componentEntity.getVersion() + "的组件已存在，保存失败。");
-            throw new DataIntegrityViolationException("名称为：" + componentEntity.getName() + "版本号：" + componentEntity.getVersion() + "的组件已存在，保存失败。");
+            logger.info(NotificationMessage.COMPONENT_EXISTS);
+            throw new CustomizeException(NotificationMessage.COMPONENT_EXISTS);
         }
-        componentEntity = componentInit(componentEntity, loginUser);
+        componentEntity = componentInit(componentEntity);
         // 设置组件文件关联
-        componentEntity.setComponentFileEntities(componentFileService.addComponentFile(addFilePath, multipartFiles, componentEntity));
+        componentEntity.setComponentFileEntities(componentFileService.createComponentFile(componentEntity, multipartFiles, addFilePath));
         // 设置组件大小
         componentEntity.setSize(FileUtils.sizeOf(new File(componentEntity.getFilePath())));
+        componentEntity.setLastModified(new Date());
         return componentRepository.save(componentEntity);
     }
 
     // 删除组件信息
     @Transactional
-    public ComponentEntity deleteComponent(String componentId) throws MissingServletRequestParameterException {
+    public ComponentEntity deleteComponents(String componentId) {
         if (StringUtils.isEmpty(componentId)) {
-            logger.info("请求参数不正确：component.id不存在，删除失败。");
-            throw new MissingServletRequestParameterException("component.id", "String");
+            logger.info(NotificationMessage.COMPONENT_ID_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.COMPONENT_ID_NOT_FOUND);
         }
         if (componentRepository.exists(componentId)) {
-            logger.info("请求参数不正确：id为：" + componentId + "的组件不存在，删除失败。");
-            throw new CustomizeException("请求参数不正确：id为：" + componentId + "的组件不存在，删除失败。");
+            logger.info(NotificationMessage.COMPONENT_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.COMPONENT_NOT_FOUND);
         }
         ComponentEntity componentEntity = componentRepository.findOne(componentId);
         componentEntity.setDeleted(true);
@@ -87,18 +86,18 @@ public class ComponentService {
 
     // 更新组件信息
     @Transactional
-    public ComponentEntity updateComponents(String componentId, ComponentEntity componentArgs) throws MissingServletRequestParameterException {
+    public ComponentEntity updateComponents(String componentId, ComponentEntity componentArgs) {
         if (StringUtils.isEmpty(componentId)) {
-            logger.info("请求参数不正确：component.id不存在，更新失败。");
-            throw new MissingServletRequestParameterException("component.id", "String");
+            logger.info(NotificationMessage.COMPONENT_ID_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.COMPONENT_ID_NOT_FOUND);
         }
         if (componentRepository.exists(componentId)) {
-            logger.info("请求参数不正确：id = " + componentId + "的组件不存在，更新失败。");
-            throw new CustomizeException("请求参数不正确：id = " + componentId + "的组件不存在，更新失败。");
+            logger.info(NotificationMessage.COMPONENT_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.COMPONENT_NOT_FOUND);
         }
         // 查询需要修改的组件
         ComponentEntity componentEntity = componentRepository.findOne(componentId);
-        BeanUtils.copyProperties(componentArgs, componentEntity, "userEntities", "componentFileEntities");
+        BeanUtils.copyProperties(componentArgs, componentEntity, "id", "createTime", "componentFileEntities");
         // todo 添加对组件实体文件的修改功能
         // 设置组件大小
         componentEntity.setSize(FileUtils.sizeOf(new File(componentEntity.getFilePath())));
@@ -108,10 +107,10 @@ public class ComponentService {
     }
 
     // 根据id查询组件信息
-    public ComponentEntity getComponents(String componentId) throws MissingServletRequestParameterException {
+    public ComponentEntity getComponents(String componentId) {
         if (StringUtils.isEmpty(componentId)) {
-            logger.info("请求参数不正确：component.id不存在，查询失败。");
-            throw new MissingServletRequestParameterException("component.id", "String");
+            logger.info(NotificationMessage.COMPONENT_ID_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.COMPONENT_ID_NOT_FOUND);
         }
         return componentRepository.findOne(componentId);
     }
@@ -131,11 +130,11 @@ public class ComponentService {
 
     // 导入组件实现
     @Transactional
-    public List<ComponentEntity> importComponents(UserEntity loginUser, MultipartFile[] multipartFiles) throws MissingServletRequestParameterException, IOException, ZipException, NoSuchAlgorithmException {
+    public List<ComponentEntity> importComponents(MultipartFile[] multipartFiles) throws IOException, ZipException, NoSuchAlgorithmException {
         // 检查上传文件对象是否存在
         if (multipartFiles == null) {
-            logger.info("请求参数解析异常：multipartFiles，保存失败。");
-            throw new MissingServletRequestParameterException("multipartFiles", "MultipartFile[]");
+            logger.info(NotificationMessage.COMPONENT_UPLOAD_FILE_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.COMPONENT_UPLOAD_FILE_NOT_FOUND);
         }
         List<ComponentEntity> componentEntityList = new ArrayList<>();
         for (MultipartFile multipartFile : multipartFiles) {
@@ -152,10 +151,10 @@ public class ComponentService {
             // 1、解压缩文件到缓存目录
             File decompressFile = CompressUtils.decompressZip(zipFile, new File(tempFolderPath), null);
             // 2、解析json文件生成数据库目录
-            File jsonFile = new File(tempFolderPath + serverConfiguration.getExportDescriptionFileName() + ".json");
+            File jsonFile = new File(tempFolderPath + ServerConfiguration.EXPORT_COMPONENT_INFO_NAME);
             if (!jsonFile.exists()) {
-                logger.info("文件：" + tempFolderPath + serverConfiguration.getExportDescriptionFileName() + ".json" + "不存在，导出文件已损坏，" + multipartFile.getOriginalFilename() + "导入失败。");
-                throw new FileNotFoundException("文件：" + tempFolderPath + serverConfiguration.getExportDescriptionFileName() + ".json" + "不存在，导出文件已损坏，" + multipartFile.getOriginalFilename() + "导入失败。");
+                logger.info("文件：" + tempFolderPath + ServerConfiguration.EXPORT_COMPONENT_INFO_NAME + "不存在，导出文件已损坏，" + multipartFile.getOriginalFilename() + "导入失败。");
+                throw new FileNotFoundException("文件：" + tempFolderPath + ServerConfiguration.EXPORT_COMPONENT_INFO_NAME + "不存在，导出文件已损坏，" + multipartFile.getOriginalFilename() + "导入失败。");
             }
             ComponentEntity componentEntity = Tools.readJsonFile(jsonFile, ComponentEntity.class);
             // 检查组件是否存在
@@ -164,8 +163,8 @@ public class ComponentService {
                 throw new CustomizeException("组件名称为：" + componentEntity.getName() + "版本号：" + componentEntity.getVersion() + "已存在，导入失败。");
             } else {
                 // 组件库不存在该名称的组件
-                componentEntity = componentInit(componentEntity, loginUser);
-                componentEntity.setComponentFileEntities(componentFileService.addComponentFile(componentEntity, decompressFile));
+                componentEntity = componentInit(componentEntity);
+                componentEntity.setComponentFileEntities(componentFileService.createComponentFile(componentEntity, decompressFile));
                 // 设置组件大小
                 componentEntity.setSize(FileUtils.sizeOf(new File(componentEntity.getFilePath())));
                 componentEntity.setLastModified(new Date());
@@ -177,16 +176,15 @@ public class ComponentService {
     }
 
     // 导出组件实现
-    public File exportComponents(String componentId) throws MissingServletRequestParameterException, IOException {
+    public File exportComponents(String componentId) throws IOException {
         if (StringUtils.isEmpty(componentId)) {
-            logger.info("请求参数不正确：component.id不存在，导出失败。");
-            throw new MissingServletRequestParameterException("component.id", "String");
+            logger.info(NotificationMessage.COMPONENT_ID_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.COMPONENT_ID_NOT_FOUND);
         }
         if (!componentRepository.exists(componentId)) {
-            logger.info("请求参数不正确：id = " + componentId + "的组件不存在，导出失败。");
-            throw new CustomizeException("请求参数不正确：id = " + componentId + "的组件不存在，导出失败。");
+            logger.info(NotificationMessage.COMPONENT_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.COMPONENT_NOT_FOUND);
         }
-        ComponentEntity componentEntity = componentRepository.findOne(componentId);
         // 在系统缓存文件中建立操作目录
         String id = UUID.randomUUID().toString();
         String tempFolderPath = FileUtils.getTempDirectoryPath() + id + File.separator;
@@ -194,30 +192,29 @@ public class ComponentService {
             logger.info("在路径：" + tempFolderPath + "无法正确生成缓存文件夹，导出失败");
             throw new FileNotFoundException("在路径：" + tempFolderPath + "无法正确生成缓存文件夹，导出失败");
         }
+        ComponentEntity componentEntity = componentRepository.findOne(componentId);
         // 1.生成组件信息的json描述文件到缓存文件夹。
-        Tools.writeJsonFile(componentEntity, new File(tempFolderPath + serverConfiguration.getExportDescriptionFileName() + ".json"));
+        Tools.writeJsonFile(componentEntity, new File(tempFolderPath + ServerConfiguration.EXPORT_COMPONENT_INFO_NAME));
         // 2.复制组件的实体文件到缓存文件夹。
-        FileUtils.copyDirectory(new File(componentEntity.getFilePath()), new File(tempFolderPath + serverConfiguration.getExportComponentFileName()));
+        FileUtils.copyDirectory(new File(componentEntity.getFilePath()), new File(tempFolderPath + ServerConfiguration.EXPORT_ENTITY_FILE_NAME));
         // 3.压缩文件
-        String zipFilePath = FileUtils.getTempDirectoryPath() + serverConfiguration.getExportFileName() + ".zip";
+        String zipFilePath = FileUtils.getTempDirectoryPath() + ServerConfiguration.EXPORT_COMPONENT_FILE_NAME + ".zip";
         return CompressUtils.compressToZip(tempFolderPath, zipFilePath);
     }
 
     // 获取组件实体文件库路径
-    private String getLibraryPath(ComponentEntity componentEntity) {
-        return serverConfiguration.getLibraryPath() + componentEntity.getName() + serverConfiguration.getNameSeparator() + componentEntity.getVersion() + File.separator;
+    private String getEntityPath(ComponentEntity componentEntity) {
+        if (StringUtils.isEmpty(componentEntity.getName()) || StringUtils.isEmpty(componentEntity.getVersion())) {
+            logger.info(NotificationMessage.COMPONENT_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.COMPONENT_NOT_FOUND);
+        }
+        return serverConfiguration.getComponentLibraryPath() + componentEntity.getName() + ServerConfiguration.SEPARATOR + componentEntity.getVersion() + File.separatorChar;
     }
 
     // 组件对象初始化
-    private ComponentEntity componentInit(ComponentEntity componentEntity, UserEntity loginUser) {
-        componentEntity.setFilePath(getLibraryPath(componentEntity));
+    private ComponentEntity componentInit(ComponentEntity componentEntity) {
+        componentEntity.setFilePath(getEntityPath(componentEntity));
         componentEntity.setDeleted(false);
-        // 设置组件的拥有者为当前登录用户
-        if (loginUser != null) {
-            List<UserEntity> userEntities = new ArrayList<>();
-            userEntities.add(loginUser);
-            componentEntity.setUserEntities(userEntities);
-        }
         return componentEntity;
     }
 }

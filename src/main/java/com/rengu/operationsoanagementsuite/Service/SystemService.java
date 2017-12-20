@@ -8,12 +8,9 @@ import java.util.Properties;
 
 @Service
 public class SystemService {
-    private final ServerConfiguration serverConfiguration;
 
     @Autowired
-    public SystemService(ServerConfiguration serverConfiguration) {
-        this.serverConfiguration = serverConfiguration;
-    }
+    private ServerConfiguration serverConfiguration;
 
     // 返回系统信息
     public Properties getSystemInfo() {

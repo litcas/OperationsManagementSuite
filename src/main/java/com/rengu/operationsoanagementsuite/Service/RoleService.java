@@ -1,14 +1,19 @@
 package com.rengu.operationsoanagementsuite.Service;
 
 import com.rengu.operationsoanagementsuite.Entity.RoleEntity;
+import com.rengu.operationsoanagementsuite.Entity.UserEntity;
+import com.rengu.operationsoanagementsuite.Exception.CustomizeException;
 import com.rengu.operationsoanagementsuite.Repository.RoleRepository;
+import com.rengu.operationsoanagementsuite.Utils.NotificationMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.util.StringUtils;
 
+import javax.persistence.criteria.Predicate;
 import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -19,39 +24,59 @@ public class RoleService {
     private RoleRepository roleRepository;
 
     @Transactional
-    public List<RoleEntity> getRoles() {
-        return roleRepository.findAll();
+    public RoleEntity saveRoles(String name) {
+        if (StringUtils.isEmpty(name)) {
+            logger.info(NotificationMessage.ROLE_NAME_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.ROLE_NAME_NOT_FOUND);
+        }
+        if (roleRepository.findByName(name) != null) {
+            logger.info(NotificationMessage.ROLE_EXISTS);
+            throw new CustomizeException(NotificationMessage.ROLE_EXISTS);
+        }
+        RoleEntity roleEntity = new RoleEntity();
+        roleEntity.setName(name);
+        return roleRepository.save(roleEntity);
     }
 
-    // 根据角色id查询角色信息
     @Transactional
-    public RoleEntity getRoleById(String roleId) throws MissingServletRequestParameterException {
-        if (roleId == null) {
-            logger.info("请求参数解析异常：role.id不存在，查询失败。");
-            throw new MissingServletRequestParameterException("role.id", "String");
+    public RoleEntity getRoleById(String roleId) {
+        if (StringUtils.isEmpty(roleId)) {
+            logger.info(NotificationMessage.ROLE_ID_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.ROLE_ID_NOT_FOUND);
         }
         return roleRepository.findOne(roleId);
     }
 
-    // 根据角色名称查询角色信息
     @Transactional
-    public RoleEntity getRoleByRole(String role) throws MissingServletRequestParameterException {
-        if (role == null) {
-            logger.info("请求参数解析异常：role.name不存在，查询失败。");
-            throw new MissingServletRequestParameterException("role.name", "String");
-        }
-        return roleRepository.findByRole(role);
+    public List<RoleEntity> getRoles(RoleEntity roleArgs) {
+        return roleRepository.findAll((root, query, cb) -> {
+            List<Predicate> predicateList = new ArrayList<>();
+            if (!StringUtils.isEmpty(roleArgs.getName())) {
+                predicateList.add(cb.like(root.get("name"), roleArgs.getName()));
+            }
+            return cb.and(predicateList.toArray(new Predicate[predicateList.size()]));
+        });
     }
 
-    //保存角色信息
     @Transactional
-    public RoleEntity saveRole(String role) throws MissingServletRequestParameterException {
-        if (role == null) {
-            logger.info("请求参数解析异常：role.name不存在，查询失败。");
-            throw new MissingServletRequestParameterException("role.name", "String");
+    public RoleEntity getRoleByName(String name) {
+        if (StringUtils.isEmpty(name)) {
+            logger.info(NotificationMessage.ROLE_NAME_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.ROLE_NAME_NOT_FOUND);
         }
-        RoleEntity roleEntity = new RoleEntity();
-        roleEntity.setRole(role);
-        return roleRepository.save(roleEntity);
+        return roleRepository.findByName(name);
+    }
+
+    public List<RoleEntity> addRoles(UserEntity userEntity, RoleEntity... roleEntities) {
+        List<RoleEntity> roleEntityList = userEntity.getRoleEntities();
+        if (roleEntityList == null) {
+            roleEntityList = new ArrayList<>();
+        }
+        for (RoleEntity roleEntity : roleEntities) {
+            if (!roleEntityList.contains(roleEntity)) {
+                roleEntityList.add(roleEntity);
+            }
+        }
+        return roleEntityList;
     }
 }
