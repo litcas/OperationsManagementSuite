@@ -3,17 +3,21 @@ package com.rengu.operationsoanagementsuite.Service;
 import com.rengu.operationsoanagementsuite.Configuration.ServerConfiguration;
 import com.rengu.operationsoanagementsuite.Entity.RoleEntity;
 import com.rengu.operationsoanagementsuite.Entity.UserEntity;
+import com.rengu.operationsoanagementsuite.Exception.CustomizeException;
 import com.rengu.operationsoanagementsuite.Repository.RoleRepository;
 import com.rengu.operationsoanagementsuite.Repository.UserRepository;
+import com.rengu.operationsoanagementsuite.Utils.NotificationMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.util.StringUtils;
 
+import javax.persistence.criteria.Predicate;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,86 +25,14 @@ import java.util.List;
 @Service
 public class UserService implements UserDetailsService {
 
-    private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
-    private final ServerConfiguration serverConfiguration;
     // 引入日志记录类
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-
     @Autowired
-    public UserService(UserRepository userRepository, RoleRepository roleRepository, ServerConfiguration serverConfiguration) {
-        this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
-        this.serverConfiguration = serverConfiguration;
-    }
-
-    //  保存用户
-    @Transactional
-    public UserEntity saveUser(UserEntity userArgs) throws MissingServletRequestParameterException {
-        UserEntity userEntity = new UserEntity();
-        // 检查是否有用户名
-        if (userArgs.getUsername() == null) {
-            logger.info("请求参数解析异常：user.username不存在，保存失败。");
-            throw new MissingServletRequestParameterException("user.username", "String");
-        }
-        userEntity.setUsername(userArgs.getUsername());
-        //检查是否有密码
-        if (userArgs.getPassword() == null) {
-            logger.info("请求参数解析异常：user.password不存在，保存失败。");
-            throw new MissingServletRequestParameterException("user.password", "String");
-        }
-        userEntity.setPassword(userArgs.getPassword());
-        // 绑定默认角色
-        RoleEntity roleEntity = roleRepository.findByRole(serverConfiguration.getDefultUserRole());
-        if (roleEntity != null) {
-            List<RoleEntity> roleEntityList = new ArrayList<>();
-            roleEntityList.add(roleEntity);
-            userEntity.setRoleEntities(roleEntityList);
-        }
-        return userRepository.save(userEntity);
-    }
-
-    // 删除用户
-    @Transactional
-    public void deleteUser(String userId) throws MissingServletRequestParameterException {
-        if (userId == null) {
-            logger.info("请求参数解析异常：user.id不存在，删除失败。");
-            throw new MissingServletRequestParameterException("user.id", "String");
-        }
-        userRepository.delete(userId);
-    }
-
-    //根据用户Id查询用户
-    @Transactional
-    public UserEntity getUser(String userId) throws MissingServletRequestParameterException {
-        if (userId == null) {
-            logger.info("请求参数解析异常：user.id不存在，查询失败。");
-            throw new MissingServletRequestParameterException("user.id", "String");
-        }
-        return userRepository.findOne(userId);
-    }
-
-    @Transactional
-    public List<UserEntity> getUsers() {
-        return userRepository.findAll();
-    }
-
-    // 用户绑定角色
-    @Transactional
-    public UserEntity assignRoleToUser(String userId, String roleId) throws MissingServletRequestParameterException {
-        if (userId == null) {
-            logger.info("请求参数解析异常：user.id不存在，更新失败。");
-            throw new MissingServletRequestParameterException("user.id", "String");
-        }
-        UserEntity userEntity = userRepository.findOne(userId);
-        if (roleId == null) {
-            logger.info("请求参数解析异常：role.id不存在，更新失败。");
-            throw new MissingServletRequestParameterException("role.id", "String");
-        }
-        RoleEntity roleEntity = roleRepository.findOne(roleId);
-        userEntity.getRoleEntities().add(roleEntity);
-        return userRepository.save(userEntity);
-    }
+    private UserRepository userRepository;
+    @Autowired
+    private RoleRepository roleRepository;
+    @Autowired
+    private RoleService roleService;
 
     @Override
     public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
@@ -111,8 +43,111 @@ public class UserService implements UserDetailsService {
         return userEntity;
     }
 
+    // 保存用户
     @Transactional
-    public UserEntity getAdminUser() {
-        return userRepository.findByUsername(serverConfiguration.getDefultUserName());
+    public UserEntity saveUsers(UserEntity userEntity) {
+        if (userEntity == null) {
+            logger.info(NotificationMessage.USER_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.USER_NOT_FOUND);
+        }
+        if (StringUtils.isEmpty(userEntity.getUsername())) {
+            logger.info(NotificationMessage.USER_NAME_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.USER_NAME_NOT_FOUND);
+        }
+        if (StringUtils.isEmpty(userEntity.getPassword())) {
+            logger.info(NotificationMessage.USER_PASSWORD_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.USER_PASSWORD_NOT_FOUND);
+        }
+        RoleEntity roleEntity = roleService.getRoleByName(ServerConfiguration.USER_ROLE_NAME);
+        userEntity.setRoleEntities(addRoles(userEntity, roleEntity));
+        return userRepository.save(userEntity);
+    }
+
+    // 删除用户
+    @Transactional
+    public void deleteUser(String userId) {
+        if (StringUtils.isEmpty(userId)) {
+            logger.info(NotificationMessage.USER_ID_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.USER_ID_NOT_FOUND);
+        }
+        if (!userRepository.exists(userId)) {
+            logger.info(NotificationMessage.USER_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.USER_NOT_FOUND);
+        }
+        userRepository.delete(userId);
+    }
+
+    // 修改用户
+    @Transactional
+    public UserEntity updateUsers(String userId, UserEntity userArgs) {
+        if (StringUtils.isEmpty(userId)) {
+            logger.info(NotificationMessage.USER_ID_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.USER_ID_NOT_FOUND);
+        }
+        if (!userRepository.exists(userId)) {
+            logger.info(NotificationMessage.USER_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.USER_NOT_FOUND);
+        }
+        UserEntity userEntity = userRepository.findOne(userId);
+        BeanUtils.copyProperties(userArgs, userEntity, "id", "createTime", "username", "accountNonExpired", "accountNonLocked", "credentialsNonExpired", "enabled", "roleEntities");
+        return userRepository.save(userEntity);
+    }
+
+    // 查看用户
+    @Transactional
+    public UserEntity getUser(String userId) {
+        if (StringUtils.isEmpty(userId)) {
+            logger.info(NotificationMessage.USER_ID_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.USER_ID_NOT_FOUND);
+        }
+        return userRepository.findOne(userId);
+    }
+
+    @Transactional
+    public List<UserEntity> getUsers(UserEntity userArgs) {
+        return userRepository.findAll((root, query, cb) -> {
+            List<Predicate> predicateList = new ArrayList<>();
+            if (!StringUtils.isEmpty(userArgs.getUsername())) {
+                predicateList.add(cb.like(root.get("username"), userArgs.getUsername()));
+            }
+            return cb.and(predicateList.toArray(new Predicate[predicateList.size()]));
+        });
+    }
+
+    @Transactional
+    public UserEntity assignRoleToUser(String userId, String roleId) {
+        if (StringUtils.isEmpty(userId)) {
+            logger.info(NotificationMessage.USER_ID_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.USER_ID_NOT_FOUND);
+        }
+        if (!userRepository.exists(userId)) {
+            logger.info(NotificationMessage.USER_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.USER_NOT_FOUND);
+        }
+        if (StringUtils.isEmpty(roleId)) {
+            logger.info(NotificationMessage.ROLE_ID_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.ROLE_ID_NOT_FOUND);
+        }
+        if (!roleRepository.exists(userId)) {
+            logger.info(NotificationMessage.ROLE_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.ROLE_NOT_FOUND);
+        }
+        UserEntity userEntity = userRepository.findOne(userId);
+        RoleEntity roleEntity = roleRepository.findOne(roleId);
+        userEntity.setRoleEntities(addRoles(userEntity, roleEntity));
+        return userRepository.save(userEntity);
+    }
+
+    public List<RoleEntity> addRoles(UserEntity userEntity, RoleEntity... roleEntities) {
+        List<RoleEntity> roleEntityList = userEntity.getRoleEntities();
+        if (roleEntityList == null) {
+            roleEntityList = new ArrayList<>();
+        }
+        for (RoleEntity roleEntity : roleEntities) {
+            if (!roleEntityList.contains(roleEntity)) {
+                roleEntityList.add(roleEntity);
+            }
+        }
+        return roleEntityList;
     }
 }

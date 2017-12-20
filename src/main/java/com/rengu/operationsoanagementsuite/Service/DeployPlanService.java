@@ -1,11 +1,15 @@
 package com.rengu.operationsoanagementsuite.Service;
 
-import com.rengu.operationsoanagementsuite.Entity.*;
+import com.rengu.operationsoanagementsuite.Entity.ComponentEntity;
+import com.rengu.operationsoanagementsuite.Entity.DeployPlanEntity;
+import com.rengu.operationsoanagementsuite.Entity.DeviceEntity;
+import com.rengu.operationsoanagementsuite.Entity.ProjectEntity;
 import com.rengu.operationsoanagementsuite.Exception.CustomizeException;
 import com.rengu.operationsoanagementsuite.Repository.ComponentRepository;
 import com.rengu.operationsoanagementsuite.Repository.DeployPlanRepository;
 import com.rengu.operationsoanagementsuite.Repository.DeviceRepository;
 import com.rengu.operationsoanagementsuite.Repository.ProjectRepository;
+import com.rengu.operationsoanagementsuite.Utils.NotificationMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -38,24 +42,24 @@ public class DeployPlanService {
     @Transactional
     public DeployPlanEntity saveDeployPlans(String projectId, DeployPlanEntity deployPlanEntity) {
         if (StringUtils.isEmpty(projectId)) {
-            logger.info("请求参数解析异常：project.id不存在，保存失败。");
-            throw new CustomizeException("请求参数解析异常：project.id不存在，保存失败。");
+            logger.info(NotificationMessage.PROJECT_ID_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.PROJECT_ID_NOT_FOUND);
         }
         if (!projectRepository.exists(projectId)) {
-            logger.info("请求参数不正确：id为：" + projectId + "的工程不存在，保存失败。");
-            throw new CustomizeException("请求参数不正确：id为：" + projectId + "的工程不存在，保存失败。");
+            logger.info(NotificationMessage.PROJECT_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.PROJECT_NOT_FOUND);
         }
         if (deployPlanEntity == null) {
-            logger.info("请求参数解析异常：deployPlan不存在，保存失败。");
-            throw new CustomizeException("请求参数解析异常：deployPlan不存在，保存失败。");
+            logger.info(NotificationMessage.DEPLOY_PLAN_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.DEPLOY_PLAN_NOT_FOUND);
         }
         if (StringUtils.isEmpty(deployPlanEntity.getName())) {
-            logger.info("请求参数解析异常：deployPlanEntity.name不存在，保存失败。");
-            throw new CustomizeException("请求参数解析异常：deployPlanEntity.name不存在，保存失败。");
+            logger.info(NotificationMessage.DEPLOY_PLAN_NAME_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.DEPLOY_PLAN_NAME_NOT_FOUND);
         }
         if (hasDeployPlan(deployPlanEntity.getName(), projectRepository.findOne(projectId))) {
-            logger.info("名称为：" + deployPlanEntity.getName() + "的部署设计已存在，保存失败。");
-            throw new CustomizeException("名称为：" + deployPlanEntity.getName() + "的部署设计已存在，保存失败。");
+            logger.info(NotificationMessage.DEPLOY_PLAN_EXISTS);
+            throw new CustomizeException(NotificationMessage.DEPLOY_PLAN_EXISTS);
         }
         deployPlanEntity.setProjectEntity(projectRepository.findOne(projectId));
         deployPlanEntity.setLastModified(new Date());
@@ -65,12 +69,12 @@ public class DeployPlanService {
     @Transactional
     public void deleteDeployPlans(String deployplanId) {
         if (StringUtils.isEmpty(deployplanId)) {
-            logger.info("请求参数解析异常：deployplan.id不存在，删除失败。");
-            throw new CustomizeException("请求参数解析异常：deployplan.id不存在，删除失败。");
+            logger.info(NotificationMessage.DEPLOY_PLAN_ID_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.DEPLOY_PLAN_ID_NOT_FOUND);
         }
         if (!deployPlanRepository.exists(deployplanId)) {
-            logger.info("请求参数不正确：id为：" + deployplanId + "的部署设计不存在，保存失败。");
-            throw new CustomizeException("请求参数不正确：id为：" + deployplanId + "的部署设计不存在，保存失败。");
+            logger.info(NotificationMessage.DEPLOY_PLAN_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.DEPLOY_PLAN_NOT_FOUND);
         }
         deployPlanRepository.delete(deployplanId);
     }
@@ -78,12 +82,12 @@ public class DeployPlanService {
     @Transactional
     public DeployPlanEntity updateDeployPlans(String deployplanId, DeployPlanEntity deployPlanArgs) {
         if (StringUtils.isEmpty(deployplanId)) {
-            logger.info("请求参数解析异常：deployplan.id不存在，更新失败。");
-            throw new CustomizeException("请求参数解析异常：deployplan.id不存在，更新失败。");
+            logger.info(NotificationMessage.DEPLOY_PLAN_ID_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.DEPLOY_PLAN_ID_NOT_FOUND);
         }
         if (!deployPlanRepository.exists(deployplanId)) {
-            logger.info("请求参数不正确：id为：" + deployplanId + "的部署设计不存在，更新失败。");
-            throw new CustomizeException("请求参数不正确：id为：" + deployplanId + "的部署设计不存在，更新失败。");
+            logger.info(NotificationMessage.DEPLOY_PLAN_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.DEPLOY_PLAN_NOT_FOUND);
         }
         DeployPlanEntity deployPlanEntity = deployPlanRepository.findOne(deployplanId);
         BeanUtils.copyProperties(deployPlanArgs, deployPlanEntity, "id", "createTime", "lastModified", "deployPlanDetailEntity", "projectEntity");
@@ -94,8 +98,8 @@ public class DeployPlanService {
     @Transactional
     public DeployPlanEntity getDeployPlan(String deployplanId) {
         if (StringUtils.isEmpty(deployplanId)) {
-            logger.info("请求参数解析异常：deployplan.id不存在，查询失败。");
-            throw new CustomizeException("请求参数解析异常：deployplan.id不存在，查询失败。");
+            logger.info(NotificationMessage.DEPLOY_PLAN_ID_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.DEPLOY_PLAN_ID_NOT_FOUND);
         }
         return deployPlanRepository.findOne(deployplanId);
     }
@@ -122,53 +126,41 @@ public class DeployPlanService {
     @Transactional
     public DeployPlanEntity AddDeployPlanDetail(String deployplanId, String deviceId, String componentId, String deployPath) {
         if (StringUtils.isEmpty(deployplanId)) {
-            logger.info("请求参数解析异常：deployplan.id不存在，更新失败。");
-            throw new CustomizeException("请求参数解析异常：deployplan.id不存在，绑定失败。");
+            logger.info(NotificationMessage.DEPLOY_PLAN_ID_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.DEPLOY_PLAN_ID_NOT_FOUND);
         }
         if (!deployPlanRepository.exists(deployplanId)) {
-            logger.info("请求参数不正确：id为：" + deployplanId + "的部署设计不存在，更新失败。");
-            throw new CustomizeException("请求参数不正确：id为：" + deployplanId + "的部署设计不存在，绑定失败。");
+            logger.info(NotificationMessage.DEPLOY_PLAN_ID_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.DEPLOY_PLAN_ID_NOT_FOUND);
         }
         if (StringUtils.isEmpty(deviceId)) {
-            logger.info("请求参数解析异常：device.id不存在，更新失败。");
-            throw new CustomizeException("请求参数解析异常：deviceId.id不存在，绑定失败。");
+            logger.info(NotificationMessage.DEVICE_ID_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.DEVICE_ID_NOT_FOUND);
         }
         if (!deviceRepository.exists(deviceId)) {
-            logger.info("请求参数不正确：id为：" + deviceId + "的设备不存在，绑定失败。");
-            throw new CustomizeException("请求参数不正确：id为：" + deviceId + "的设备不存在，绑定失败。");
+            logger.info(NotificationMessage.DEVICE_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.DEVICE_NOT_FOUND);
         }
         if (StringUtils.isEmpty(componentId)) {
-            logger.info("请求参数解析异常：component.id不存在，绑定失败。");
-            throw new CustomizeException("请求参数解析异常：component.id不存在，绑定失败。");
+            logger.info(NotificationMessage.COMPONENT_ID_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.COMPONENT_ID_NOT_FOUND);
         }
         if (!componentRepository.exists(componentId)) {
-            logger.info("请求参数不正确：id为：" + componentId + "的组件不存在，更绑定失败。");
-            throw new CustomizeException("请求参数不正确：id为：" + componentId + "的组件不存在，绑定失败。");
+            logger.info(NotificationMessage.COMPONENT_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.COMPONENT_NOT_FOUND);
         }
         if (StringUtils.isEmpty(deployPath)) {
-            logger.info("请求参数解析异常：deployPath不存在，绑定失败。");
-            throw new CustomizeException("请求参数解析异常：deployPath不存在，绑定失败。");
+            logger.info(NotificationMessage.DEPLOY_PLAN_DEPLOY_PATH_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.DEPLOY_PLAN_DEPLOY_PATH_NOT_FOUND);
         }
         DeployPlanEntity deployPlanEntity = deployPlanRepository.findOne(deployplanId);
         DeviceEntity deviceEntity = deviceRepository.findOne(deviceId);
         ComponentEntity componentEntity = componentRepository.findOne(componentId);
-        DeployPlanDetailEntity deployPlanDetailEntity = deployPlanDetailService.saveDeployPlanDetails(deviceEntity, componentEntity, deployPath);
-        deployPlanEntity.setDeployPlanDetailEntities(AddDeployPlanDetail(deployPlanEntity, deployPlanDetailEntity));
+        deployPlanEntity.setDeployPlanDetailEntities(deployPlanDetailService.createDeployPlanDetails(deployPlanEntity, deviceEntity, componentEntity, deployPath));
         return deployPlanRepository.save(deployPlanEntity);
     }
 
     private boolean hasDeployPlan(String name, ProjectEntity projectEntity) {
         return deployPlanRepository.findByNameAndProjectEntity(name, projectEntity) != null;
-    }
-
-    private List<DeployPlanDetailEntity> AddDeployPlanDetail(DeployPlanEntity deployPlanEntity, DeployPlanDetailEntity deployPlanDetailEntity) {
-        List<DeployPlanDetailEntity> deployPlanDetailEntities = deployPlanEntity.getDeployPlanDetailEntities();
-        if (deployPlanDetailEntities == null) {
-            deployPlanDetailEntities = new ArrayList<>();
-        }
-        if (!deployPlanDetailEntities.contains(deployPlanDetailEntity)) {
-            deployPlanDetailEntities.add(deployPlanDetailEntity);
-        }
-        return deployPlanDetailEntities;
     }
 }

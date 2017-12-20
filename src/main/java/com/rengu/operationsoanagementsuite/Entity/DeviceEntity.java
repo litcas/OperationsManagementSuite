@@ -5,9 +5,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -24,8 +22,6 @@ public class DeviceEntity {
     private String ip;
     private boolean online = false;
     private String description;
-    @OneToMany
-    private List<ComponentEntity> componentEntities;
 
     public String getId() {
         return id;
@@ -81,13 +77,5 @@ public class DeviceEntity {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public List<ComponentEntity> getComponentEntities() {
-        return componentEntities;
-    }
-
-    public void setComponentEntities(List<ComponentEntity> componentEntities) {
-        this.componentEntities = componentEntities;
     }
 }

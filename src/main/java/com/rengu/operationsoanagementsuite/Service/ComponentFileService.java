@@ -4,15 +4,13 @@ import com.rengu.operationsoanagementsuite.Configuration.ServerConfiguration;
 import com.rengu.operationsoanagementsuite.Entity.ComponentEntity;
 import com.rengu.operationsoanagementsuite.Entity.ComponentFileEntity;
 import com.rengu.operationsoanagementsuite.Exception.CustomizeException;
-import com.rengu.operationsoanagementsuite.Repository.ComponentFileRepository;
+import com.rengu.operationsoanagementsuite.Utils.NotificationMessage;
 import com.rengu.operationsoanagementsuite.Utils.Tools;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
@@ -27,27 +25,18 @@ import java.util.List;
 public class ComponentFileService {
     // 引入日志记录类
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-    @Autowired
-    private ComponentFileRepository componentFileRepository;
-    @Autowired
-    private ServerConfiguration serverConfiguration;
 
     @Transactional
-    public List<ComponentFileEntity> addComponentFile(String[] addFilePath, MultipartFile[] multipartFiles, ComponentEntity componentEntity) throws IOException, NoSuchAlgorithmException, MissingServletRequestParameterException {
+    public List<ComponentFileEntity> createComponentFile(ComponentEntity componentEntity, MultipartFile[] multipartFiles, String[] addFilePath) throws IOException, NoSuchAlgorithmException {
         // 检查上传文件对象是否存在
         if (multipartFiles == null) {
-            logger.info("请求参数解析异常：multipartFiles，保存失败。");
-            throw new MissingServletRequestParameterException("multipartFiles", "MultipartFile[]");
+            logger.info(NotificationMessage.COMPONENT_UPLOAD_FILE_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.COMPONENT_UPLOAD_FILE_NOT_FOUND);
         }
         // 检查路径信息是否存在
         if (addFilePath == null) {
-            logger.info("请求参数解析异常：addFilePath，保存失败。");
-            throw new MissingServletRequestParameterException("addFilePath", "String[]");
-        }
-        // 检查上传文件信息和文件是否对应
-        if (multipartFiles.length != addFilePath.length) {
-            logger.info("请求参数解析异常：MultipartFile与addFilePath信息不对应，保存失败。");
-            throw new CustomizeException("请求参数解析异常：MultipartFile与addPath信息不对应，保存失败。");
+            logger.info(NotificationMessage.COMPONENT_UPLOAD_FILE_PATH_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.COMPONENT_UPLOAD_FILE_PATH_NOT_FOUND);
         }
         List<ComponentFileEntity> componentFileEntityList = new ArrayList<>();
         for (int i = 0; i < multipartFiles.length; i++) {
@@ -69,14 +58,13 @@ public class ComponentFileService {
             componentFileEntity.setSize(FileUtils.sizeOf(file));
             componentFileEntity.setPath(file.getPath());
             componentFileEntityList.add(componentFileEntity);
-            componentFileRepository.save(componentFileEntity);
         }
-        return componentFileEntityList;
+        return addComponentFile(componentEntity, componentFileEntityList);
     }
 
     @Transactional
-    public List<ComponentFileEntity> addComponentFile(ComponentEntity componentEntity, File srcDir) throws IOException, NoSuchAlgorithmException {
-        File componentFile = new File(srcDir.getAbsolutePath() + File.separatorChar + serverConfiguration.getExportComponentFileName());
+    public List<ComponentFileEntity> createComponentFile(ComponentEntity componentEntity, File srcDir) throws IOException, NoSuchAlgorithmException {
+        File componentFile = new File(srcDir.getAbsolutePath() + File.separatorChar + ServerConfiguration.EXPORT_ENTITY_FILE_NAME);
         FileUtils.copyDirectory(componentFile, new File(componentEntity.getFilePath()));
         Collection<File> fileCollection = FileUtils.listFiles(new File(componentEntity.getFilePath()), null, true);
         List<ComponentFileEntity> componentFileEntityList = new ArrayList<>();
@@ -88,7 +76,23 @@ public class ComponentFileService {
             componentFileEntity.setSize(FileUtils.sizeOf(file));
             componentFileEntity.setPath(file.getPath());
             componentFileEntityList.add(componentFileEntity);
-            componentFileRepository.save(componentFileEntity);
+        }
+        return addComponentFile(componentEntity, componentFileEntityList);
+    }
+
+    private List<ComponentFileEntity> addComponentFile(ComponentEntity componentEntity, List<ComponentFileEntity> componentFileEntities) {
+        if (componentEntity == null) {
+            logger.info(NotificationMessage.COMPONENT_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.COMPONENT_NOT_FOUND);
+        }
+        List<ComponentFileEntity> componentFileEntityList = componentEntity.getComponentFileEntities();
+        if (componentFileEntityList == null) {
+            componentFileEntityList = new ArrayList<>();
+        }
+        for (ComponentFileEntity componentFileEntity : componentFileEntities) {
+            if (!componentFileEntityList.contains(componentFileEntity)) {
+                componentFileEntityList.add(componentFileEntity);
+            }
         }
         return componentFileEntityList;
     }

@@ -3,6 +3,7 @@ package com.rengu.operationsoanagementsuite.Controller;
 import com.rengu.operationsoanagementsuite.Entity.DeployPlanEntity;
 import com.rengu.operationsoanagementsuite.Entity.UserEntity;
 import com.rengu.operationsoanagementsuite.Service.DeployPlanService;
+import com.rengu.operationsoanagementsuite.Utils.NotificationMessage;
 import com.rengu.operationsoanagementsuite.Utils.ResultEntity;
 import com.rengu.operationsoanagementsuite.Utils.ResultUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +28,7 @@ public class DeployPlanController {
     @DeleteMapping(value = "/{deployplanId}")
     public ResultEntity deleteDeployPlans(@AuthenticationPrincipal UserEntity loginUser, @PathVariable("deployplanId") String deployplanId) {
         deployPlanService.deleteDeployPlans(deployplanId);
-        return ResultUtils.resultBuilder(HttpStatus.NO_CONTENT, ResultUtils.HTTPRESPONSE, loginUser, "Id为" + deployplanId + "的部署设计已删除。");
+        return ResultUtils.resultBuilder(HttpStatus.NO_CONTENT, ResultUtils.HTTPRESPONSE, loginUser, NotificationMessage.deployplanDeleteMessage(deployplanId));
     }
 
     // 修改部署设计

@@ -3,13 +3,13 @@ package com.rengu.operationsoanagementsuite.Service;
 import com.rengu.operationsoanagementsuite.Entity.DeviceEntity;
 import com.rengu.operationsoanagementsuite.Exception.CustomizeException;
 import com.rengu.operationsoanagementsuite.Repository.DeviceRepository;
+import com.rengu.operationsoanagementsuite.Utils.NotificationMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.MissingServletRequestParameterException;
 
 import javax.persistence.criteria.Predicate;
 import javax.transaction.Transactional;
@@ -27,21 +27,21 @@ public class DeviceService {
 
     // 新增设备
     @Transactional
-    public DeviceEntity saveDevice(DeviceEntity deviceEntity) throws MissingServletRequestParameterException {
+    public DeviceEntity saveDevice(DeviceEntity deviceEntity) {
         // 检查设备名称参数是否存在
         if (StringUtils.isEmpty(deviceEntity.getName())) {
-            logger.info("请求参数解析异常：device.name不存在，保存失败。");
-            throw new MissingServletRequestParameterException("device.name", "String");
+            logger.info(NotificationMessage.DEVICE_NAME_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.DEVICE_NAME_NOT_FOUND);
         }
         // 检查设备ip参数是否存在
         if (StringUtils.isEmpty(deviceEntity.getIp())) {
-            logger.info("请求参数解析异常：device.ip不存在，保存失败。");
-            throw new MissingServletRequestParameterException("device.ip", "String");
+            logger.info(NotificationMessage.DEVICE_IP_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.DEVICE_IP_NOT_FOUND);
         }
         // 检查Ip是否已经存在
         if (deviceRepository.findByIp(deviceEntity.getIp()) != null) {
-            logger.info("设备IP：" + deviceEntity.getIp() + "已经存在，保存失败。");
-            throw new CustomizeException("设备IP：" + deviceEntity.getIp() + "已经存在，保存失败。");
+            logger.info(NotificationMessage.DEVICE_IP_EXISTS);
+            throw new CustomizeException(NotificationMessage.DEVICE_IP_EXISTS);
         }
         deviceEntity.setLastModified(new Date());
         return deviceRepository.save(deviceEntity);
@@ -49,45 +49,45 @@ public class DeviceService {
 
     // 删除设备
     @Transactional
-    public void deleteDevice(String deviceId) throws MissingServletRequestParameterException {
+    public void deleteDevice(String deviceId) {
         // 检查设备id参数是否存在
         if (StringUtils.isEmpty(deviceId)) {
-            logger.info("请求参数解析异常：device.id不存在，删除失败。");
-            throw new MissingServletRequestParameterException("device.id", "String");
+            logger.info(NotificationMessage.DEVICE_ID_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.DEVICE_ID_NOT_FOUND);
         }
         // 检查设备id是否存在
         if (!deviceRepository.exists(deviceId)) {
-            logger.info("请求参数不正确：id为：" + deviceId + "的设备不存在，删除失败。");
-            throw new CustomizeException("请求参数不正确：id为：" + deviceId + "的设备不存在，删除失败。");
+            logger.info(NotificationMessage.DEVICE_EXISTS);
+            throw new CustomizeException(NotificationMessage.DEVICE_EXISTS);
         }
         deviceRepository.delete(deviceId);
     }
 
     // 更新设备
     @Transactional
-    public DeviceEntity updateDevice(String deviceId, DeviceEntity deviceArgs) throws MissingServletRequestParameterException {
+    public DeviceEntity updateDevice(String deviceId, DeviceEntity deviceArgs) {
         // 检查设备id参数是否存在
         if (StringUtils.isEmpty(deviceId)) {
-            logger.info("请求参数解析异常：device.id不存在，更新失败。");
-            throw new MissingServletRequestParameterException("device.id", "String");
+            logger.info(NotificationMessage.DEVICE_ID_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.DEVICE_ID_NOT_FOUND);
         }
         // 检查设备id是否存在
         if (!deviceRepository.exists(deviceId)) {
-            logger.info("请求参数不正确：id为：" + deviceId + "的设备不存在，更新失败。");
-            throw new CustomizeException("请求参数不正确：id为：" + deviceId + "的设备不存在，更新失败。");
+            logger.info(NotificationMessage.DEVICE_EXISTS);
+            throw new CustomizeException(NotificationMessage.DEVICE_EXISTS);
         }
         DeviceEntity deviceEntity = deviceRepository.findOne(deviceId);
-        BeanUtils.copyProperties(deviceArgs, deviceEntity, "id", "createTime");
+        BeanUtils.copyProperties(deviceArgs, deviceEntity, "id", "createTime", "");
         deviceEntity.setLastModified(new Date());
         return deviceRepository.save(deviceEntity);
     }
 
     // 查询设备
-    public DeviceEntity getDevice(String deviceId) throws MissingServletRequestParameterException {
+    public DeviceEntity getDevice(String deviceId) {
         // 检查设备id参数是否存在
         if (StringUtils.isEmpty(deviceId)) {
-            logger.info("请求参数解析异常：device.id不存在，查询失败。");
-            throw new MissingServletRequestParameterException("device.id", "String");
+            logger.info(NotificationMessage.DEVICE_ID_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.DEVICE_ID_NOT_FOUND);
         }
         return deviceRepository.findOne(deviceId);
     }

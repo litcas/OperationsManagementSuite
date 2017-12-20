@@ -36,7 +36,7 @@ public class UserEntity implements UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<GrantedAuthority> grantedAuthorityList = new ArrayList<>();
         for (RoleEntity roleEntity : roleEntities) {
-            grantedAuthorityList.add(new SimpleGrantedAuthority(roleEntity.getRole()));
+            grantedAuthorityList.add(new SimpleGrantedAuthority(roleEntity.getName()));
         }
         return grantedAuthorityList;
     }

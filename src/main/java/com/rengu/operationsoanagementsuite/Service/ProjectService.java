@@ -4,6 +4,7 @@ import com.rengu.operationsoanagementsuite.Entity.ProjectEntity;
 import com.rengu.operationsoanagementsuite.Entity.UserEntity;
 import com.rengu.operationsoanagementsuite.Exception.CustomizeException;
 import com.rengu.operationsoanagementsuite.Repository.ProjectRepository;
+import com.rengu.operationsoanagementsuite.Utils.NotificationMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -28,17 +29,17 @@ public class ProjectService {
     @Transactional
     public ProjectEntity saveProjects(ProjectEntity projectEntity, UserEntity loginUser) {
         if (projectEntity == null) {
-            logger.info("请求参数解析异常：project不存在，保存失败。");
-            throw new CustomizeException("请求参数解析异常：project不存在，保存失败。");
+            logger.info(NotificationMessage.PROJECT_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.PROJECT_NOT_FOUND);
         }
         if (StringUtils.isEmpty(projectEntity.getName())) {
-            logger.info("请求参数解析异常：project.name不存在，保存失败。");
-            throw new CustomizeException("请求参数解析异常：project.name不存在，保存失败。");
+            logger.info(NotificationMessage.PROJECT_NAME_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.PROJECT_NAME_NOT_FOUND);
         }
         // 检查该名称的工程是否已经存在
         if (hasProject(projectEntity.getName(), loginUser)) {
-            logger.info("名称为：" + projectEntity.getName() + "的工程已存在，保存失败。");
-            throw new CustomizeException("名称为：" + projectEntity.getName() + "的工程已存在，保存失败。");
+            logger.info(NotificationMessage.PROJECT_EXISTS);
+            throw new CustomizeException(NotificationMessage.PROJECT_EXISTS);
         }
         projectEntity.setUserEntity(loginUser);
         return projectRepository.save(projectEntity);
@@ -48,12 +49,12 @@ public class ProjectService {
     @Transactional
     public void deleteProjects(String projectId) {
         if (StringUtils.isEmpty(projectId)) {
-            logger.info("请求参数解析异常：projectId不存在，删除失败。");
-            throw new CustomizeException("请求参数解析异常：projectId不存在，删除失败。");
+            logger.info(NotificationMessage.PROJECT_ID_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.PROJECT_ID_NOT_FOUND);
         }
         if (!projectRepository.exists(projectId)) {
-            logger.info("请求参数不正确：id为：" + projectId + "的工程不存在，删除失败。");
-            throw new CustomizeException("请求参数不正确：id为：" + projectId + "的工程不存在，删除失败。");
+            logger.info(NotificationMessage.PROJECT_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.PROJECT_NOT_FOUND);
         }
         projectRepository.delete(projectId);
     }
@@ -62,12 +63,12 @@ public class ProjectService {
     @Transactional
     public ProjectEntity updateProjects(String projectId, ProjectEntity projectArgs) {
         if (StringUtils.isEmpty(projectId)) {
-            logger.info("请求参数解析异常：projectId不存在，更新失败。");
-            throw new CustomizeException("请求参数解析异常：projectId不存在，更新失败。");
+            logger.info(NotificationMessage.PROJECT_ID_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.PROJECT_ID_NOT_FOUND);
         }
         if (!projectRepository.exists(projectId)) {
-            logger.info("请求参数不正确：id为：" + projectId + "的工程不存在，更新失败。");
-            throw new CustomizeException("请求参数不正确：id为：" + projectId + "的工程不存在，更新失败。");
+            logger.info(NotificationMessage.PROJECT_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.PROJECT_NOT_FOUND);
         }
         ProjectEntity projectEntity = projectRepository.findOne(projectId);
         BeanUtils.copyProperties(projectArgs, projectEntity, "id", "createTime", "userEntities", "deployPlanEntities");
@@ -78,8 +79,8 @@ public class ProjectService {
     @Transactional
     public ProjectEntity getProject(String projectId) {
         if (StringUtils.isEmpty(projectId)) {
-            logger.info("请求参数解析异常：projectId不存在，查询失败。");
-            throw new CustomizeException("请求参数解析异常：projectId不存在，查询失败。");
+            logger.info(NotificationMessage.PROJECT_ID_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.PROJECT_ID_NOT_FOUND);
         }
         return projectRepository.findOne(projectId);
     }

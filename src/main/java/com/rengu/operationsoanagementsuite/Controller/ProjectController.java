@@ -3,6 +3,7 @@ package com.rengu.operationsoanagementsuite.Controller;
 import com.rengu.operationsoanagementsuite.Entity.ProjectEntity;
 import com.rengu.operationsoanagementsuite.Entity.UserEntity;
 import com.rengu.operationsoanagementsuite.Service.ProjectService;
+import com.rengu.operationsoanagementsuite.Utils.NotificationMessage;
 import com.rengu.operationsoanagementsuite.Utils.ResultEntity;
 import com.rengu.operationsoanagementsuite.Utils.ResultUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +29,7 @@ public class ProjectController {
     @DeleteMapping(value = "/{projectId}")
     public ResultEntity deleteProjects(@AuthenticationPrincipal UserEntity loginUser, @PathVariable("projectId") String projectId) {
         projectService.deleteProjects(projectId);
-        return ResultUtils.resultBuilder(HttpStatus.NO_CONTENT, ResultUtils.HTTPRESPONSE, loginUser, "Id为" + projectId + "的工程已删除。");
+        return ResultUtils.resultBuilder(HttpStatus.NO_CONTENT, ResultUtils.HTTPRESPONSE, loginUser, NotificationMessage.projectDeleteMessage(projectId));
     }
 
     // 修改工程
