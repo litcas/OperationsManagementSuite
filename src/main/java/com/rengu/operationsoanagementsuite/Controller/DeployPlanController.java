@@ -21,7 +21,7 @@ public class DeployPlanController {
     // 保存部署设计
     @PostMapping
     public ResultEntity saveDeployPlans(@AuthenticationPrincipal UserEntity loginUser, String projectId, DeployPlanEntity deployPlanEntity) {
-        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, deployPlanService.saveDeployPlans(projectId, deployPlanEntity));
+        return ResultUtils.resultBuilder(HttpStatus.CREATED, ResultUtils.HTTPRESPONSE, loginUser, deployPlanService.saveDeployPlans(projectId, deployPlanEntity));
     }
 
     // 删除部署设计

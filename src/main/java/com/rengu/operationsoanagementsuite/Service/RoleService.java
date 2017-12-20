@@ -1,6 +1,7 @@
 package com.rengu.operationsoanagementsuite.Service;
 
 import com.rengu.operationsoanagementsuite.Entity.RoleEntity;
+import com.rengu.operationsoanagementsuite.Entity.UserEntity;
 import com.rengu.operationsoanagementsuite.Exception.CustomizeException;
 import com.rengu.operationsoanagementsuite.Repository.RoleRepository;
 import com.rengu.operationsoanagementsuite.Utils.NotificationMessage;
@@ -64,5 +65,18 @@ public class RoleService {
             throw new CustomizeException(NotificationMessage.ROLE_NAME_NOT_FOUND);
         }
         return roleRepository.findByName(name);
+    }
+
+    public List<RoleEntity> addRoles(UserEntity userEntity, RoleEntity... roleEntities) {
+        List<RoleEntity> roleEntityList = userEntity.getRoleEntities();
+        if (roleEntityList == null) {
+            roleEntityList = new ArrayList<>();
+        }
+        for (RoleEntity roleEntity : roleEntities) {
+            if (!roleEntityList.contains(roleEntity)) {
+                roleEntityList.add(roleEntity);
+            }
+        }
+        return roleEntityList;
     }
 }

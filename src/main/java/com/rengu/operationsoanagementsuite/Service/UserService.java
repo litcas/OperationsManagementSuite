@@ -59,7 +59,7 @@ public class UserService implements UserDetailsService {
             throw new CustomizeException(NotificationMessage.USER_PASSWORD_NOT_FOUND);
         }
         RoleEntity roleEntity = roleService.getRoleByName(ServerConfiguration.USER_ROLE_NAME);
-        userEntity.setRoleEntities(addRoles(userEntity, roleEntity));
+        userEntity.setRoleEntities(roleService.addRoles(userEntity, roleEntity));
         return userRepository.save(userEntity);
     }
 
@@ -134,20 +134,7 @@ public class UserService implements UserDetailsService {
         }
         UserEntity userEntity = userRepository.findOne(userId);
         RoleEntity roleEntity = roleRepository.findOne(roleId);
-        userEntity.setRoleEntities(addRoles(userEntity, roleEntity));
+        userEntity.setRoleEntities(roleService.addRoles(userEntity, roleEntity));
         return userRepository.save(userEntity);
-    }
-
-    public List<RoleEntity> addRoles(UserEntity userEntity, RoleEntity... roleEntities) {
-        List<RoleEntity> roleEntityList = userEntity.getRoleEntities();
-        if (roleEntityList == null) {
-            roleEntityList = new ArrayList<>();
-        }
-        for (RoleEntity roleEntity : roleEntities) {
-            if (!roleEntityList.contains(roleEntity)) {
-                roleEntityList.add(roleEntity);
-            }
-        }
-        return roleEntityList;
     }
 }

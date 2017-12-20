@@ -22,7 +22,7 @@ public class ProjectController {
     // 保存工程z
     @PostMapping
     public ResultEntity saveProjects(@AuthenticationPrincipal UserEntity loginUser, ProjectEntity projectEntity) {
-        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, projectService.saveProjects(projectEntity, loginUser));
+        return ResultUtils.resultBuilder(HttpStatus.CREATED, ResultUtils.HTTPRESPONSE, loginUser, projectService.saveProjects(projectEntity, loginUser));
     }
 
     // 删除工程
