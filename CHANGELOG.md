@@ -10,6 +10,7 @@
 ## 0.0.4 - SNAPSHOT - 2017-12-20
 ### Added
 - 实现定时向网内广播发送UDP消息报告服务器ip地址。
+- 实现UDP端口的监听，多线程处理。
 ### Changed
 ### Fixed
 ### Removed

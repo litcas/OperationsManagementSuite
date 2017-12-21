@@ -4,9 +4,12 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 public class UDPMessage {
-    public static String getServerInfoMessage() throws UnknownHostException {
-        short Id = (short) 0xB102;
-        String Ip = InetAddress.getLocalHost().getHostAddress();
-        return Id + Ip;
+    // 客户端报文
+    public static final String RECEIVEHEARBEAT = "C101";
+    // 服务器报文
+    private static final String SEND_BROADCAST = "S101";
+
+    public static String getServerIpMessage() throws UnknownHostException {
+        return SEND_BROADCAST + InetAddress.getLocalHost().getHostAddress();
     }
 }

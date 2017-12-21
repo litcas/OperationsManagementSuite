@@ -4,7 +4,6 @@ import com.rengu.operationsoanagementsuite.Configuration.ServerConfiguration;
 import com.rengu.operationsoanagementsuite.Entity.UserEntity;
 import com.rengu.operationsoanagementsuite.Repository.UserRepository;
 import com.rengu.operationsoanagementsuite.Service.RoleService;
-import com.rengu.operationsoanagementsuite.Service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,8 +23,6 @@ public class ServerInit implements CommandLineRunner {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     @Autowired
     private RoleService roleService;
-    @Autowired
-    private UserService userService;
     @Autowired
     private ServerConfiguration serverConfiguration;
     @Autowired
