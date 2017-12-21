@@ -16,6 +16,7 @@ public class DeployPlanDetailService {
         deployPlanDetailEntity.setDeviceEntity(deviceEntity);
         deployPlanDetailEntity.setComponentEntity(componentEntity);
         deployPlanDetailEntity.setDeployPath(deployPath);
+        deployPlanDetailEntity.setDeployPlanEntity(deployPlanEntity);
         return AddDeployPlanDetail(deployPlanEntity, deployPlanDetailEntity);
     }
 
