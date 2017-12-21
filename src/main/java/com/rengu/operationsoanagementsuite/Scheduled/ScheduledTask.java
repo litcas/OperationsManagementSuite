@@ -7,7 +7,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.net.InetAddress;
+import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.util.Enumeration;
 
@@ -18,7 +18,13 @@ public class ScheduledTask {
     public void reportServerInfo() throws IOException {
         // todo 自动获取本机广播地址
         Enumeration<NetworkInterface> networkInterfaceEnumeration = NetworkInterface.getNetworkInterfaces();
-        InetAddress inetAddress = InetAddress.getByName("192.168.0.255");
-        UDPServer.sandMessage(inetAddress, ServerConfiguration.UDP_SEND_PORT, UDPMessage.getServerIpMessage());
+        while (networkInterfaceEnumeration.hasMoreElements()) {
+            NetworkInterface networkInterface = networkInterfaceEnumeration.nextElement();
+            for (InterfaceAddress interfaceAddress : networkInterface.getInterfaceAddresses()) {
+                if (interfaceAddress.getBroadcast() != null) {
+                    UDPServer.sandMessage(interfaceAddress.getBroadcast(), ServerConfiguration.UDP_SEND_PORT, UDPMessage.getServerIpMessage());
+                }
+            }
+        }
     }
 }
