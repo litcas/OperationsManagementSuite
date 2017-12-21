@@ -31,8 +31,11 @@ public class UDPHandlerThread implements Runnable {
     @Override
     public void run() {
         String code = new String(datagramPacket.getData(), 0, ServerConfiguration.UDP_CODE_SIZE);
+        byte[] data = new byte[datagramPacket.getLength() - ServerConfiguration.UDP_CODE_SIZE];
+        System.arraycopy(datagramPacket.getData(), ServerConfiguration.UDP_CODE_SIZE, data, 0, datagramPacket.getLength() - ServerConfiguration.UDP_CODE_SIZE);
         if (code.equals(UDPMessage.RECEIVEHEARBEAT)) {
-            logger.info("心跳报文");
+            String ip = (data[0] & 0xff) + "." + (data[1] & 0xff) + "." + (data[2] & 0xff) + "." + (data[3] & 0xff);
+            logger.info(ip);
         }
     }
 }
