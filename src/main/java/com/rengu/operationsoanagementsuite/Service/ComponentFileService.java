@@ -60,7 +60,6 @@ public class ComponentFileService {
             componentFileEntity.setType(FilenameUtils.getExtension(file.getName()));
             componentFileEntity.setSize(FileUtils.sizeOf(file));
             componentFileEntity.setPath(file.getPath());
-            componentFileRepository.save(componentFileEntity);
             componentFileEntityList.add(componentFileEntity);
         }
         return addComponentFile(componentEntity, componentFileEntityList);
@@ -79,7 +78,6 @@ public class ComponentFileService {
             componentFileEntity.setType(FilenameUtils.getExtension(file.getName()));
             componentFileEntity.setSize(FileUtils.sizeOf(file));
             componentFileEntity.setPath(file.getPath());
-            componentFileRepository.save(componentFileEntity);
             componentFileEntityList.add(componentFileEntity);
         }
         return addComponentFile(componentEntity, componentFileEntityList);

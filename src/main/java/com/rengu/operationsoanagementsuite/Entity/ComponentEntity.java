@@ -2,10 +2,7 @@ package com.rengu.operationsoanagementsuite.Entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -26,7 +23,7 @@ public class ComponentEntity {
     private String filePath;
     private long size;
     private boolean deleted = false;
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     private List<ComponentFileEntity> componentFileEntities;
 
     public String getId() {

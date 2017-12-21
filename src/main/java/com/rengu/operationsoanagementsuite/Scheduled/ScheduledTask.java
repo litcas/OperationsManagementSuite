@@ -16,6 +16,7 @@ public class ScheduledTask {
 
     @Scheduled(fixedRate = 5000)
     public void reportServerInfo() throws IOException {
+        // todo 自动获取本机广播地址
         Enumeration<NetworkInterface> networkInterfaceEnumeration = NetworkInterface.getNetworkInterfaces();
         InetAddress inetAddress = InetAddress.getByName("192.168.0.255");
         UDPServer.sandMessage(inetAddress, ServerConfiguration.UDP_SEND_PORT, UDPMessage.getServerIpMessage());

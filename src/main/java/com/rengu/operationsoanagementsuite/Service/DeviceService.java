@@ -1,7 +1,10 @@
 package com.rengu.operationsoanagementsuite.Service;
 
+import com.rengu.operationsoanagementsuite.Entity.DeployPlanDetailEntity;
+import com.rengu.operationsoanagementsuite.Entity.DeployPlanEntity;
 import com.rengu.operationsoanagementsuite.Entity.DeviceEntity;
 import com.rengu.operationsoanagementsuite.Exception.CustomizeException;
+import com.rengu.operationsoanagementsuite.Repository.DeployPlanRepository;
 import com.rengu.operationsoanagementsuite.Repository.DeviceRepository;
 import com.rengu.operationsoanagementsuite.Utils.NotificationMessage;
 import org.slf4j.Logger;
@@ -24,6 +27,8 @@ public class DeviceService {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     @Autowired
     private DeviceRepository deviceRepository;
+    @Autowired
+    private DeployPlanRepository deployPlanRepository;
 
     // 新增设备
     @Transactional
@@ -101,5 +106,37 @@ public class DeviceService {
             }
             return cb.and(predicateList.toArray(new Predicate[predicateList.size()]));
         });
+    }
+
+    public List<DeployPlanDetailEntity> scanDevices(String deviceId, String deployplanId) {
+        // 检查设备id参数是否存在
+        if (StringUtils.isEmpty(deviceId)) {
+            logger.info(NotificationMessage.DEVICE_ID_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.DEVICE_ID_NOT_FOUND);
+        }
+        // 检查设备id是否存在
+        if (!deviceRepository.exists(deviceId)) {
+            logger.info(NotificationMessage.DEVICE_EXISTS);
+            throw new CustomizeException(NotificationMessage.DEVICE_EXISTS);
+        }
+        // 检查设备id参数是否存在
+        if (StringUtils.isEmpty(deployplanId)) {
+            logger.info(NotificationMessage.DEPLOY_PLAN_ID_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.DEPLOY_PLAN_ID_NOT_FOUND);
+        }
+        // 检查设备id是否存在
+        if (!deployPlanRepository.exists(deployplanId)) {
+            logger.info(NotificationMessage.DEVICE_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.DEVICE_NOT_FOUND);
+        }
+        List<DeployPlanDetailEntity> deployPlanDetailEntityList = new ArrayList<>();
+        DeployPlanEntity deployPlanEntity = deployPlanRepository.findOne(deployplanId);
+        for (DeployPlanDetailEntity deployPlanDetailEntity : deployPlanEntity.getDeployPlanDetailEntities()) {
+            if (deployPlanDetailEntity.getDeviceEntity().getId().equals(deviceId)) {
+                deployPlanDetailEntityList.add(deployPlanDetailEntity);
+                logger.info(deployPlanDetailEntity.getComponentEntity().getId());
+            }
+        }
+        return deployPlanDetailEntityList;
     }
 }
