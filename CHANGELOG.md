@@ -7,6 +7,13 @@
 ### Fixed
 ### Removed
 
+## 0.0.4 - SNAPSHOT - 2017-12-20
+### Added
+- 实现定时向网内广播发送UDP消息报告服务器ip地址。
+### Changed
+### Fixed
+### Removed
+
 ## 0.0.3 - SNAPSHOT - 2017-12-15
 ### Added
 - 实现自动生成REST API文档（使用SWAGGER2框架）。

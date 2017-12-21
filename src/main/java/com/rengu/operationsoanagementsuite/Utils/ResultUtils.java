@@ -7,6 +7,7 @@ public class ResultUtils {
 
     // 定义返回类型
     public static final String HTTPRESPONSE = "HTTP";
+    public static final String UDP = "UDP";
     public static final String ERROR = "ERROR";
 
     // 创建ResultEntity

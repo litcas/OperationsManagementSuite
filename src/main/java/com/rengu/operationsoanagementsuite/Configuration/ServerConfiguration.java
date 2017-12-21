@@ -12,6 +12,7 @@ public class ServerConfiguration {
     public static final String EXPORT_COMPONENT_FILE_NAME = "exportcomponent";
     public static final String EXPORT_COMPONENT_INFO_NAME = "component.json";
     public static final String EXPORT_ENTITY_FILE_NAME = "entityFile";
+    public static final int UDP_PORT = 3086;
 
     // todo 修改可配置项为从配置文件读取属性
     // 用户相关
