@@ -33,7 +33,6 @@ public class NotificationMessage {
     public static final String DEPLOY_PLAN_NOT_FOUND = "参数解析异常：deployplan不存在.";
     public static final String DEPLOY_PLAN_ID_NOT_FOUND = "参数解析异常：deployplan.id不存在.";
     public static final String DEPLOY_PLAN_NAME_NOT_FOUND = "参数解析异常：deployplan.name不存在.";
-    public static final String DEPLOY_PLAN_PLATFORM_NOT_FOUND = "参数解析异常：deployplan.platform不存在.";
     public static final String DEPLOY_PLAN_DEPLOY_PATH_NOT_FOUND = "参数解析异常：deployplan.deploypath不存在.";
 
     // 设备相关
@@ -42,6 +41,7 @@ public class NotificationMessage {
     public static final String DEVICE_NOT_FOUND = "参数解析异常：device不存在.";
     public static final String DEVICE_ID_NOT_FOUND = "参数解析异常：device.id不存在.";
     public static final String DEVICE_IP_NOT_FOUND = "参数解析异常：device.ip不存在.";
+    public static final String DEVICE_PLATFORM_NOT_FOUND = "参数解析异常：device.platform不存在.";
     public static final String DEVICE_NAME_NOT_FOUND = "参数解析异常：device.name不存在.";
 
     public static String userDeleteMessage(String userId) {

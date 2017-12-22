@@ -6,6 +6,7 @@ import com.rengu.operationsoanagementsuite.Entity.DeviceEntity;
 import com.rengu.operationsoanagementsuite.Exception.CustomizeException;
 import com.rengu.operationsoanagementsuite.Repository.DeployPlanRepository;
 import com.rengu.operationsoanagementsuite.Repository.DeviceRepository;
+import com.rengu.operationsoanagementsuite.Repository.ProjectRepository;
 import com.rengu.operationsoanagementsuite.Utils.NotificationMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,10 +30,20 @@ public class DeviceService {
     private DeviceRepository deviceRepository;
     @Autowired
     private DeployPlanRepository deployPlanRepository;
+    @Autowired
+    private ProjectRepository projectRepository;
 
     // 新增设备
     @Transactional
-    public DeviceEntity saveDevice(DeviceEntity deviceEntity) {
+    public DeviceEntity saveDevice(String projectId, DeviceEntity deviceEntity) {
+        if (StringUtils.isEmpty(projectId)) {
+            logger.info(NotificationMessage.PROJECT_ID_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.PROJECT_ID_NOT_FOUND);
+        }
+        if (!projectRepository.exists(projectId)) {
+            logger.info(NotificationMessage.PROJECT_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.PROJECT_NOT_FOUND);
+        }
         // 检查设备名称参数是否存在
         if (StringUtils.isEmpty(deviceEntity.getName())) {
             logger.info(NotificationMessage.DEVICE_NAME_NOT_FOUND);
@@ -48,11 +59,8 @@ public class DeviceService {
             logger.info(NotificationMessage.DEVICE_IP_EXISTS);
             throw new CustomizeException(NotificationMessage.DEVICE_IP_EXISTS);
         }
-        if (StringUtils.isEmpty(deviceEntity.getPlatform())) {
-            logger.info(NotificationMessage.DEPLOY_PLAN_PLATFORM_NOT_FOUND);
-            throw new CustomizeException(NotificationMessage.DEPLOY_PLAN_PLATFORM_NOT_FOUND);
-        }
         deviceEntity.setLastModified(new Date());
+        deviceEntity.setProjectEntity(projectRepository.findOne(projectId));
         return deviceRepository.save(deviceEntity);
     }
 

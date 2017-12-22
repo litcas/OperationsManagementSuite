@@ -18,7 +18,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URLConnection;
-import java.security.NoSuchAlgorithmException;
 
 @RestController
 @RequestMapping(value = "/components")
@@ -28,8 +27,8 @@ public class ComponentController {
 
     // 保存组件
     @PostMapping
-    public ResultEntity saveComponents(@AuthenticationPrincipal UserEntity loginUser, ComponentEntity componentEntity, @RequestParam(value = "addFilePath") String[] addFilePath, @RequestParam(value = "componentfile") MultipartFile[] multipartFiles) throws IOException, NoSuchAlgorithmException {
-        return ResultUtils.resultBuilder(HttpStatus.CREATED, ResultUtils.HTTPRESPONSE, loginUser, componentService.saveComponents(componentEntity, addFilePath, multipartFiles));
+    public ResultEntity saveComponents(@AuthenticationPrincipal UserEntity loginUser, @RequestParam(value = "projectId") String projectId, ComponentEntity componentEntity, @RequestParam(value = "addFilePath") String[] addFilePath, @RequestParam(value = "componentfile") MultipartFile[] multipartFiles) throws IOException {
+        return ResultUtils.resultBuilder(HttpStatus.CREATED, ResultUtils.HTTPRESPONSE, loginUser, componentService.saveComponents(projectId, componentEntity, addFilePath, multipartFiles));
     }
 
     // 删除组件
@@ -58,7 +57,7 @@ public class ComponentController {
 
     // 导入组件
     @PostMapping(value = "/import")
-    public ResultEntity importComponents(@AuthenticationPrincipal UserEntity loginUser, @RequestParam(value = "importComponents") MultipartFile[] multipartFiles) throws IOException, ZipException, NoSuchAlgorithmException {
+    public ResultEntity importComponents(@AuthenticationPrincipal UserEntity loginUser, @RequestParam(value = "importComponents") MultipartFile[] multipartFiles) throws IOException, ZipException {
         return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, componentService.importComponents(multipartFiles));
     }
 

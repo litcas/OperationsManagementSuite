@@ -4,6 +4,7 @@ import com.rengu.operationsoanagementsuite.Configuration.ServerConfiguration;
 import com.rengu.operationsoanagementsuite.Entity.ComponentEntity;
 import com.rengu.operationsoanagementsuite.Exception.CustomizeException;
 import com.rengu.operationsoanagementsuite.Repository.ComponentRepository;
+import com.rengu.operationsoanagementsuite.Repository.ProjectRepository;
 import com.rengu.operationsoanagementsuite.Utils.CompressUtils;
 import com.rengu.operationsoanagementsuite.Utils.NotificationMessage;
 import com.rengu.operationsoanagementsuite.Utils.Tools;
@@ -22,7 +23,6 @@ import javax.transaction.Transactional;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -39,10 +39,20 @@ public class ComponentService {
     private ComponentFileService componentFileService;
     @Autowired
     private ServerConfiguration serverConfiguration;
+    @Autowired
+    private ProjectRepository projectRepository;
 
     // 新建组件
     @Transactional
-    public ComponentEntity saveComponents(ComponentEntity componentEntity, String[] addFilePath, MultipartFile[] multipartFiles) throws IOException, NoSuchAlgorithmException {
+    public ComponentEntity saveComponents(String projectId, ComponentEntity componentEntity, String[] addFilePath, MultipartFile[] multipartFiles) throws IOException {
+        if (StringUtils.isEmpty(projectId)) {
+            logger.info(NotificationMessage.PROJECT_ID_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.PROJECT_ID_NOT_FOUND);
+        }
+        if (!projectRepository.exists(projectId)) {
+            logger.info(NotificationMessage.PROJECT_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.PROJECT_NOT_FOUND);
+        }
         // 检查组件名称参数是否存在
         if (StringUtils.isEmpty(componentEntity.getName())) {
             logger.info(NotificationMessage.COMPONENT_NAME_NOT_FOUND);
@@ -59,6 +69,7 @@ public class ComponentService {
             throw new CustomizeException(NotificationMessage.COMPONENT_EXISTS);
         }
         componentEntity = componentInit(componentEntity);
+        componentEntity.setProjectEntity(projectRepository.findOne(projectId));
         // 设置组件文件关联
         componentEntity.setComponentFileEntities(componentFileService.createComponentFile(componentEntity, multipartFiles, addFilePath));
         // 设置组件大小
@@ -130,7 +141,7 @@ public class ComponentService {
 
     // 导入组件实现
     @Transactional
-    public List<ComponentEntity> importComponents(MultipartFile[] multipartFiles) throws IOException, ZipException, NoSuchAlgorithmException {
+    public List<ComponentEntity> importComponents(MultipartFile[] multipartFiles) throws IOException, ZipException {
         // 检查上传文件对象是否存在
         if (multipartFiles == null) {
             logger.info(NotificationMessage.COMPONENT_UPLOAD_FILE_NOT_FOUND);
