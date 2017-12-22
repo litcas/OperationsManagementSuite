@@ -4,12 +4,10 @@ import java.util.Objects;
 
 public class DeviceRealInfoEntity {
     private String ip;
-    private String platform;
     private int count;
 
-    public DeviceRealInfoEntity(String ip, String platform, int count) {
+    public DeviceRealInfoEntity(String ip, int count) {
         this.ip = ip;
-        this.platform = platform;
         this.count = count;
     }
 
@@ -19,14 +17,6 @@ public class DeviceRealInfoEntity {
 
     public void setIp(String ip) {
         this.ip = ip;
-    }
-
-    public String getPlatform() {
-        return platform;
-    }
-
-    public void setPlatform(String platform) {
-        this.platform = platform;
     }
 
     public int getCount() {
@@ -48,6 +38,6 @@ public class DeviceRealInfoEntity {
     @Override
     public int hashCode() {
 
-        return Objects.hash(ip, platform, count);
+        return Objects.hash(ip);
     }
 }

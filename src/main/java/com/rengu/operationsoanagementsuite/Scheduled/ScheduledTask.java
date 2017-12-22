@@ -2,7 +2,6 @@ package com.rengu.operationsoanagementsuite.Scheduled;
 
 import com.rengu.operationsoanagementsuite.Configuration.ServerConfiguration;
 import com.rengu.operationsoanagementsuite.Utils.DeviceRealInfoEntity;
-import com.rengu.operationsoanagementsuite.Utils.UDPMessage;
 import com.rengu.operationsoanagementsuite.Utils.UDPSTools;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -24,7 +23,7 @@ public class ScheduledTask {
             NetworkInterface networkInterface = networkInterfaceEnumeration.nextElement();
             for (InterfaceAddress interfaceAddress : networkInterface.getInterfaceAddresses()) {
                 if (interfaceAddress.getBroadcast() != null) {
-                    UDPSTools.sandMessage(interfaceAddress.getBroadcast(), ServerConfiguration.UDP_SEND_PORT, UDPMessage.getServerIpMessage(interfaceAddress));
+                    UDPSTools.sandMessage(interfaceAddress.getBroadcast(), ServerConfiguration.UDP_SEND_PORT, UDPSTools.getServerIpMessage(interfaceAddress));
                 }
             }
         }

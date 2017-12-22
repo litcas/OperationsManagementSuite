@@ -1,8 +1,5 @@
 package com.rengu.operationsoanagementsuite.Utils;
 
-import com.rengu.operationsoanagementsuite.Configuration.ServerConfiguration;
-import com.rengu.operationsoanagementsuite.Thread.UDPHandlerThread;
-
 import java.io.IOException;
 import java.net.*;
 import java.util.ArrayList;
@@ -12,6 +9,15 @@ public class UDPSTools {
 
     public static List<DeviceRealInfoEntity> onlineDevices = new ArrayList<>();
 
+    // 客户端报文
+    public static final String RECEIVEHEARBEAT = "C101";
+    // 服务器报文
+    private static final String SEND_BROADCAST = "S101";
+
+    public static String getServerIpMessage(InterfaceAddress interfaceAddress) {
+        return (SEND_BROADCAST + interfaceAddress.getAddress().toString()).replace("/", "");
+    }
+
     // UDP发送消息
     public static void sandMessage(InetAddress inetAddress, int port, String message) throws IOException {
         DatagramSocket datagramSocket = new DatagramSocket();
@@ -20,16 +26,5 @@ public class UDPSTools {
         datagramSocket.send(datagramPacket);
         System.out.println("目标地址：" + inetAddress.getHostAddress() + ":" + port + "-->" + "发送消息：" + message);
         datagramSocket.close();
-    }
-
-    public static void receiveMessage(int port) throws IOException {
-        DatagramSocket datagramSocket = new DatagramSocket(port);
-        byte[] bytes = new byte[ServerConfiguration.UDP_BUFFER_SIZE];
-        DatagramPacket datagramPacket = new DatagramPacket(bytes, bytes.length);
-        while (true) {
-            datagramSocket.receive(datagramPacket);
-            // 启动处理线程
-            new UDPHandlerThread(datagramPacket).run();
-        }
     }
 }

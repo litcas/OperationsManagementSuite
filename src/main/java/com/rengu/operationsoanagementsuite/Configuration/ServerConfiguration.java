@@ -14,7 +14,7 @@ public class ServerConfiguration {
     public static final String EXPORT_ENTITY_FILE_NAME = "entityFile";
     // UDP 配置
     public static final int UDP_SEND_PORT = 3086;
-    public static final int UDP_RECEIVE_PORT = 6004;
+    public static final int UDP_HEARBEAT_RECEIVE_PORT = 6004;
     public static final int UDP_CODE_SIZE = 4;
     public static final int UDP_BUFFER_SIZE = 32;
 
