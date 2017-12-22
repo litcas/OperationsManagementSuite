@@ -34,6 +34,6 @@ public class UDPMessage {
     private static final String SEND_BROADCAST = "S101";
 
     public static String getServerIpMessage(InterfaceAddress interfaceAddress) {
-        return SEND_BROADCAST + interfaceAddress.getAddress().toString();
+        return (SEND_BROADCAST + interfaceAddress.getAddress().toString()).replace("/", "");
     }
 }

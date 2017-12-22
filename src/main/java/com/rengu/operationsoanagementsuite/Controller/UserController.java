@@ -54,6 +54,12 @@ public class UserController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping(value = "/{userId}/roles/{roleId}")
     public ResultEntity assignRoleToUser(@AuthenticationPrincipal UserEntity loginUser, @PathVariable String userId, @PathVariable String roleId) {
-        return ResultUtils.resultBuilder(HttpStatus.NO_CONTENT, ResultUtils.HTTPRESPONSE, loginUser, userService.assignRoleToUser(userId, roleId));
+        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, userService.assignRoleToUser(userId, roleId));
+    }
+
+    // 用户登录
+    @PostMapping(value = "/login")
+    public ResultEntity login(@AuthenticationPrincipal UserEntity loginUser) {
+        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, loginUser);
     }
 }

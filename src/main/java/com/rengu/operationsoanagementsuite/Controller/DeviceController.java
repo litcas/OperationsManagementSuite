@@ -19,8 +19,8 @@ public class DeviceController {
 
     // 保存设备
     @PostMapping
-    public ResultEntity saveDevice(@AuthenticationPrincipal UserEntity loginUser, DeviceEntity deviceEntity) {
-        return ResultUtils.resultBuilder(HttpStatus.CREATED, ResultUtils.HTTPRESPONSE, loginUser, deviceService.saveDevice(deviceEntity));
+    public ResultEntity saveDevice(@AuthenticationPrincipal UserEntity loginUser, @RequestParam(value = "projectId") String projectId, DeviceEntity deviceEntity) {
+        return ResultUtils.resultBuilder(HttpStatus.CREATED, ResultUtils.HTTPRESPONSE, loginUser, deviceService.saveDevice(projectId, deviceEntity));
     }
 
     // 删除设备

@@ -1,12 +1,16 @@
-package com.rengu.operationsoanagementsuite.Network;
+package com.rengu.operationsoanagementsuite.Utils;
 
 import com.rengu.operationsoanagementsuite.Configuration.ServerConfiguration;
 import com.rengu.operationsoanagementsuite.Thread.UDPHandlerThread;
 
 import java.io.IOException;
 import java.net.*;
+import java.util.ArrayList;
+import java.util.List;
 
-public class UDPService {
+public class UDPSTools {
+
+    public static List<DeviceRealInfoEntity> onlineDevices = new ArrayList<>();
 
     // UDP发送消息
     public static void sandMessage(InetAddress inetAddress, int port, String message) throws IOException {
@@ -14,7 +18,7 @@ public class UDPService {
         SocketAddress socketAddress = new InetSocketAddress(inetAddress, port);
         DatagramPacket datagramPacket = new DatagramPacket(message.getBytes(), message.length(), socketAddress);
         datagramSocket.send(datagramPacket);
-        System.out.println("发送消息：" + message);
+        System.out.println("目标地址：" + inetAddress.getHostAddress() + ":" + port + "-->" + "发送消息：" + message);
         datagramSocket.close();
     }
 

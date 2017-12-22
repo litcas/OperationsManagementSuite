@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import java.util.Date;
 import java.util.UUID;
 
@@ -22,8 +23,8 @@ public class DeviceEntity {
     private String ip;
     private boolean online = false;
     private String description;
-    @Column(nullable = false)
-    private String platform;
+    @ManyToOne
+    private ProjectEntity projectEntity;
 
     public String getId() {
         return id;
@@ -81,11 +82,11 @@ public class DeviceEntity {
         this.description = description;
     }
 
-    public String getPlatform() {
-        return platform;
+    public ProjectEntity getProjectEntity() {
+        return projectEntity;
     }
 
-    public void setPlatform(String platform) {
-        this.platform = platform;
+    public void setProjectEntity(ProjectEntity projectEntity) {
+        this.projectEntity = projectEntity;
     }
 }
