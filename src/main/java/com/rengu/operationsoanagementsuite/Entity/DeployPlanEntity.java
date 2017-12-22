@@ -1,6 +1,7 @@
 package com.rengu.operationsoanagementsuite.Entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -8,7 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
-public class ComponentEntity {
+public class DeployPlanEntity {
     @Id
     private String id = UUID.randomUUID().toString();
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
@@ -17,14 +18,12 @@ public class ComponentEntity {
     private Date lastModified;
     @Column(nullable = false)
     private String name;
-    @Column(nullable = false)
-    private String version;
     private String description;
-    private String filePath;
-    private long size;
-    private boolean deleted = false;
     @OneToMany(cascade = CascadeType.ALL)
-    private List<ComponentFileEntity> componentFileEntities;
+    private List<DeployPlanDetailEntity> deployPlanDetailEntities;
+    @JsonIgnore
+    @ManyToOne
+    private ProjectEntity projectEntity;
 
     public String getId() {
         return id;
@@ -50,28 +49,12 @@ public class ComponentEntity {
         this.lastModified = lastModified;
     }
 
-    public boolean isDeleted() {
-        return deleted;
-    }
-
-    public void setDeleted(boolean deleted) {
-        this.deleted = deleted;
-    }
-
     public String getName() {
         return name;
     }
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getVersion() {
-        return version;
-    }
-
-    public void setVersion(String version) {
-        this.version = version;
     }
 
     public String getDescription() {
@@ -82,27 +65,19 @@ public class ComponentEntity {
         this.description = description;
     }
 
-    public String getFilePath() {
-        return filePath;
+    public List<DeployPlanDetailEntity> getDeployPlanDetailEntities() {
+        return deployPlanDetailEntities;
     }
 
-    public void setFilePath(String filePath) {
-        this.filePath = filePath;
+    public void setDeployPlanDetailEntities(List<DeployPlanDetailEntity> deployPlanDetailEntities) {
+        this.deployPlanDetailEntities = deployPlanDetailEntities;
     }
 
-    public long getSize() {
-        return size;
+    public ProjectEntity getProjectEntity() {
+        return projectEntity;
     }
 
-    public void setSize(long size) {
-        this.size = size;
-    }
-
-    public List<ComponentFileEntity> getComponentFileEntities() {
-        return componentFileEntities;
-    }
-
-    public void setComponentFileEntities(List<ComponentFileEntity> componentFileEntities) {
-        this.componentFileEntities = componentFileEntities;
+    public void setProjectEntity(ProjectEntity projectEntity) {
+        this.projectEntity = projectEntity;
     }
 }

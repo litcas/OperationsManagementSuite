@@ -1,5 +1,7 @@
 package com.rengu.operationsoanagementsuite.Entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -11,15 +13,16 @@ import java.util.*;
 public class UserEntity implements UserDetails {
     @Id
     private String id = UUID.randomUUID().toString();
-    @Column(unique = true)
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date createTime = new Date();
+    @Column(nullable = false, unique = true)
     private String username;
-    @Column(unique = true)
+    @Column(nullable = false)
     private String password;
     private boolean accountNonExpired = true;
     private boolean accountNonLocked = true;
     private boolean credentialsNonExpired = true;
     private boolean enabled = true;
-    private Date createTime = new Date();
     @ManyToMany(fetch = FetchType.EAGER)
     private List<RoleEntity> roleEntities;
 
@@ -28,11 +31,12 @@ public class UserEntity implements UserDetails {
      *
      * @return the authorities, sorted by natural key (never <code>null</code>)
      */
+    @JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<GrantedAuthority> grantedAuthorityList = new ArrayList<>();
         for (RoleEntity roleEntity : roleEntities) {
-            grantedAuthorityList.add(new SimpleGrantedAuthority(roleEntity.getRole()));
+            grantedAuthorityList.add(new SimpleGrantedAuthority(roleEntity.getName()));
         }
         return grantedAuthorityList;
     }
@@ -113,5 +117,13 @@ public class UserEntity implements UserDetails {
 
     public void setRoleEntities(List<RoleEntity> roleEntities) {
         this.roleEntities = roleEntities;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        UserEntity that = (UserEntity) o;
+        return Objects.equals(id, that.id);
     }
 }

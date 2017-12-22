@@ -1,9 +1,7 @@
 package com.rengu.operationsoanagementsuite.Utils;
 
 import com.rengu.operationsoanagementsuite.Configuration.ServerConfiguration;
-import com.rengu.operationsoanagementsuite.Entity.RoleEntity;
 import com.rengu.operationsoanagementsuite.Entity.UserEntity;
-import com.rengu.operationsoanagementsuite.Repository.RoleRepository;
 import com.rengu.operationsoanagementsuite.Repository.UserRepository;
 import com.rengu.operationsoanagementsuite.Service.RoleService;
 import org.slf4j.Logger;
@@ -14,8 +12,8 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ClassUtils;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.File;
+import java.util.Objects;
 
 @Component
 @Order(value = 2)
@@ -28,40 +26,37 @@ public class ServerInit implements CommandLineRunner {
     @Autowired
     private ServerConfiguration serverConfiguration;
     @Autowired
-    private RoleRepository roleRepository;
-    @Autowired
     private UserRepository userRepository;
 
-
-    /**
-     * Callback used to run the bean.
-     *
-     * @param args incoming main method arguments
-     * @throws Exception on error
-     */
     @Override
-    public void run(String... args) throws Exception {
+    public void run(String... args) {
         // 服务启动后执行一些初始化的工作
-        // 初始化服务器根路径
-        serverConfiguration.setLocalPath(ClassUtils.getDefaultClassLoader().getResource("").getPath());
-        // 初始化角色
-        if (roleRepository.findByRole(serverConfiguration.getDefultUserRole()) == null) {
-            logger.info("系统默认角色信息'" + serverConfiguration.getDefultUserRole() + "'不存在，系统自动创建。");
-            roleService.saveRole(serverConfiguration.getDefultUserRole());
+        // 调试环境获取组件库路径
+        String libraryPath = Objects.requireNonNull(ClassUtils.getDefaultClassLoader().getResource("")).getPath();
+        // 调试环境组件库路径
+        if (libraryPath.endsWith("/target/classes/")) {
+            serverConfiguration.setComponentLibraryPath(libraryPath.replace("classes/", ServerConfiguration.COMPONENT_LIBRARY_NAME + File.separatorChar));
         }
-        if (roleRepository.findByRole(serverConfiguration.getDefultAdminRole()) == null) {
-            logger.info("系统默认角色信息'" + serverConfiguration.getDefultAdminRole() + "'不存在，系统自动创建。");
-            roleService.saveRole(serverConfiguration.getDefultAdminRole());
+        // relese环境组件库路径(OSX)
+        if (libraryPath.endsWith("!/BOOT-INF/classes!/")) {
+            serverConfiguration.setComponentLibraryPath(new File(libraryPath.replace("!/BOOT-INF/classes!/", "")).getParent() + File.separatorChar + ServerConfiguration.COMPONENT_LIBRARY_NAME + File.separatorChar);
+        }
+        // 初始化角色
+        if (roleService.getRoleByName(ServerConfiguration.USER_ROLE_NAME) == null) {
+            logger.info("默认角色信息'" + ServerConfiguration.USER_ROLE_NAME + "'不存在，自动创建。");
+            roleService.saveRoles(ServerConfiguration.USER_ROLE_NAME);
+        }
+        if (roleService.getRoleByName(ServerConfiguration.ADMIN_ROLE_NAME) == null) {
+            logger.info("默认角色信息'" + ServerConfiguration.ADMIN_ROLE_NAME + "'不存在，自动创建。");
+            roleService.saveRoles(ServerConfiguration.ADMIN_ROLE_NAME);
         }
         //初始化管理员用户
-        if (userRepository.findByUsername(serverConfiguration.getDefultUserName()) == null) {
-            logger.info("系统默认用户信息'" + serverConfiguration.getDefultUserName() + "'不存在，系统自动创建。");
+        if (userRepository.findByUsername(serverConfiguration.getDefultUsername()) == null) {
+            logger.info("默认用户信息'" + serverConfiguration.getDefultUsername() + "'不存在，自动创建。");
             UserEntity userEntity = new UserEntity();
-            userEntity.setUsername(serverConfiguration.getDefultUserName());
+            userEntity.setUsername(serverConfiguration.getDefultUsername());
             userEntity.setPassword(serverConfiguration.getDefultPassword());
-            List<RoleEntity> roleEntityList = new ArrayList<>();
-            roleEntityList.add(roleService.getRoleByRole(serverConfiguration.getDefultAdminRole()));
-            userEntity.setRoleEntities(roleEntityList);
+            userEntity.setRoleEntities(roleService.addRoles(userEntity, roleService.getRoleByName(ServerConfiguration.ADMIN_ROLE_NAME)));
             userRepository.save(userEntity);
         }
     }

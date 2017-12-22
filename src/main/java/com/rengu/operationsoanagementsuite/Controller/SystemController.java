@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.net.SocketException;
+
 @RestController
 @RequestMapping(value = "/system")
 public class SystemController {
@@ -20,11 +22,16 @@ public class SystemController {
 
     @GetMapping(value = "/info")
     public ResultEntity getSystemInfo(@AuthenticationPrincipal UserEntity loginUser) {
-        return ResultUtils.init(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, systemService.getSystemInfo());
+        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, systemService.getSystemInfo());
+    }
+
+    @GetMapping(value = "/networks")
+    public ResultEntity getNetworks(@AuthenticationPrincipal UserEntity loginUser) throws SocketException {
+        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, systemService.getNetworks());
     }
 
     @GetMapping(value = "/serverconfiguration")
     public ResultEntity getServerConfiguration(@AuthenticationPrincipal UserEntity loginUser) {
-        return ResultUtils.init(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, systemService.getServerConfiguration());
+        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, systemService.getServerConfiguration());
     }
 }

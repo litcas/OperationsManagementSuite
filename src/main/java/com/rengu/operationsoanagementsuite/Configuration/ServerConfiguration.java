@@ -1,41 +1,36 @@
 package com.rengu.operationsoanagementsuite.Configuration;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 @Component
-@ConfigurationProperties(prefix = "rengu.config")
 public class ServerConfiguration {
-    // todo 修改为从配置文件获取属性值
-    private String defultUserRole = "USER";
-    private String defultAdminRole = "ADMIN";
-    private String defultUserName = "admin";
+    // 用户相关
+    public static final String USER_ROLE_NAME = "ROLE_USER";
+    public static final String ADMIN_ROLE_NAME = "ROLE_ADMIN";
+    public static final String SEPARATOR = "-";
+    public static final String COMPONENT_LIBRARY_NAME = "ComponentLibraries";
+    public static final String EXPORT_COMPONENT_FILE_NAME = "exportcomponent";
+    public static final String EXPORT_COMPONENT_INFO_NAME = "component.json";
+    public static final String EXPORT_ENTITY_FILE_NAME = "entityFile";
+    // UDP 配置
+    public static final int UDP_SEND_PORT = 3086;
+    public static final int UDP_RECEIVE_PORT = 6004;
+    public static final int UDP_CODE_SIZE = 4;
+    public static final int UDP_BUFFER_SIZE = 32;
+
+    // todo 修改可配置项为从配置文件读取属性
+    // 用户相关
+    private String defultUsername = "admin";
     private String defultPassword = "admin";
+    // 组件相关
+    private String componentLibraryPath;
 
-    private String localPath = "";
-
-    public String getDefultUserRole() {
-        return defultUserRole;
+    public String getDefultUsername() {
+        return defultUsername;
     }
 
-    public void setDefultUserRole(String defultUserRole) {
-        this.defultUserRole = defultUserRole;
-    }
-
-    public String getDefultAdminRole() {
-        return defultAdminRole;
-    }
-
-    public void setDefultAdminRole(String defultAdminRole) {
-        this.defultAdminRole = defultAdminRole;
-    }
-
-    public String getDefultUserName() {
-        return defultUserName;
-    }
-
-    public void setDefultUserName(String defultUserName) {
-        this.defultUserName = defultUserName;
+    public void setDefultUsername(String defultUsername) {
+        this.defultUsername = defultUsername;
     }
 
     public String getDefultPassword() {
@@ -46,11 +41,11 @@ public class ServerConfiguration {
         this.defultPassword = defultPassword;
     }
 
-    public String getLocalPath() {
-        return localPath;
+    public String getComponentLibraryPath() {
+        return componentLibraryPath;
     }
 
-    public void setLocalPath(String localPath) {
-        this.localPath = localPath;
+    public void setComponentLibraryPath(String componentLibraryPath) {
+        this.componentLibraryPath = componentLibraryPath;
     }
 }

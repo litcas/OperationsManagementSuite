@@ -1,29 +1,25 @@
-package com.rengu.operationsoanagementsuite.Utils;
+package com.rengu.operationsoanagementsuite.Entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import org.springframework.http.HttpStatus;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
 import java.util.Date;
 import java.util.UUID;
 
-public class ResultEntity<T> {
-
+@Entity
+public class ResultLogEntity {
+    @Id
     private String id = UUID.randomUUID().toString();
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime = new Date();
+    private String hostIP;
+    private String requestMethod;
+    private String requestUrl;
     private String username;
     private String type;
     private int code;
     private String message;
-    private T data;
-
-    public ResultEntity() {
-    }
-
-    public ResultEntity(HttpStatus status) {
-        this.code = status.value();
-        this.message = status.getReasonPhrase();
-    }
 
     public String getId() {
         return id;
@@ -39,6 +35,30 @@ public class ResultEntity<T> {
 
     public void setCreateTime(Date createTime) {
         this.createTime = createTime;
+    }
+
+    public String getHostIP() {
+        return hostIP;
+    }
+
+    public void setHostIP(String hostIP) {
+        this.hostIP = hostIP;
+    }
+
+    public String getRequestMethod() {
+        return requestMethod;
+    }
+
+    public void setRequestMethod(String requestMethod) {
+        this.requestMethod = requestMethod;
+    }
+
+    public String getRequestUrl() {
+        return requestUrl;
+    }
+
+    public void setRequestUrl(String requestUrl) {
+        this.requestUrl = requestUrl;
     }
 
     public String getUsername() {
@@ -73,24 +93,18 @@ public class ResultEntity<T> {
         this.message = message;
     }
 
-    public T getData() {
-        return data;
-    }
-
-    public void setData(T data) {
-        this.data = data;
-    }
-
     @Override
     public String toString() {
-        return "ResultEntity{" +
+        return "ResultLogEntity{" +
                 "id='" + id + '\'' +
                 ", createTime=" + createTime +
+                ", hostIP='" + hostIP + '\'' +
+                ", requestMethod='" + requestMethod + '\'' +
+                ", requestUrl='" + requestUrl + '\'' +
                 ", username='" + username + '\'' +
                 ", type='" + type + '\'' +
                 ", code=" + code +
                 ", message='" + message + '\'' +
-                ", data=" + data +
                 '}';
     }
 }
