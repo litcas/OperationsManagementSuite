@@ -48,6 +48,10 @@ public class DeviceService {
             logger.info(NotificationMessage.DEVICE_IP_EXISTS);
             throw new CustomizeException(NotificationMessage.DEVICE_IP_EXISTS);
         }
+        if (StringUtils.isEmpty(deviceEntity.getPlatform())) {
+            logger.info(NotificationMessage.DEPLOY_PLAN_PLATFORM_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.DEPLOY_PLAN_PLATFORM_NOT_FOUND);
+        }
         deviceEntity.setLastModified(new Date());
         return deviceRepository.save(deviceEntity);
     }

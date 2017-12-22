@@ -2,6 +2,7 @@ package com.rengu.operationsoanagementsuite.Thread;
 
 import com.rengu.operationsoanagementsuite.Configuration.ServerConfiguration;
 import com.rengu.operationsoanagementsuite.Network.UDPMessage;
+import com.rengu.operationsoanagementsuite.Utils.Tools;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +36,8 @@ public class UDPHandlerThread implements Runnable {
         System.arraycopy(datagramPacket.getData(), ServerConfiguration.UDP_CODE_SIZE, data, 0, datagramPacket.getLength() - ServerConfiguration.UDP_CODE_SIZE);
         if (code.equals(UDPMessage.RECEIVEHEARBEAT)) {
             String ip = (data[0] & 0xff) + "." + (data[1] & 0xff) + "." + (data[2] & 0xff) + "." + (data[3] & 0xff);
-            logger.info(ip);
+            String platform = Tools.getPlatformName((data[4] & 0xff));
+            logger.info("客户端ip地址：" + ip + "操作系统：" + platform);
         }
     }
 }

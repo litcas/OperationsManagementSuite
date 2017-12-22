@@ -22,6 +22,8 @@ public class DeviceEntity {
     private String ip;
     private boolean online = false;
     private String description;
+    @Column(nullable = false)
+    private String platform;
 
     public String getId() {
         return id;
@@ -77,5 +79,13 @@ public class DeviceEntity {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getPlatform() {
+        return platform;
+    }
+
+    public void setPlatform(String platform) {
+        this.platform = platform;
     }
 }

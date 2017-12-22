@@ -33,6 +33,7 @@ public class NotificationMessage {
     public static final String DEPLOY_PLAN_NOT_FOUND = "参数解析异常：deployplan不存在.";
     public static final String DEPLOY_PLAN_ID_NOT_FOUND = "参数解析异常：deployplan.id不存在.";
     public static final String DEPLOY_PLAN_NAME_NOT_FOUND = "参数解析异常：deployplan.name不存在.";
+    public static final String DEPLOY_PLAN_PLATFORM_NOT_FOUND = "参数解析异常：deployplan.platform不存在.";
     public static final String DEPLOY_PLAN_DEPLOY_PATH_NOT_FOUND = "参数解析异常：deployplan.deploypath不存在.";
 
     // 设备相关

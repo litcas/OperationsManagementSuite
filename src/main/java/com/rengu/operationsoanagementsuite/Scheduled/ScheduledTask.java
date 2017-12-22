@@ -16,7 +16,6 @@ public class ScheduledTask {
 
     @Scheduled(fixedRate = 5000)
     public void reportServerInfo() throws IOException {
-        // todo 自动获取本机广播地址
         Enumeration<NetworkInterface> networkInterfaceEnumeration = NetworkInterface.getNetworkInterfaces();
         while (networkInterfaceEnumeration.hasMoreElements()) {
             NetworkInterface networkInterface = networkInterfaceEnumeration.nextElement();

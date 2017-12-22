@@ -1,6 +1,7 @@
 package com.rengu.operationsoanagementsuite.Utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rengu.operationsoanagementsuite.Network.UDPMessage;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import java.io.File;
@@ -23,5 +24,15 @@ public class Tools {
     public static <T> T readJsonFile(File jsonFile, Class<T> classType) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         return objectMapper.readValue(jsonFile, classType);
+    }
+
+    // 查询操作系统
+    public static String getPlatformName(int platformCode) {
+        for (UDPMessage.PLATFORM platform : UDPMessage.PLATFORM.values()) {
+            if (platformCode == platform.getPlatformCode()) {
+                return platform.getPlatformName();
+            }
+        }
+        return null;
     }
 }
