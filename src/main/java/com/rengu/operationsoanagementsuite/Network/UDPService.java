@@ -14,6 +14,7 @@ public class UDPService {
         SocketAddress socketAddress = new InetSocketAddress(inetAddress, port);
         DatagramPacket datagramPacket = new DatagramPacket(message.getBytes(), message.length(), socketAddress);
         datagramSocket.send(datagramPacket);
+        System.out.println("发送消息：" + message);
         datagramSocket.close();
     }
 

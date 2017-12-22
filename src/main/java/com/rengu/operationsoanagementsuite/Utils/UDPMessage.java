@@ -1,7 +1,6 @@
 package com.rengu.operationsoanagementsuite.Utils;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.net.InterfaceAddress;
 
 public class UDPMessage {
 
@@ -34,7 +33,7 @@ public class UDPMessage {
     // 服务器报文
     private static final String SEND_BROADCAST = "S101";
 
-    public static String getServerIpMessage() throws UnknownHostException {
-        return SEND_BROADCAST + InetAddress.getLocalHost().getHostAddress();
+    public static String getServerIpMessage(InterfaceAddress interfaceAddress) {
+        return SEND_BROADCAST + interfaceAddress.getAddress().toString();
     }
 }

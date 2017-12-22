@@ -21,7 +21,7 @@ public class ScheduledTask {
             NetworkInterface networkInterface = networkInterfaceEnumeration.nextElement();
             for (InterfaceAddress interfaceAddress : networkInterface.getInterfaceAddresses()) {
                 if (interfaceAddress.getBroadcast() != null) {
-                    UDPService.sandMessage(interfaceAddress.getBroadcast(), ServerConfiguration.UDP_SEND_PORT, UDPMessage.getServerIpMessage());
+                    UDPService.sandMessage(interfaceAddress.getBroadcast(), ServerConfiguration.UDP_SEND_PORT, UDPMessage.getServerIpMessage(interfaceAddress));
                 }
             }
         }
