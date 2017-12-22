@@ -1,4 +1,4 @@
-package com.rengu.operationsoanagementsuite.Network;
+package com.rengu.operationsoanagementsuite.Utils;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;

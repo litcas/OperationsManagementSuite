@@ -6,7 +6,7 @@ import com.rengu.operationsoanagementsuite.Thread.UDPHandlerThread;
 import java.io.IOException;
 import java.net.*;
 
-public class UDPServer {
+public class UDPService {
 
     // UDP发送消息
     public static void sandMessage(InetAddress inetAddress, int port, String message) throws IOException {

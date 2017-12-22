@@ -1,8 +1,8 @@
 package com.rengu.operationsoanagementsuite.Thread;
 
 import com.rengu.operationsoanagementsuite.Configuration.ServerConfiguration;
-import com.rengu.operationsoanagementsuite.Network.UDPMessage;
 import com.rengu.operationsoanagementsuite.Utils.Tools;
+import com.rengu.operationsoanagementsuite.Utils.UDPMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

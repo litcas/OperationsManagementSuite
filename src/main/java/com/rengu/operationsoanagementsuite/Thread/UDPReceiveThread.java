@@ -1,7 +1,7 @@
 package com.rengu.operationsoanagementsuite.Thread;
 
 import com.rengu.operationsoanagementsuite.Configuration.ServerConfiguration;
-import com.rengu.operationsoanagementsuite.Network.UDPServer;
+import com.rengu.operationsoanagementsuite.Network.UDPService;
 
 import java.io.IOException;
 
@@ -20,7 +20,7 @@ public class UDPReceiveThread implements Runnable {
     @Override
     public void run() {
         try {
-            UDPServer.receiveMessage(ServerConfiguration.UDP_RECEIVE_PORT);
+            UDPService.receiveMessage(ServerConfiguration.UDP_RECEIVE_PORT);
         } catch (IOException e) {
             e.printStackTrace();
         }
