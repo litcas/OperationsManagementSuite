@@ -40,7 +40,6 @@ public class UDPHearBeatReceiveThread implements Runnable {
                     // 已存在更新计数器
                     UDPSTools.onlineDevices.get(index).setCount(3);
                 }
-                System.out.println("当前设备数量-udp：" + UDPSTools.onlineDevices.size() + "台");
             }
         } catch (IOException e) {
             e.printStackTrace();
