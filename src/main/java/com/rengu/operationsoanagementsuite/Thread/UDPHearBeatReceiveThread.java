@@ -1,7 +1,7 @@
 package com.rengu.operationsoanagementsuite.Thread;
 
 import com.rengu.operationsoanagementsuite.Configuration.ServerConfiguration;
-import com.rengu.operationsoanagementsuite.Utils.DeviceRealInfoEntity;
+import com.rengu.operationsoanagementsuite.Entity.DeviceRealInfoEntity;
 import com.rengu.operationsoanagementsuite.Utils.UDPSTools;
 
 import java.io.IOException;

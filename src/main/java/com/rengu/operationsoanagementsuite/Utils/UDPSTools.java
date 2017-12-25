@@ -1,5 +1,7 @@
 package com.rengu.operationsoanagementsuite.Utils;
 
+import com.rengu.operationsoanagementsuite.Entity.DeviceRealInfoEntity;
+
 import java.io.IOException;
 import java.net.*;
 import java.util.ArrayList;
@@ -9,8 +11,6 @@ public class UDPSTools {
 
     public static List<DeviceRealInfoEntity> onlineDevices = new ArrayList<>();
 
-    // 客户端报文
-    public static final String RECEIVEHEARBEAT = "C101";
     // 服务器报文
     private static final String SEND_BROADCAST = "S101";
 
@@ -24,7 +24,6 @@ public class UDPSTools {
         SocketAddress socketAddress = new InetSocketAddress(inetAddress, port);
         DatagramPacket datagramPacket = new DatagramPacket(message.getBytes(), message.length(), socketAddress);
         datagramSocket.send(datagramPacket);
-        System.out.println("目标地址：" + inetAddress.getHostAddress() + ":" + port + "-->" + "发送消息：" + message);
         datagramSocket.close();
     }
 }

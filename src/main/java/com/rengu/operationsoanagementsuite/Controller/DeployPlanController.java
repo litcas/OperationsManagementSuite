@@ -1,10 +1,10 @@
 package com.rengu.operationsoanagementsuite.Controller;
 
 import com.rengu.operationsoanagementsuite.Entity.DeployPlanEntity;
+import com.rengu.operationsoanagementsuite.Entity.ResultEntity;
 import com.rengu.operationsoanagementsuite.Entity.UserEntity;
 import com.rengu.operationsoanagementsuite.Service.DeployPlanService;
 import com.rengu.operationsoanagementsuite.Utils.NotificationMessage;
-import com.rengu.operationsoanagementsuite.Utils.ResultEntity;
 import com.rengu.operationsoanagementsuite.Utils.ResultUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

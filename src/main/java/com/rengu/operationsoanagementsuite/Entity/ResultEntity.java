@@ -1,4 +1,4 @@
-package com.rengu.operationsoanagementsuite.Utils;
+package com.rengu.operationsoanagementsuite.Entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.http.HttpStatus;

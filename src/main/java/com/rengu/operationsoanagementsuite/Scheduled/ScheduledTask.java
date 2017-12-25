@@ -1,7 +1,7 @@
 package com.rengu.operationsoanagementsuite.Scheduled;
 
 import com.rengu.operationsoanagementsuite.Configuration.ServerConfiguration;
-import com.rengu.operationsoanagementsuite.Utils.DeviceRealInfoEntity;
+import com.rengu.operationsoanagementsuite.Entity.DeviceRealInfoEntity;
 import com.rengu.operationsoanagementsuite.Utils.UDPSTools;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -40,6 +40,5 @@ public class ScheduledTask {
                 deviceRealInfoEntityIterator.remove();
             }
         }
-        System.out.println("当前设备数量-check：" + UDPSTools.onlineDevices.size() + "台");
     }
 }
