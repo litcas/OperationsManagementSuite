@@ -7,7 +7,7 @@ import java.net.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UDPSTools {
+public class UDPTools {
 
     public static List<DeviceRealInfoEntity> onlineDevices = new ArrayList<>();
 
