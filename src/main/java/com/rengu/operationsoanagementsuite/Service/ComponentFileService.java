@@ -59,7 +59,7 @@ public class ComponentFileService {
             componentFileEntity.setMD5(Tools.getFileMD5(file));
             componentFileEntity.setType(FilenameUtils.getExtension(file.getName()));
             componentFileEntity.setSize(FileUtils.sizeOf(file));
-            componentFileEntity.setPath(file.getPath());
+            componentFileEntity.setPath(filePath + multipartFile.getOriginalFilename());
             componentFileEntityList.add(componentFileEntity);
         }
         return addComponentFile(componentEntity, componentFileEntityList);

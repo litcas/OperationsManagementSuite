@@ -21,6 +21,7 @@ public class DeviceEntity {
     private String name;
     @Column(nullable = false)
     private String ip;
+    private int port;
     private boolean online = false;
     private String description;
     @ManyToOne
@@ -64,6 +65,14 @@ public class DeviceEntity {
 
     public void setIp(String ip) {
         this.ip = ip;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
     }
 
     public boolean isOnline() {

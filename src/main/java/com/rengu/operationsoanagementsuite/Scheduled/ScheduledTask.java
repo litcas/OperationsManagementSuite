@@ -2,7 +2,7 @@ package com.rengu.operationsoanagementsuite.Scheduled;
 
 import com.rengu.operationsoanagementsuite.Configuration.ServerConfiguration;
 import com.rengu.operationsoanagementsuite.Entity.DeviceRealInfoEntity;
-import com.rengu.operationsoanagementsuite.Utils.UDPTools;
+import com.rengu.operationsoanagementsuite.Utils.UDPUtils;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -23,7 +23,7 @@ public class ScheduledTask {
             NetworkInterface networkInterface = networkInterfaceEnumeration.nextElement();
             for (InterfaceAddress interfaceAddress : networkInterface.getInterfaceAddresses()) {
                 if (interfaceAddress.getBroadcast() != null) {
-                    UDPTools.sandMessage(interfaceAddress.getBroadcast(), ServerConfiguration.UDP_SEND_PORT, UDPTools.getServerIpMessage(interfaceAddress));
+                    UDPUtils.sandMessage(interfaceAddress.getBroadcast(), ServerConfiguration.UDP_SEND_PORT, UDPUtils.getServerIpMessage(interfaceAddress));
                 }
             }
         }
@@ -32,7 +32,7 @@ public class ScheduledTask {
     // 检查设备在线状态
     @Scheduled(fixedRate = 5000)
     public void devicesOnlineMonitor() {
-        Iterator<DeviceRealInfoEntity> deviceRealInfoEntityIterator = UDPTools.onlineDevices.iterator();
+        Iterator<DeviceRealInfoEntity> deviceRealInfoEntityIterator = UDPUtils.onlineDevices.iterator();
         while (deviceRealInfoEntityIterator.hasNext()) {
             DeviceRealInfoEntity deviceRealInfoEntity = deviceRealInfoEntityIterator.next();
             deviceRealInfoEntity.setCount(deviceRealInfoEntity.getCount() - 1);

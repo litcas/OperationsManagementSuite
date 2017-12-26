@@ -7,7 +7,7 @@ import java.net.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UDPTools {
+public class UDPUtils {
 
     public static List<DeviceRealInfoEntity> onlineDevices = new ArrayList<>();
 
@@ -23,7 +23,10 @@ public class UDPTools {
         DatagramSocket datagramSocket = new DatagramSocket();
         SocketAddress socketAddress = new InetSocketAddress(inetAddress, port);
         DatagramPacket datagramPacket = new DatagramPacket(message.getBytes(), message.length(), socketAddress);
-        datagramSocket.send(datagramPacket);
+        if (datagramSocket.isConnected()) {
+            datagramSocket.send(datagramPacket);
+            datagramSocket.close();
+        }
         datagramSocket.close();
     }
 }

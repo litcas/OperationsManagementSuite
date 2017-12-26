@@ -2,7 +2,7 @@ package com.rengu.operationsoanagementsuite.Thread;
 
 import com.rengu.operationsoanagementsuite.Configuration.ServerConfiguration;
 import com.rengu.operationsoanagementsuite.Entity.DeviceRealInfoEntity;
-import com.rengu.operationsoanagementsuite.Utils.UDPTools;
+import com.rengu.operationsoanagementsuite.Utils.UDPUtils;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -32,13 +32,13 @@ public class UDPHearBeatReceiveThread implements Runnable {
                 byte[] data = datagramPacket.getData();
                 String ip = (data[0] & 0xff) + "." + (data[1] & 0xff) + "." + (data[2] & 0xff) + "." + (data[3] & 0xff);
                 DeviceRealInfoEntity deviceRealInfoEntity = new DeviceRealInfoEntity(ip, 3);
-                int index = UDPTools.onlineDevices.indexOf(deviceRealInfoEntity);
+                int index = UDPUtils.onlineDevices.indexOf(deviceRealInfoEntity);
                 if (index == -1) {
                     // 不存在直接添加到数组
-                    UDPTools.onlineDevices.add(deviceRealInfoEntity);
+                    UDPUtils.onlineDevices.add(deviceRealInfoEntity);
                 } else {
                     // 已存在更新计数器
-                    UDPTools.onlineDevices.get(index).setCount(3);
+                    UDPUtils.onlineDevices.get(index).setCount(3);
                 }
             }
         } catch (IOException e) {

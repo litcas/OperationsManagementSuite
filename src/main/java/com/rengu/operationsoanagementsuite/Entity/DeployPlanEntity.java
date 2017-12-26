@@ -21,6 +21,8 @@ public class DeployPlanEntity {
     private String description;
     @OneToMany(cascade = CascadeType.ALL)
     private List<DeployPlanDetailEntity> deployPlanDetailEntities;
+    @OneToMany(fetch = FetchType.EAGER)
+    private List<DeviceEntity> deviceEntities;
     @JsonIgnore
     @ManyToOne
     private ProjectEntity projectEntity;
@@ -71,6 +73,14 @@ public class DeployPlanEntity {
 
     public void setDeployPlanDetailEntities(List<DeployPlanDetailEntity> deployPlanDetailEntities) {
         this.deployPlanDetailEntities = deployPlanDetailEntities;
+    }
+
+    public List<DeviceEntity> getDeviceEntities() {
+        return deviceEntities;
+    }
+
+    public void setDeviceEntities(List<DeviceEntity> deviceEntities) {
+        this.deviceEntities = deviceEntities;
     }
 
     public ProjectEntity getProjectEntity() {

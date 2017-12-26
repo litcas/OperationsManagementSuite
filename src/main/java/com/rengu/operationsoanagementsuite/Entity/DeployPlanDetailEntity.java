@@ -1,9 +1,11 @@
 package com.rengu.operationsoanagementsuite.Entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import java.util.Date;
 import java.util.Objects;
@@ -20,6 +22,9 @@ public class DeployPlanDetailEntity {
     private DeviceEntity deviceEntity;
     @OneToOne
     private ComponentEntity componentEntity;
+    @JsonIgnore
+    @ManyToOne
+    private DeployPlanEntity deployPlanEntity;
 
     public String getId() {
         return id;
@@ -61,6 +66,14 @@ public class DeployPlanDetailEntity {
         this.componentEntity = componentEntity;
     }
 
+    public DeployPlanEntity getDeployPlanEntity() {
+        return deployPlanEntity;
+    }
+
+    public void setDeployPlanEntity(DeployPlanEntity deployPlanEntity) {
+        this.deployPlanEntity = deployPlanEntity;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -71,6 +84,6 @@ public class DeployPlanDetailEntity {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, createTime, deployPath, deviceEntity, componentEntity);
+        return Objects.hash(id);
     }
 }

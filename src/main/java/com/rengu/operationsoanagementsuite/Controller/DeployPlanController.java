@@ -12,6 +12,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+
 @RestController
 @RequestMapping(value = "/deployplan")
 public class DeployPlanController {
@@ -55,8 +57,19 @@ public class DeployPlanController {
         return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, deployPlanService.getDeployPlans(deployPlanArgs));
     }
 
+    // 创建部署信息
     @PutMapping(value = "/{deployplanId}/devices/{deviceId}/components/{componentId}")
     public ResultEntity AddDeployPlanDetail(@AuthenticationPrincipal UserEntity loginUser, @PathVariable("deployplanId") String deployplanId, @PathVariable("deviceId") String deviceId, @PathVariable("componentId") String componentId, @RequestParam(value = "deployPath") String deployPath) {
         return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, deployPlanService.AddDeployPlanDetail(deployplanId, deviceId, componentId, deployPath));
+    }
+
+    // 修改部署信息
+
+    // 删除部署信息
+
+    // 开始部署
+    @GetMapping(value = "/start/{deployplanId}")
+    public ResultEntity startDeploy(@AuthenticationPrincipal UserEntity loginUser, @PathVariable("deployplanId") String deployplanId) throws IOException {
+        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, deployPlanService.startDeploy(deployplanId));
     }
 }
