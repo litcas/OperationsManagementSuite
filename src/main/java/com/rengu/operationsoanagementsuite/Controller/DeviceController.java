@@ -47,10 +47,4 @@ public class DeviceController {
     public ResultEntity getDevices(@AuthenticationPrincipal UserEntity loginUser, DeviceEntity deviceArgs) {
         return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, deviceService.getDevices(deviceArgs));
     }
-
-    // 扫描设备
-    @GetMapping(value = "/scan/{deviceId}/deployplan/{deployplanId}")
-    public ResultEntity scanDevices(@AuthenticationPrincipal UserEntity loginUser, @PathVariable("deviceId") String deviceId, @PathVariable("deployplanId") String deployplanId) {
-        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, deviceService.scanDevices(deviceId, deployplanId));
-    }
 }

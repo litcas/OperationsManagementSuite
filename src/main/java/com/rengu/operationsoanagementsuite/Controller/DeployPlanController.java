@@ -45,7 +45,7 @@ public class DeployPlanController {
         return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, deployPlanService.getDeployPlan(deployplanId));
     }
 
-    // 搜索部署设计
+    // 查看全部部署设计
     @GetMapping
     public ResultEntity getDeployPlans(@AuthenticationPrincipal UserEntity loginUser, String projectId, DeployPlanEntity deployPlanArgs) {
         return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, deployPlanService.getDeployPlans(projectId, deployPlanArgs));
@@ -63,13 +63,19 @@ public class DeployPlanController {
         return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, deployPlanService.AddDeployPlanDetail(deployplanId, deviceId, componentId, deployPath));
     }
 
-    // 修改部署信息
+    // todo 修改部署信息
 
-    // 删除部署信息
+    // todo 删除部署信息
 
     // 开始部署
-    @GetMapping(value = "/start/{deployplanId}")
+    @GetMapping(value = "/deploy/{deployplanId}")
     public ResultEntity startDeploy(@AuthenticationPrincipal UserEntity loginUser, @PathVariable("deployplanId") String deployplanId) throws IOException {
         return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, deployPlanService.startDeploy(deployplanId));
+    }
+
+    // 扫描设备
+    @GetMapping(value = "/scan/{deployplanId}/devices/{deviceId}")
+    public ResultEntity scanDevices(@AuthenticationPrincipal UserEntity loginUser, @PathVariable("deviceId") String deviceId, @PathVariable("deployplanId") String deployplanId) {
+        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, deployPlanService.scanDevices(deployplanId, deviceId));
     }
 }

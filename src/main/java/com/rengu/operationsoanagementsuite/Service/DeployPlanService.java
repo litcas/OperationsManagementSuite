@@ -183,7 +183,39 @@ public class DeployPlanService {
         return deployPlanEntity;
     }
 
-    // 一步发送文件
+    public List<DeployPlanDetailEntity> scanDevices(String deployplanId, String deviceId) {
+        // 检查部署设计id参数是否存在
+        if (StringUtils.isEmpty(deployplanId)) {
+            logger.info(NotificationMessage.DEPLOY_PLAN_ID_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.DEPLOY_PLAN_ID_NOT_FOUND);
+        }
+        // 检查部署设计id参数是否存在
+        if (!deployPlanRepository.exists(deployplanId)) {
+            logger.info(NotificationMessage.DEVICE_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.DEVICE_NOT_FOUND);
+        }
+        // 检查设备id参数是否存在
+        if (StringUtils.isEmpty(deviceId)) {
+            logger.info(NotificationMessage.DEVICE_ID_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.DEVICE_ID_NOT_FOUND);
+        }
+        // 检查设备id是否存在
+        if (!deviceRepository.exists(deviceId)) {
+            logger.info(NotificationMessage.DEVICE_EXISTS);
+            throw new CustomizeException(NotificationMessage.DEVICE_EXISTS);
+        }
+        List<DeployPlanDetailEntity> deployPlanDetailEntityList = new ArrayList<>();
+        DeployPlanEntity deployPlanEntity = deployPlanRepository.findOne(deployplanId);
+        for (DeployPlanDetailEntity deployPlanDetailEntity : deployPlanEntity.getDeployPlanDetailEntities()) {
+            if (deployPlanDetailEntity.getDeviceEntity().getId().equals(deviceId)) {
+                deployPlanDetailEntityList.add(deployPlanDetailEntity);
+                logger.info(deployPlanDetailEntity.getComponentEntity().getId());
+            }
+        }
+        return deployPlanDetailEntityList;
+    }
+
+    // 异步发送文件
     @Async
     Future<Boolean> startDeploy(DeviceEntity deviceEntity, List<DeployPlanDetailEntity> deployPlanDetailEntities) throws IOException {
         Socket socket = new Socket(deviceEntity.getIp(), deviceEntity.getPort());

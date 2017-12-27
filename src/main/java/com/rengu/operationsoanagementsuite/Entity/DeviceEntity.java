@@ -2,10 +2,7 @@ package com.rengu.operationsoanagementsuite.Entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 import java.util.Date;
 import java.util.UUID;
 
@@ -22,6 +19,7 @@ public class DeviceEntity {
     @Column(nullable = false)
     private String ip;
     private int port;
+    @Transient
     private boolean online = false;
     private String description;
     @ManyToOne
