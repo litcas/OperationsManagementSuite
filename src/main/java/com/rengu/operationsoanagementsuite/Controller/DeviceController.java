@@ -17,12 +17,6 @@ public class DeviceController {
     @Autowired
     private DeviceService deviceService;
 
-    // 保存设备
-    @PostMapping
-    public ResultEntity saveDevice(@AuthenticationPrincipal UserEntity loginUser, @RequestParam(value = "projectId") String projectId, DeviceEntity deviceEntity) {
-        return ResultUtils.resultBuilder(HttpStatus.CREATED, ResultUtils.HTTPRESPONSE, loginUser, deviceService.saveDevice(projectId, deviceEntity));
-    }
-
     // 删除设备
     @DeleteMapping(value = "/{deviceId}")
     public ResultEntity deleteDevice(@AuthenticationPrincipal UserEntity loginUser, @PathVariable("deviceId") String deviceId) {
@@ -40,11 +34,5 @@ public class DeviceController {
     @GetMapping(value = "/{deviceId}")
     public ResultEntity getDevice(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deviceId") String deviceId) {
         return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, deviceService.getDevice(deviceId));
-    }
-
-    // 查询设备
-    @GetMapping
-    public ResultEntity getDevices(@AuthenticationPrincipal UserEntity loginUser, DeviceEntity deviceArgs) {
-        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, deviceService.getDevices(deviceArgs));
     }
 }

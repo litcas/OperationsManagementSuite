@@ -25,8 +25,6 @@ public class ComponentEntity {
     private boolean deleted = false;
     @OneToMany(cascade = CascadeType.ALL)
     private List<ComponentFileEntity> componentFileEntities;
-    @ManyToOne
-    private ProjectEntity projectEntity;
 
     public String getId() {
         return id;
@@ -106,13 +104,5 @@ public class ComponentEntity {
 
     public void setComponentFileEntities(List<ComponentFileEntity> componentFileEntities) {
         this.componentFileEntities = componentFileEntities;
-    }
-
-    public ProjectEntity getProjectEntity() {
-        return projectEntity;
-    }
-
-    public void setProjectEntity(ProjectEntity projectEntity) {
-        this.projectEntity = projectEntity;
     }
 }

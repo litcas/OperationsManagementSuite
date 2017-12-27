@@ -2,10 +2,7 @@ package com.rengu.operationsoanagementsuite.Service;
 
 import com.rengu.operationsoanagementsuite.Entity.*;
 import com.rengu.operationsoanagementsuite.Exception.CustomizeException;
-import com.rengu.operationsoanagementsuite.Repository.ComponentRepository;
 import com.rengu.operationsoanagementsuite.Repository.DeployPlanRepository;
-import com.rengu.operationsoanagementsuite.Repository.DeviceRepository;
-import com.rengu.operationsoanagementsuite.Repository.ProjectRepository;
 import com.rengu.operationsoanagementsuite.Utils.NotificationMessage;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -36,62 +33,47 @@ public class DeployPlanService {
     @Autowired
     private DeployPlanRepository deployPlanRepository;
     @Autowired
-    private ProjectRepository projectRepository;
-    @Autowired
-    private DeviceRepository deviceRepository;
-    @Autowired
-    private ComponentRepository componentRepository;
-    @Autowired
     private DeployPlanDetailService deployPlanDetailService;
+    @Autowired
+    private DeviceService deviceService;
+    @Autowired
+    private ComponentService componentService;
+    @Autowired
+    private ProjectService projectService;
 
+    // 保存部署设计
     @Transactional
     public DeployPlanEntity saveDeployPlans(String projectId, DeployPlanEntity deployPlanEntity) {
-        if (StringUtils.isEmpty(projectId)) {
-            logger.info(NotificationMessage.PROJECT_ID_NOT_FOUND);
-            throw new CustomizeException(NotificationMessage.PROJECT_ID_NOT_FOUND);
-        }
-        if (!projectRepository.exists(projectId)) {
-            logger.info(NotificationMessage.PROJECT_NOT_FOUND);
+        if (!projectService.hasProject(projectId)) {
             throw new CustomizeException(NotificationMessage.PROJECT_NOT_FOUND);
         }
         if (deployPlanEntity == null) {
-            logger.info(NotificationMessage.DEPLOY_PLAN_NOT_FOUND);
             throw new CustomizeException(NotificationMessage.DEPLOY_PLAN_NOT_FOUND);
         }
         if (StringUtils.isEmpty(deployPlanEntity.getName())) {
-            logger.info(NotificationMessage.DEPLOY_PLAN_NAME_NOT_FOUND);
             throw new CustomizeException(NotificationMessage.DEPLOY_PLAN_NAME_NOT_FOUND);
         }
-        if (hasDeployPlan(deployPlanEntity.getName(), projectRepository.findOne(projectId))) {
-            logger.info(NotificationMessage.DEPLOY_PLAN_EXISTS);
+        if (hasDeployPlans(deployPlanEntity.getName(), projectId)) {
             throw new CustomizeException(NotificationMessage.DEPLOY_PLAN_EXISTS);
         }
-        deployPlanEntity.setProjectEntity(projectRepository.findOne(projectId));
+        deployPlanEntity.setProjectEntity(projectService.getProject(projectId));
         deployPlanEntity.setLastModified(new Date());
         return deployPlanRepository.save(deployPlanEntity);
     }
 
+    // 删除部署设计
     @Transactional
     public void deleteDeployPlans(String deployplanId) {
-        if (StringUtils.isEmpty(deployplanId)) {
-            logger.info(NotificationMessage.DEPLOY_PLAN_ID_NOT_FOUND);
-            throw new CustomizeException(NotificationMessage.DEPLOY_PLAN_ID_NOT_FOUND);
-        }
-        if (!deployPlanRepository.exists(deployplanId)) {
-            logger.info(NotificationMessage.DEPLOY_PLAN_NOT_FOUND);
+        if (!hasDeployPlans(deployplanId)) {
             throw new CustomizeException(NotificationMessage.DEPLOY_PLAN_NOT_FOUND);
         }
         deployPlanRepository.delete(deployplanId);
     }
 
+    // 更新部署设计
     @Transactional
     public DeployPlanEntity updateDeployPlans(String deployplanId, DeployPlanEntity deployPlanArgs) {
-        if (StringUtils.isEmpty(deployplanId)) {
-            logger.info(NotificationMessage.DEPLOY_PLAN_ID_NOT_FOUND);
-            throw new CustomizeException(NotificationMessage.DEPLOY_PLAN_ID_NOT_FOUND);
-        }
-        if (!deployPlanRepository.exists(deployplanId)) {
-            logger.info(NotificationMessage.DEPLOY_PLAN_NOT_FOUND);
+        if (!hasDeployPlans(deployplanId)) {
             throw new CustomizeException(NotificationMessage.DEPLOY_PLAN_NOT_FOUND);
         }
         DeployPlanEntity deployPlanEntity = deployPlanRepository.findOne(deployplanId);
@@ -100,12 +82,9 @@ public class DeployPlanService {
         return deployPlanRepository.save(deployPlanEntity);
     }
 
+    // 查看部署设计
     @Transactional
-    public DeployPlanEntity getDeployPlan(String deployplanId) {
-        if (StringUtils.isEmpty(deployplanId)) {
-            logger.info(NotificationMessage.DEPLOY_PLAN_ID_NOT_FOUND);
-            throw new CustomizeException(NotificationMessage.DEPLOY_PLAN_ID_NOT_FOUND);
-        }
+    public DeployPlanEntity getDeployPlans(String deployplanId) {
         return deployPlanRepository.findOne(deployplanId);
     }
 
@@ -113,11 +92,13 @@ public class DeployPlanService {
     public List<DeployPlanEntity> getDeployPlans(String projectId, DeployPlanEntity deployPlanArgs) {
         return deployPlanRepository.findAll((root, query, cb) -> {
             List<Predicate> predicateList = new ArrayList<>();
-            if (!StringUtils.isEmpty(deployPlanArgs.getName())) {
-                predicateList.add(cb.like(root.get("name"), deployPlanArgs.getName()));
-            }
             if (!StringUtils.isEmpty(projectId)) {
                 predicateList.add(cb.equal(root.get("projectEntity").get("id"), projectId));
+            }
+            if (deployPlanArgs != null) {
+                if (!StringUtils.isEmpty(deployPlanArgs.getName())) {
+                    predicateList.add(cb.like(root.get("name"), deployPlanArgs.getName()));
+                }
             }
             return cb.and(predicateList.toArray(new Predicate[predicateList.size()]));
         });
@@ -129,90 +110,50 @@ public class DeployPlanService {
     }
 
     @Transactional
-    public DeployPlanEntity AddDeployPlanDetail(String deployplanId, String deviceId, String componentId, String deployPath) {
-        if (StringUtils.isEmpty(deployplanId)) {
-            logger.info(NotificationMessage.DEPLOY_PLAN_ID_NOT_FOUND);
-            throw new CustomizeException(NotificationMessage.DEPLOY_PLAN_ID_NOT_FOUND);
+    public DeployPlanDetailEntity addDeployPlanDetail(String deployplanId, String deviceId, String componentId, String deployPath) {
+        if (!hasDeployPlans(deployplanId)) {
+            throw new CustomizeException(NotificationMessage.DEPLOY_PLAN_NOT_FOUND);
         }
-        if (!deployPlanRepository.exists(deployplanId)) {
-            logger.info(NotificationMessage.DEPLOY_PLAN_ID_NOT_FOUND);
-            throw new CustomizeException(NotificationMessage.DEPLOY_PLAN_ID_NOT_FOUND);
-        }
-        if (StringUtils.isEmpty(deviceId)) {
-            logger.info(NotificationMessage.DEVICE_ID_NOT_FOUND);
-            throw new CustomizeException(NotificationMessage.DEVICE_ID_NOT_FOUND);
-        }
-        if (!deviceRepository.exists(deviceId)) {
-            logger.info(NotificationMessage.DEVICE_NOT_FOUND);
+        if (!deviceService.hasDevice(deviceId)) {
             throw new CustomizeException(NotificationMessage.DEVICE_NOT_FOUND);
         }
-        if (StringUtils.isEmpty(componentId)) {
-            logger.info(NotificationMessage.COMPONENT_ID_NOT_FOUND);
-            throw new CustomizeException(NotificationMessage.COMPONENT_ID_NOT_FOUND);
-        }
-        if (!componentRepository.exists(componentId)) {
-            logger.info(NotificationMessage.COMPONENT_NOT_FOUND);
+        if (!componentService.hasComponent(componentId)) {
             throw new CustomizeException(NotificationMessage.COMPONENT_NOT_FOUND);
         }
         if (StringUtils.isEmpty(deployPath)) {
-            logger.info(NotificationMessage.DEPLOY_PLAN_DEPLOY_PATH_NOT_FOUND);
             throw new CustomizeException(NotificationMessage.DEPLOY_PLAN_DEPLOY_PATH_NOT_FOUND);
         }
         DeployPlanEntity deployPlanEntity = deployPlanRepository.findOne(deployplanId);
-        DeviceEntity deviceEntity = deviceRepository.findOne(deviceId);
-        ComponentEntity componentEntity = componentRepository.findOne(componentId);
-        deployPlanEntity.setDeviceEntities(addDevices(deployPlanEntity, deviceEntity));
-        deployPlanEntity.setDeployPlanDetailEntities(deployPlanDetailService.createDeployPlanDetails(deployPlanEntity, deviceEntity, componentEntity, deployPath));
-        return deployPlanRepository.save(deployPlanEntity);
+        DeviceEntity deviceEntity = deviceService.getDevice(deviceId);
+        ComponentEntity componentEntity = componentService.getComponent(componentId);
+        DeployPlanDetailEntity deployPlanDetailEntity = deployPlanDetailService.saveDeployPlanDetails(deployPlanEntity, deviceEntity, componentEntity, deployPath);
+        deployPlanEntity.setDeployPlanDetailEntities(addDeployPlanDetails(deployPlanEntity, deployPlanDetailEntity));
+        deployPlanRepository.save(deployPlanEntity);
+        return deployPlanDetailEntity;
+    }
+
+    @Transactional
+    public DeployPlanDetailEntity updateDeployPlanDetails(String deployplandetailId, DeployPlanDetailEntity deployPlanDetailArgs) {
+        return deployPlanDetailService.updateDeployPlanDetails(deployplandetailId, deployPlanDetailArgs);
+    }
+
+    @Transactional
+    public void deleteDeployPlanDetails(String deployplandetailId) {
+        deployPlanDetailService.deleteDeployPlanDetails(deployplandetailId);
     }
 
     // 开始部署
-    public DeployPlanEntity startDeploy(String deployplanId) throws IOException {
-        if (StringUtils.isEmpty(deployplanId)) {
-            logger.info(NotificationMessage.DEPLOY_PLAN_ID_NOT_FOUND);
-            throw new CustomizeException(NotificationMessage.DEPLOY_PLAN_ID_NOT_FOUND);
-        }
+    @Transactional
+    public Future<Boolean> startDeploy(String deployplanId, String deviceId) throws IOException {
         if (!deployPlanRepository.exists(deployplanId)) {
-            logger.info(NotificationMessage.DEPLOY_PLAN_ID_NOT_FOUND);
-            throw new CustomizeException(NotificationMessage.DEPLOY_PLAN_ID_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.DEPLOY_PLAN_NOT_FOUND);
         }
-        DeployPlanEntity deployPlanEntity = deployPlanRepository.findOne(deployplanId);
-        for (DeviceEntity deviceEntity : deployPlanEntity.getDeviceEntities()) {
-            startDeploy(deviceEntity, deployPlanEntity.getDeployPlanDetailEntities());
-        }
-        return deployPlanEntity;
-    }
-
-    public List<DeployPlanDetailEntity> scanDevices(String deployplanId, String deviceId) {
-        // 检查部署设计id参数是否存在
-        if (StringUtils.isEmpty(deployplanId)) {
-            logger.info(NotificationMessage.DEPLOY_PLAN_ID_NOT_FOUND);
-            throw new CustomizeException(NotificationMessage.DEPLOY_PLAN_ID_NOT_FOUND);
-        }
-        // 检查部署设计id参数是否存在
-        if (!deployPlanRepository.exists(deployplanId)) {
-            logger.info(NotificationMessage.DEVICE_NOT_FOUND);
+        if (!deviceService.hasDevice(deviceId)) {
             throw new CustomizeException(NotificationMessage.DEVICE_NOT_FOUND);
         }
-        // 检查设备id参数是否存在
-        if (StringUtils.isEmpty(deviceId)) {
-            logger.info(NotificationMessage.DEVICE_ID_NOT_FOUND);
-            throw new CustomizeException(NotificationMessage.DEVICE_ID_NOT_FOUND);
-        }
-        // 检查设备id是否存在
-        if (!deviceRepository.exists(deviceId)) {
-            logger.info(NotificationMessage.DEVICE_EXISTS);
-            throw new CustomizeException(NotificationMessage.DEVICE_EXISTS);
-        }
-        List<DeployPlanDetailEntity> deployPlanDetailEntityList = new ArrayList<>();
-        DeployPlanEntity deployPlanEntity = deployPlanRepository.findOne(deployplanId);
-        for (DeployPlanDetailEntity deployPlanDetailEntity : deployPlanEntity.getDeployPlanDetailEntities()) {
-            if (deployPlanDetailEntity.getDeviceEntity().getId().equals(deviceId)) {
-                deployPlanDetailEntityList.add(deployPlanDetailEntity);
-                logger.info(deployPlanDetailEntity.getComponentEntity().getId());
-            }
-        }
-        return deployPlanDetailEntityList;
+        DeviceEntity deviceEntity = deviceService.getDevice(deviceId);
+        List<DeployPlanDetailEntity> deployPlanDetailEntityList = deployPlanDetailService.getDeployPlanDetails(deployplanId, deviceId);
+        return startDeploy(deviceEntity, deployPlanDetailEntityList);
     }
 
     // 异步发送文件
@@ -237,7 +178,7 @@ public class DeployPlanService {
                     // 3、发送文件实体
                     IOUtils.copy(new FileInputStream(componentEntity.getFilePath() + componentFileEntity.getPath()), dataOutputStream);
                     dataOutputStream.flush();
-                    // 发送文件结束比标志
+                    // 发送文件结束标志
                     socket.shutdownOutput();
                 }
             }
@@ -248,21 +189,47 @@ public class DeployPlanService {
         return new AsyncResult<>(false);
     }
 
-    private boolean hasDeployPlan(String name, ProjectEntity projectEntity) {
-        return deployPlanRepository.findByNameAndProjectEntity(name, projectEntity) != null;
-    }
-
-    // 添加设备
-    private List<DeviceEntity> addDevices(DeployPlanEntity deployPlanEntity, DeviceEntity... deviceEntities) {
-        List<DeviceEntity> deviceEntityList = deployPlanEntity.getDeviceEntities();
-        if (deviceEntityList == null) {
-            deviceEntityList = new ArrayList<>();
+    public List<DeployPlanDetailEntity> scanDevices(String deployplanId, String deviceId) {
+        // 检查部署设计id参数是否存在
+        if (!deployPlanRepository.exists(deployplanId)) {
+            logger.info(NotificationMessage.DEVICE_NOT_FOUND);
+            throw new CustomizeException(NotificationMessage.DEVICE_NOT_FOUND);
         }
-        for (DeviceEntity deviceEntity : deviceEntities) {
-            if (!deviceEntityList.contains(deviceEntity)) {
-                deviceEntityList.add(deviceEntity);
+        // 检查设备id是否存在
+        if (!deviceService.hasDevice(deviceId)) {
+            logger.info(NotificationMessage.DEVICE_EXISTS);
+            throw new CustomizeException(NotificationMessage.DEVICE_EXISTS);
+        }
+        List<DeployPlanDetailEntity> deployPlanDetailEntityList = new ArrayList<>();
+        DeployPlanEntity deployPlanEntity = deployPlanRepository.findOne(deployplanId);
+        for (DeployPlanDetailEntity deployPlanDetailEntity : deployPlanEntity.getDeployPlanDetailEntities()) {
+            if (deployPlanDetailEntity.getDeviceEntity().getId().equals(deviceId)) {
+                deployPlanDetailEntityList.add(deployPlanDetailEntity);
+                logger.info(deployPlanDetailEntity.getComponentEntity().getId());
             }
         }
-        return deviceEntityList;
+        return deployPlanDetailEntityList;
+    }
+
+    // 添加部署设计信息
+    private List<DeployPlanDetailEntity> addDeployPlanDetails(DeployPlanEntity deployPlanEntity, DeployPlanDetailEntity... deployPlanDetailEntities) {
+        List<DeployPlanDetailEntity> deployPlanDetailEntityList = deployPlanEntity.getDeployPlanDetailEntities();
+        if (deployPlanDetailEntityList == null) {
+            deployPlanDetailEntityList = new ArrayList<>();
+        }
+        for (DeployPlanDetailEntity deployPlanDetailEntity : deployPlanDetailEntities) {
+            if (!deployPlanDetailEntityList.contains(deployPlanDetailEntity)) {
+                deployPlanDetailEntityList.add(deployPlanDetailEntity);
+            }
+        }
+        return deployPlanDetailEntityList;
+    }
+
+    private boolean hasDeployPlans(String deployplanId) {
+        return deployPlanRepository.exists(deployplanId);
+    }
+
+    private boolean hasDeployPlans(String name, String projectId) {
+        return deployPlanRepository.findByNameAndProjectEntityId(name, projectId) != null;
     }
 }

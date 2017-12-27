@@ -4,6 +4,7 @@ import com.rengu.operationsoanagementsuite.Configuration.ServerConfiguration;
 import com.rengu.operationsoanagementsuite.Entity.UserEntity;
 import com.rengu.operationsoanagementsuite.Repository.UserRepository;
 import com.rengu.operationsoanagementsuite.Service.RoleService;
+import com.rengu.operationsoanagementsuite.Service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,8 @@ public class ServerInit implements CommandLineRunner {
     private ServerConfiguration serverConfiguration;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private UserService userService;
 
     @Override
     public void run(String... args) {
@@ -42,11 +45,11 @@ public class ServerInit implements CommandLineRunner {
             serverConfiguration.setComponentLibraryPath(new File(libraryPath.replace("!/BOOT-INF/classes!/", "")).getParent() + File.separatorChar + ServerConfiguration.COMPONENT_LIBRARY_NAME + File.separatorChar);
         }
         // 初始化角色
-        if (roleService.getRoleByName(ServerConfiguration.USER_ROLE_NAME) == null) {
+        if (roleService.getRolesByName(ServerConfiguration.USER_ROLE_NAME) == null) {
             logger.info("默认角色信息'" + ServerConfiguration.USER_ROLE_NAME + "'不存在，自动创建。");
             roleService.saveRoles(ServerConfiguration.USER_ROLE_NAME);
         }
-        if (roleService.getRoleByName(ServerConfiguration.ADMIN_ROLE_NAME) == null) {
+        if (roleService.getRolesByName(ServerConfiguration.ADMIN_ROLE_NAME) == null) {
             logger.info("默认角色信息'" + ServerConfiguration.ADMIN_ROLE_NAME + "'不存在，自动创建。");
             roleService.saveRoles(ServerConfiguration.ADMIN_ROLE_NAME);
         }
@@ -56,7 +59,7 @@ public class ServerInit implements CommandLineRunner {
             UserEntity userEntity = new UserEntity();
             userEntity.setUsername(serverConfiguration.getDefultUsername());
             userEntity.setPassword(serverConfiguration.getDefultPassword());
-            userEntity.setRoleEntities(roleService.addRoles(userEntity, roleService.getRoleByName(ServerConfiguration.ADMIN_ROLE_NAME)));
+            userEntity.setRoleEntities(userService.addRoles(userEntity, roleService.getRolesByName(ServerConfiguration.ADMIN_ROLE_NAME)));
             userRepository.save(userEntity);
         }
     }

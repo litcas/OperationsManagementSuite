@@ -20,15 +20,15 @@ public class RoleController {
     @Autowired
     private RoleService roleService;
 
+    // 查看角色信息（管理员）
+    @GetMapping(value = "/admin/{roleId}")
+    public ResultEntity getRole(@AuthenticationPrincipal UserEntity loginUser, @PathVariable String roleId) {
+        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, roleService.getRoles(roleId));
+    }
+
     // 查看角色信息(管理员)
     @GetMapping(value = "/admin")
     public ResultEntity getRole(@AuthenticationPrincipal UserEntity loginUser, RoleEntity roleArgs) {
         return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, roleService.getRoles(roleArgs));
-    }
-
-    // 查看角色信息（管理员）
-    @GetMapping(value = "/admin/{roleId}")
-    public ResultEntity getRole(@AuthenticationPrincipal UserEntity loginUser, @PathVariable String roleId) {
-        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, roleService.getRoleById(roleId));
     }
 }
