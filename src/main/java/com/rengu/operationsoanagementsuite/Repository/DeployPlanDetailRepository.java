@@ -9,4 +9,6 @@ import java.util.List;
 @Repository
 public interface DeployPlanDetailRepository extends JpaRepository<DeployPlanDetailEntity, String> {
     List<DeployPlanDetailEntity> findByDeployPlanEntityIdAndDeviceEntityId(String deployplanId, String deviceId);
+
+    DeployPlanDetailEntity findByDeployPlanEntityIdAndDeviceEntityIdAndComponentEntityId(String deployplanId, String deviceId, String componentId);
 }

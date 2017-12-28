@@ -33,6 +33,10 @@ public class DeployPlanDetailService {
         return deployPlanDetailRepository.findByDeployPlanEntityIdAndDeviceEntityId(deployplanId, deviceId);
     }
 
+    public DeployPlanDetailEntity getDeployPlanDetails(String deployplanId, String deviceId, String componentId) {
+        return deployPlanDetailRepository.findByDeployPlanEntityIdAndDeviceEntityIdAndComponentEntityId(deployplanId, deviceId, componentId);
+    }
+
     public DeployPlanDetailEntity updateDeployPlanDetails(String deployplandetailId, DeployPlanDetailEntity deployPlanDetailArgs) {
         if (!hasDeployplandetail(deployplandetailId)) {
             throw new CustomizeException(NotificationMessage.DEPLOY_PLAN_DETAIL_NOT_FOUND);
@@ -51,5 +55,9 @@ public class DeployPlanDetailService {
 
     private boolean hasDeployplandetail(String deployplandetailId) {
         return deployPlanDetailRepository.exists(deployplandetailId);
+    }
+
+    public boolean hasDeployplandetail(String deployplanId, String deviceId) {
+        return deployPlanDetailRepository.findByDeployPlanEntityIdAndDeviceEntityId(deployplanId, deviceId) != null;
     }
 }

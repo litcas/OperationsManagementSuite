@@ -76,10 +76,6 @@ public class ProjectController {
         return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, deviceService.getDevices(projectId, deviceArgs));
     }
 
-    // todo 新建组件
-
-    // todo 查询组件
-
     // 新建部署设计
     @PostMapping(value = "/{projectId}/deployplan")
     public ResultEntity saveDeployPlans(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "projectId") String projectId, DeployPlanEntity deployPlanEntity) {

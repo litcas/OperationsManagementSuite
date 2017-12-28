@@ -73,7 +73,15 @@ public class DeployPlanController {
 
     // 扫描设备
     @GetMapping(value = "/scan/{deployplanId}/devices/{deviceId}")
-    public ResultEntity scanDevices(@AuthenticationPrincipal UserEntity loginUser, @PathVariable("deviceId") String deviceId, @PathVariable("deployplanId") String deployplanId) {
-        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, deployPlanService.scanDevices(deployplanId, deviceId));
+    public ResultEntity scanDevices(@AuthenticationPrincipal UserEntity loginUser, @PathVariable("deployplanId") String deployplanId, @PathVariable("deviceId") String deviceId) throws IOException {
+        deployPlanService.scanDevices(deployplanId, deviceId);
+        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, "扫描开始");
+    }
+
+    // 扫描设备
+    @GetMapping(value = "/scan/{deployplanId}/devices/{deviceId}/components/{componentId}")
+    public ResultEntity scanDevices(@AuthenticationPrincipal UserEntity loginUser, @PathVariable("deployplanId") String deployplanId, @PathVariable("deviceId") String deviceId, @PathVariable("componentId") String componentId) throws IOException {
+        deployPlanService.scanDevices(deployplanId, deviceId, componentId);
+        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, "扫描开始");
     }
 }
