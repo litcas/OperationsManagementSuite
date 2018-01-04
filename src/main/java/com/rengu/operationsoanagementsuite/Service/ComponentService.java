@@ -59,6 +59,8 @@ public class ComponentService {
         componentEntity.setFilePath(getEntityPath(componentEntity));
         List<ComponentFileEntity> componentFileEntityList = componentFileService.saveComponentFiles(componentEntity, multipartFiles);
         componentEntity.setComponentFileEntities(addComponentFile(componentEntity, componentFileEntityList));
+        // 创建实体文件存放文件夹
+        new File(componentEntity.getFilePath()).mkdirs();
         componentEntity.setSize(FileUtils.sizeOf(new File(componentEntity.getFilePath())));
         componentEntity.setDeleted(false);
         componentEntity.setLastModified(new Date());
