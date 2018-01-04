@@ -1,7 +1,7 @@
 package com.rengu.operationsoanagementsuite.Aspect;
 
+import com.rengu.operationsoanagementsuite.Entity.ResultEntity;
 import com.rengu.operationsoanagementsuite.Service.ResultLogService;
-import com.rengu.operationsoanagementsuite.Utils.ResultEntity;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
@@ -19,10 +19,10 @@ public class ResultLogAspect {
     private ResultLogService resultLogService;
 
     @Pointcut(value = "execution ( public * com.rengu.operationsoanagementsuite.Controller..*(..))")
-    public void ResultLogAspect() {
+    public void ResultLogPointcut() {
     }
 
-    @AfterReturning(returning = "result", pointcut = "ResultLogAspect()")
+    @AfterReturning(returning = "result", pointcut = "ResultLogPointcut()")
     public void doAfterReturning(ResultEntity result) {
         resultLogService.saveResultLog(result);
     }

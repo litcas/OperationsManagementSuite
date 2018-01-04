@@ -1,9 +1,9 @@
 package com.rengu.operationsoanagementsuite.Controller;
 
 import com.rengu.operationsoanagementsuite.Entity.ComponentEntity;
+import com.rengu.operationsoanagementsuite.Entity.ResultEntity;
 import com.rengu.operationsoanagementsuite.Entity.UserEntity;
 import com.rengu.operationsoanagementsuite.Service.ComponentService;
-import com.rengu.operationsoanagementsuite.Utils.ResultEntity;
 import com.rengu.operationsoanagementsuite.Utils.ResultUtils;
 import net.lingala.zip4j.exception.ZipException;
 import org.apache.commons.io.IOUtils;
@@ -27,8 +27,8 @@ public class ComponentController {
 
     // 保存组件
     @PostMapping
-    public ResultEntity saveComponents(@AuthenticationPrincipal UserEntity loginUser, @RequestParam(value = "projectId") String projectId, ComponentEntity componentEntity, @RequestParam(value = "addFilePath") String[] addFilePath, @RequestParam(value = "componentfile") MultipartFile[] multipartFiles) throws IOException {
-        return ResultUtils.resultBuilder(HttpStatus.CREATED, ResultUtils.HTTPRESPONSE, loginUser, componentService.saveComponents(projectId, componentEntity, addFilePath, multipartFiles));
+    public ResultEntity saveComponents(@AuthenticationPrincipal UserEntity loginUser, ComponentEntity componentEntity, @RequestParam(value = "componentfile") MultipartFile[] multipartFiles) throws IOException {
+        return ResultUtils.resultBuilder(HttpStatus.CREATED, ResultUtils.HTTPRESPONSE, loginUser, componentService.saveComponents(componentEntity, multipartFiles));
     }
 
     // 删除组件
@@ -46,7 +46,7 @@ public class ComponentController {
     // 查询组件
     @GetMapping(value = "/{componentId}")
     public ResultEntity getComponents(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "componentId") String componentId) {
-        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, componentService.getComponents(componentId));
+        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, componentService.getComponent(componentId));
     }
 
     // 查询组件

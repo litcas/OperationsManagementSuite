@@ -1,8 +1,8 @@
 package com.rengu.operationsoanagementsuite.Service;
 
+import com.rengu.operationsoanagementsuite.Entity.ResultEntity;
 import com.rengu.operationsoanagementsuite.Entity.ResultLogEntity;
 import com.rengu.operationsoanagementsuite.Repository.ResultLogRepository;
-import com.rengu.operationsoanagementsuite.Utils.ResultEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

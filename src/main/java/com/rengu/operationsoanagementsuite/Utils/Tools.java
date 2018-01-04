@@ -24,14 +24,4 @@ public class Tools {
         ObjectMapper objectMapper = new ObjectMapper();
         return objectMapper.readValue(jsonFile, classType);
     }
-
-    // 查询操作系统
-    public static String getPlatformName(int platformCode) {
-        for (UDPMessage.PLATFORM platform : UDPMessage.PLATFORM.values()) {
-            if (platformCode == platform.getPlatformCode()) {
-                return platform.getPlatformName();
-            }
-        }
-        return null;
-    }
 }
