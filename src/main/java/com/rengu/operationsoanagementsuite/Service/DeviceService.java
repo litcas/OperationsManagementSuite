@@ -1,12 +1,9 @@
 package com.rengu.operationsoanagementsuite.Service;
 
-import com.rengu.operationsoanagementsuite.Configuration.ServerConfiguration;
 import com.rengu.operationsoanagementsuite.Entity.DeviceEntity;
-import com.rengu.operationsoanagementsuite.Entity.DeviceRealInfoEntity;
 import com.rengu.operationsoanagementsuite.Exception.CustomizeException;
 import com.rengu.operationsoanagementsuite.Repository.DeviceRepository;
 import com.rengu.operationsoanagementsuite.Utils.NotificationMessage;
-import com.rengu.operationsoanagementsuite.Utils.UDPUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -45,7 +42,6 @@ public class DeviceService {
 
             throw new CustomizeException(NotificationMessage.DEVICE_IP_EXISTS);
         }
-        deviceEntity.setPort(ServerConfiguration.UDP_SEND_PORT);
         deviceEntity.setProjectEntity(projectService.getProject(projectId));
         deviceEntity.setLastModified(new Date());
         return deviceRepository.save(deviceEntity);
@@ -91,20 +87,6 @@ public class DeviceService {
             }
             return cb.and(predicateList.toArray(new Predicate[predicateList.size()]));
         });
-    }
-
-    // 设备在线状态检查
-    private List<DeviceEntity> onlineCheck(List<DeviceEntity> deviceEntities) {
-        List<DeviceRealInfoEntity> onlineDevices = UDPUtils.onlineDevices;
-        for (DeviceEntity deviceEntity : deviceEntities) {
-            for (DeviceRealInfoEntity deviceRealInfoEntity : onlineDevices) {
-                if (deviceEntity.getIp().equals(deviceRealInfoEntity.getIp())) {
-                    deviceEntity.setOnline(true);
-                    break;
-                }
-            }
-        }
-        return deviceEntities;
     }
 
     public boolean hasDevice(String deviceId) {

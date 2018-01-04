@@ -24,4 +24,12 @@ public class Tools {
         ObjectMapper objectMapper = new ObjectMapper();
         return objectMapper.readValue(jsonFile, classType);
     }
+
+    // 生成指定长度的字符串
+    public static String getString(String string, int size) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(string);
+        stringBuilder.setLength(size);
+        return stringBuilder.toString();
+    }
 }

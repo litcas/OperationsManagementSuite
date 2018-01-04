@@ -12,13 +12,6 @@ public class ServerConfiguration {
     public static final String EXPORT_COMPONENT_FILE_NAME = "exportcomponent";
     public static final String EXPORT_COMPONENT_INFO_NAME = "component.json";
     public static final String EXPORT_ENTITY_FILE_NAME = "entityFile";
-    // UDP 配置
-    public static final int TCP_RECEIVE_PORT = 6005;
-    public static final int UDP_BROADCAST_SEND_PORT = 3086;
-    public static final int UDP_SEND_PORT = 3087;
-    public static final int UDP_HEARBEAT_RECEIVE_PORT = 6004;
-    public static final int UDP_CODE_SIZE = 4;
-    public static final int UDP_BUFFER_SIZE = 32;
 
     // todo 修改可配置项为从配置文件读取属性
     // 用户相关

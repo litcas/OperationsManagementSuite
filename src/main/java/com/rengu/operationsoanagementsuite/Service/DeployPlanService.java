@@ -4,7 +4,6 @@ import com.rengu.operationsoanagementsuite.Entity.*;
 import com.rengu.operationsoanagementsuite.Exception.CustomizeException;
 import com.rengu.operationsoanagementsuite.Repository.DeployPlanRepository;
 import com.rengu.operationsoanagementsuite.Utils.NotificationMessage;
-import com.rengu.operationsoanagementsuite.Utils.UDPUtils;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +41,8 @@ public class DeployPlanService {
     private ComponentService componentService;
     @Autowired
     private ProjectService projectService;
+    @Autowired
+    private UDPService udpService;
 
     // 保存部署设计
     @Transactional
@@ -161,7 +162,7 @@ public class DeployPlanService {
     // 异步发送文件
     @Async
     Future<Boolean> startDeploy(DeviceEntity deviceEntity, List<DeployPlanDetailEntity> deployPlanDetailEntities) throws IOException {
-        Socket socket = new Socket(deviceEntity.getIp(), deviceEntity.getPort());
+        Socket socket = new Socket(deviceEntity.getIp(), deviceEntity.getTCPPort());
         if (socket.isConnected()) {
             DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
             // 连接成功
@@ -226,10 +227,9 @@ public class DeployPlanService {
     }
 
     @Async
-    Future<String> scanDevices(String id, DeployPlanDetailEntity deployPlanDetailEntity) throws IOException {
+    public void scanDevices(String id, DeployPlanDetailEntity deployPlanDetailEntity) throws IOException {
         DeviceEntity deviceEntity = deployPlanDetailEntity.getDeviceEntity();
-        UDPUtils.sandMessage(deviceEntity.getIp(), deviceEntity.getPort(), UDPUtils.getScanDeviceMessage(id, deployPlanDetailEntity));
-        return new AsyncResult<>("");
+        udpService.sendScanDeviceMessage(deviceEntity.getIp(), deviceEntity.getUDPPort(), id, deployPlanDetailEntity);
     }
 
     // 添加部署设计信息
