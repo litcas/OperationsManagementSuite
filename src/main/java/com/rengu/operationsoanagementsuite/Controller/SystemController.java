@@ -1,5 +1,6 @@
 package com.rengu.operationsoanagementsuite.Controller;
 
+import com.rengu.operationsoanagementsuite.Entity.DeviceRealInfoEntity;
 import com.rengu.operationsoanagementsuite.Entity.ResultEntity;
 import com.rengu.operationsoanagementsuite.Entity.UserEntity;
 import com.rengu.operationsoanagementsuite.Service.SystemService;
@@ -32,6 +33,13 @@ public class SystemController {
 
     @GetMapping(value = "/serverconfiguration")
     public ResultEntity getServerConfiguration(@AuthenticationPrincipal UserEntity loginUser) {
+        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, systemService.getServerConfiguration());
+    }
+
+    @GetMapping(value = "/test")
+    public ResultEntity getTestInfo(@AuthenticationPrincipal UserEntity loginUser) {
+        String ip = "192.168.0.99";
+        DeviceRealInfoEntity deviceRealInfoEntity = new DeviceRealInfoEntity(ip, 3);
         return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, systemService.getServerConfiguration());
     }
 }

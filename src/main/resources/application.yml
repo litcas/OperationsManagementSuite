@@ -3,6 +3,3 @@ spring:
     active: debug
 server:
   display-name: Operations Management Suite
-rengu:
-  config:
-    defultRole: USER

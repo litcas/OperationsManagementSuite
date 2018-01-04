@@ -40,4 +40,12 @@ public class DeviceRealInfoEntity {
 
         return Objects.hash(ip);
     }
+
+    @Override
+    public String toString() {
+        return "DeviceRealInfoEntity{" +
+                "ip='" + ip + '\'' +
+                ", count=" + count +
+                '}';
+    }
 }

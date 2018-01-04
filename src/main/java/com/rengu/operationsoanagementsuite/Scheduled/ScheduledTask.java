@@ -23,7 +23,7 @@ public class ScheduledTask {
             NetworkInterface networkInterface = networkInterfaceEnumeration.nextElement();
             for (InterfaceAddress interfaceAddress : networkInterface.getInterfaceAddresses()) {
                 if (interfaceAddress.getBroadcast() != null) {
-                    UDPUtils.sandMessage(interfaceAddress.getBroadcast(), ServerConfiguration.UDP_SEND_PORT, UDPUtils.getServerIpMessage(interfaceAddress));
+                    UDPUtils.sandMessage(interfaceAddress.getBroadcast(), ServerConfiguration.UDP_BROADCAST_SEND_PORT, UDPUtils.getServerIpMessage(interfaceAddress));
                 }
             }
         }
@@ -40,5 +40,6 @@ public class ScheduledTask {
                 deviceRealInfoEntityIterator.remove();
             }
         }
+        System.out.println("当前在线设备数量：" + UDPUtils.onlineDevices.size());
     }
 }

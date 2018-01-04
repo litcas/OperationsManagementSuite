@@ -8,8 +8,6 @@ import com.rengu.operationsoanagementsuite.Utils.NotificationMessage;
 import com.rengu.operationsoanagementsuite.Utils.Tools;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,8 +20,6 @@ import java.util.List;
 
 @Service
 public class ComponentFileService {
-    // 引入日志记录类
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Transactional
     public List<ComponentFileEntity> saveComponentFiles(ComponentEntity componentEntity, MultipartFile[] multipartFiles) throws IOException {
@@ -72,7 +68,6 @@ public class ComponentFileService {
 
     private List<ComponentFileEntity> addComponentFile(ComponentEntity componentEntity, List<ComponentFileEntity> componentFileEntities) {
         if (componentEntity == null) {
-            logger.info(NotificationMessage.COMPONENT_NOT_FOUND);
             throw new CustomizeException(NotificationMessage.COMPONENT_NOT_FOUND);
         }
         List<ComponentFileEntity> componentFileEntityList = componentEntity.getComponentFileEntities();

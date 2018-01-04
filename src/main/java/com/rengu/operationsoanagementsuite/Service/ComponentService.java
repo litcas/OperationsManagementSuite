@@ -142,7 +142,7 @@ public class ComponentService {
             }
             ComponentEntity componentEntity = Tools.readJsonFile(jsonFile, ComponentEntity.class);
             // 检查组件是否存在
-            if (componentRepository.findByNameAndVersion(componentEntity.getName(), componentEntity.getVersion()) != null) {
+            if (hasComponent(componentEntity.getName(), componentEntity.getVersion())) {
                 logger.info("组件名称为：" + componentEntity.getName() + "版本号：" + componentEntity.getVersion() + "已存在，导入失败。");
                 throw new CustomizeException("组件名称为：" + componentEntity.getName() + "版本号：" + componentEntity.getVersion() + "已存在，导入失败。");
             } else {
@@ -214,7 +214,7 @@ public class ComponentService {
     }
 
     private boolean hasComponent(String name, String version) {
-        return componentRepository.findByNameAndVersion(name, version) != null;
+        return componentRepository.findByNameAndVersionAndDeleted(name, version, false) != null;
     }
 
 }

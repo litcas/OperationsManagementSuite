@@ -226,10 +226,10 @@ public class DeployPlanService {
     }
 
     @Async
-    Future<Boolean> scanDevices(String id, DeployPlanDetailEntity deployPlanDetailEntity) throws IOException {
+    Future<String> scanDevices(String id, DeployPlanDetailEntity deployPlanDetailEntity) throws IOException {
         DeviceEntity deviceEntity = deployPlanDetailEntity.getDeviceEntity();
-        String message = UDPUtils.getScanDeviceMessage(id, deployPlanDetailEntity);
-        return new AsyncResult<>(UDPUtils.sandMessage(deviceEntity.getIp(), deviceEntity.getPort(), message));
+        UDPUtils.sandMessage(deviceEntity.getIp(), deviceEntity.getPort(), UDPUtils.getScanDeviceMessage(id, deployPlanDetailEntity));
+        return new AsyncResult<>("");
     }
 
     // 添加部署设计信息

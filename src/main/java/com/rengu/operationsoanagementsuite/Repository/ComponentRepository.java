@@ -7,5 +7,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ComponentRepository extends JpaRepository<ComponentEntity, String>, JpaSpecificationExecutor<ComponentEntity> {
-    ComponentEntity findByNameAndVersion(String componentName, String version);
+    ComponentEntity findByNameAndVersionAndDeleted(String componentName, String version, boolean deleted);
 }

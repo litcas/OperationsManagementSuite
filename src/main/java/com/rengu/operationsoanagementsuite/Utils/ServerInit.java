@@ -5,6 +5,8 @@ import com.rengu.operationsoanagementsuite.Entity.UserEntity;
 import com.rengu.operationsoanagementsuite.Repository.UserRepository;
 import com.rengu.operationsoanagementsuite.Service.RoleService;
 import com.rengu.operationsoanagementsuite.Service.UserService;
+import com.rengu.operationsoanagementsuite.Task.HearBeatTask;
+import com.rengu.operationsoanagementsuite.Task.MessageReceiveTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.ClassUtils;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Objects;
 
 @Component
@@ -30,9 +33,13 @@ public class ServerInit implements CommandLineRunner {
     private UserRepository userRepository;
     @Autowired
     private UserService userService;
+    @Autowired
+    private HearBeatTask hearBeatTask;
+    @Autowired
+    private MessageReceiveTask messageReceiveTask;
 
     @Override
-    public void run(String... args) {
+    public void run(String... args) throws IOException {
         // 服务启动后执行一些初始化的工作
         // 调试环境获取组件库路径
         String libraryPath = Objects.requireNonNull(ClassUtils.getDefaultClassLoader().getResource("")).getPath();
@@ -62,5 +69,9 @@ public class ServerInit implements CommandLineRunner {
             userEntity.setRoleEntities(userService.addRoles(userEntity, roleService.getRolesByName(ServerConfiguration.ADMIN_ROLE_NAME)));
             userRepository.save(userEntity);
         }
+        // 启动接收心跳报文
+        hearBeatTask.receiveHearBeat();
+        // 启动报文接收线程
+        messageReceiveTask.messageReceive();
     }
 }
