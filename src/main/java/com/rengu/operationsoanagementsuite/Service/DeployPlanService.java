@@ -4,11 +4,13 @@ import com.rengu.operationsoanagementsuite.Entity.*;
 import com.rengu.operationsoanagementsuite.Exception.CustomizeException;
 import com.rengu.operationsoanagementsuite.Repository.DeployPlanRepository;
 import com.rengu.operationsoanagementsuite.Utils.NotificationMessage;
+import com.rengu.operationsoanagementsuite.Utils.Tools;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
@@ -43,6 +45,8 @@ public class DeployPlanService {
     private ProjectService projectService;
     @Autowired
     private UDPService udpService;
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
 
     // 保存部署设计
     @Transactional
@@ -192,7 +196,7 @@ public class DeployPlanService {
         return new AsyncResult<>(false);
     }
 
-    public void scanDevices(String deployplanId, String deviceId) throws IOException {
+    public List<DeviceScanResultEntity> scanDevices(String deployplanId, String deviceId) throws IOException, InterruptedException {
         // 检查部署设计id参数是否存在
         if (!hasDeployPlans(deployplanId)) {
             throw new CustomizeException(NotificationMessage.DEPLOY_PLAN_NOT_FOUND);
@@ -205,12 +209,14 @@ public class DeployPlanService {
             throw new CustomizeException(NotificationMessage.DEPLOY_PLAN_DETAIL_NOT_FOUND);
         }
         List<DeployPlanDetailEntity> deployPlanDetailEntityList = deployPlanDetailService.getDeployPlanDetails(deployplanId, deviceId);
+        List<DeviceScanResultEntity> deviceScanResultEntityList = new ArrayList<>();
         for (DeployPlanDetailEntity deployPlanDetailEntity : deployPlanDetailEntityList) {
-            scanDevices(UUID.randomUUID().toString(), deployPlanDetailEntity);
+            deviceScanResultEntityList.add(scanDevices(UUID.randomUUID().toString(), deployPlanDetailEntity));
         }
+        return deviceScanResultEntityList;
     }
 
-    public void scanDevices(String deployplanId, String deviceId, String componentId) throws IOException {
+    public DeviceScanResultEntity scanDevices(String deployplanId, String deviceId, String componentId) throws IOException, InterruptedException {
         // 检查部署设计id参数是否存在
         if (!hasDeployPlans(deployplanId)) {
             throw new CustomizeException(NotificationMessage.DEPLOY_PLAN_NOT_FOUND);
@@ -223,13 +229,22 @@ public class DeployPlanService {
             throw new CustomizeException(NotificationMessage.COMPONENT_NOT_FOUND);
         }
         DeployPlanDetailEntity deployPlanDetailEntity = deployPlanDetailService.getDeployPlanDetails(deployplanId, deviceId, componentId);
-        scanDevices(UUID.randomUUID().toString(), deployPlanDetailEntity);
+        return scanDevices(UUID.randomUUID().toString(), deployPlanDetailEntity);
     }
 
-    @Async
-    public void scanDevices(String id, DeployPlanDetailEntity deployPlanDetailEntity) throws IOException {
+    private DeviceScanResultEntity scanDevices(String id, DeployPlanDetailEntity deployPlanDetailEntity) throws IOException, InterruptedException {
+        logger.info("设置的请求id为：" + id);
         DeviceEntity deviceEntity = deployPlanDetailEntity.getDeviceEntity();
         udpService.sendScanDeviceMessage(deviceEntity.getIp(), deviceEntity.getUDPPort(), id, deployPlanDetailEntity);
+        // 查询Redis中的存放的内容
+        while (true) {
+            if (stringRedisTemplate.hasKey(id)) {
+                return deviceScanResultHandler(deployPlanDetailEntity, Tools.getJsonObject(stringRedisTemplate.opsForValue().get(id), DeviceScanResultEntity.class));
+            } else {
+                logger.info("等待客户端上报结果");
+                Thread.sleep(5000);
+            }
+        }
     }
 
     // 添加部署设计信息
@@ -244,6 +259,43 @@ public class DeployPlanService {
             }
         }
         return deployPlanDetailEntityList;
+    }
+
+    private DeviceScanResultEntity deviceScanResultHandler(DeployPlanDetailEntity deployPlanDetailEntity, DeviceScanResultEntity deviceScanResultEntity) {
+
+        ComponentEntity componentEntity = deployPlanDetailEntity.getComponentEntity();
+        String deployPath = deployPlanDetailEntity.getDeployPath();
+
+        List<ComponentFileEntity> correctComponentFiles = new ArrayList<>();
+        List<ComponentFileEntity> modifyedComponentFiles = new ArrayList<>();
+        List<FileEntity> unknownFiles = new ArrayList<>();
+
+        for (FileEntity fileEntity : deviceScanResultEntity.getFileEntityList()) {
+            String filePath = fileEntity.getFilePath().replace(deployPath, "");
+            String md5 = fileEntity.getMd5();
+            boolean exists = false;
+            for (ComponentFileEntity componentFileEntity : componentEntity.getComponentFileEntities()) {
+                if (filePath.equals(componentFileEntity.getPath())) {
+                    exists = true;
+                    if (md5.equals(componentFileEntity.getMD5())) {
+                        // 一致文件列表
+                        correctComponentFiles.add(componentFileEntity);
+                        break;
+                    } else {
+                        // 不一致文件列表
+                        modifyedComponentFiles.add(componentFileEntity);
+                        break;
+                    }
+                }
+            }
+            if (!exists) {
+                unknownFiles.add(fileEntity);
+            }
+        }
+        deviceScanResultEntity.setCorrectComponentFiles(correctComponentFiles);
+        deviceScanResultEntity.setModifyedComponentFiles(modifyedComponentFiles);
+        deviceScanResultEntity.setUnknownFiles(unknownFiles);
+        return deviceScanResultEntity;
     }
 
     private boolean hasDeployPlans(String deployplanId) {

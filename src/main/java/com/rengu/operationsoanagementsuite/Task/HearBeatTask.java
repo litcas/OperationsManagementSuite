@@ -56,9 +56,9 @@ public class HearBeatTask {
             deviceRealInfoEntity.setCount(deviceRealInfoEntity.getCount() - 1);
             if (deviceRealInfoEntity.getCount() == 0) {
                 deviceRealInfoEntityIterator.remove();
+                logger.info(deviceRealInfoEntity.getInetAddress().getHostAddress() + "--->已断开服务器连接。");
             }
         }
-        logger.info("当前设备在线数量 ：" + onlineDevices.size() + "台");
     }
 
     @Async
@@ -70,14 +70,12 @@ public class HearBeatTask {
         while (true) {
             datagramSocket.receive(datagramPacket);
             // 心跳处理代码
-            byte[] data = datagramPacket.getData();
-            String ip = (data[0] & 0xff) + "." + (data[1] & 0xff) + "." + (data[2] & 0xff) + "." + (data[3] & 0xff);
-            DeviceRealInfoEntity deviceRealInfoEntity = new DeviceRealInfoEntity(ip, 3);
-            logger.info("收到心跳报文，来自：" + ip);
+            DeviceRealInfoEntity deviceRealInfoEntity = new DeviceRealInfoEntity(datagramPacket.getAddress(), datagramPacket.getPort());
             int index = onlineDevices.indexOf(deviceRealInfoEntity);
             if (index == -1) {
                 // 不存在直接添加到数组
                 onlineDevices.add(deviceRealInfoEntity);
+                logger.info(deviceRealInfoEntity.getInetAddress().getHostAddress() + "--->已连线服务器。");
             } else {
                 // 已存在更新计数器
                 onlineDevices.get(index).setCount(3);
