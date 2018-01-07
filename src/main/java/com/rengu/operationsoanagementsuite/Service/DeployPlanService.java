@@ -140,14 +140,20 @@ public class DeployPlanService {
     }
 
     @Transactional
+    public void deleteDeployPlanDetails(String deployplandetailId) {
+        deployPlanDetailService.deleteDeployPlanDetails(deployplandetailId);
+    }
+
+    @Transactional
     public DeployPlanDetailEntity updateDeployPlanDetails(String deployplandetailId, DeployPlanDetailEntity deployPlanDetailArgs) {
         return deployPlanDetailService.updateDeployPlanDetails(deployplandetailId, deployPlanDetailArgs);
     }
 
     @Transactional
-    public void deleteDeployPlanDetails(String deployplandetailId) {
-        deployPlanDetailService.deleteDeployPlanDetails(deployplandetailId);
+    public List<DeployPlanDetailEntity> getDeployPlanDetails(String deployplanId, String deviceId) {
+        return deployPlanDetailService.getDeployPlanDetails(deployplanId, deviceId);
     }
+
 
     // 开始部署
     @Transactional
