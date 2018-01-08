@@ -1,7 +1,7 @@
 package com.rengu.operationsoanagementsuite.Task;
 
+import com.rengu.operationsoanagementsuite.Entity.ComponentFileEntity;
 import com.rengu.operationsoanagementsuite.Entity.DeviceScanResultEntity;
-import com.rengu.operationsoanagementsuite.Entity.FileEntity;
 import com.rengu.operationsoanagementsuite.Utils.Tools;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -67,16 +67,15 @@ public class MessageReceiveTask {
             String componentId = new String(bytes, pointer, 36).trim();
             pointer = pointer + 36;
             DeviceScanResultEntity deviceScanResultEntity = new DeviceScanResultEntity(requestId, deviceId, componentId);
-            List<FileEntity> fileEntityList = new ArrayList<>();
+            List<ComponentFileEntity> componentFileEntityList = new ArrayList<>();
             while (pointer + 256 + 34 <= bytes.length) {
                 String filePath = new String(bytes, pointer, 256).trim();
                 pointer = pointer + 256;
                 String md5 = new String(bytes, pointer, 34).trim();
                 pointer = pointer + 34;
-                FileEntity fileEntity = new FileEntity(filePath, md5);
-                fileEntityList.add(fileEntity);
+                componentFileEntityList.add(new ComponentFileEntity(filePath, md5));
             }
-            deviceScanResultEntity.setFileEntityList(fileEntityList);
+            deviceScanResultEntity.setScanResult(componentFileEntityList);
             stringRedisTemplate.opsForValue().set(requestId, Tools.getJsonString(deviceScanResultEntity));
         }
     }

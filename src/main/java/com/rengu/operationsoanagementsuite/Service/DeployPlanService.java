@@ -274,28 +274,28 @@ public class DeployPlanService {
 
         List<ComponentFileEntity> correctComponentFiles = new ArrayList<>();
         List<ComponentFileEntity> modifyedComponentFiles = new ArrayList<>();
-        List<FileEntity> unknownFiles = new ArrayList<>();
+        List<ComponentFileEntity> unknownFiles = new ArrayList<>();
 
-        for (FileEntity fileEntity : deviceScanResultEntity.getFileEntityList()) {
-            String filePath = fileEntity.getFilePath().replace(deployPath, "");
-            String md5 = fileEntity.getMd5();
+        for (ComponentFileEntity componentFileEntity : deviceScanResultEntity.getScanResult()) {
+            String filePath = componentFileEntity.getPath().replace(deployPath, "");
+            String md5 = componentFileEntity.getMD5();
             boolean exists = false;
-            for (ComponentFileEntity componentFileEntity : componentEntity.getComponentFileEntities()) {
-                if (filePath.equals(componentFileEntity.getPath())) {
+            for (ComponentFileEntity temp : componentEntity.getComponentFileEntities()) {
+                if (filePath.equals(temp.getPath())) {
                     exists = true;
-                    if (md5.equals(componentFileEntity.getMD5())) {
+                    if (md5.equals(temp.getMD5())) {
                         // 一致文件列表
-                        correctComponentFiles.add(componentFileEntity);
+                        correctComponentFiles.add(temp);
                         break;
                     } else {
                         // 不一致文件列表
-                        modifyedComponentFiles.add(componentFileEntity);
+                        modifyedComponentFiles.add(temp);
                         break;
                     }
                 }
             }
             if (!exists) {
-                unknownFiles.add(fileEntity);
+                unknownFiles.add(componentFileEntity);
             }
         }
         deviceScanResultEntity.setCorrectComponentFiles(correctComponentFiles);

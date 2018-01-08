@@ -6,10 +6,10 @@ public class DeviceScanResultEntity {
     private String requestId;
     private String deviceId;
     private String componentId;
-    private List<FileEntity> fileEntityList;
+    private List<ComponentFileEntity> scanResult;
     private List<ComponentFileEntity> correctComponentFiles;
     private List<ComponentFileEntity> modifyedComponentFiles;
-    private List<FileEntity> unknownFiles;
+    private List<ComponentFileEntity> unknownFiles;
 
     public DeviceScanResultEntity() {
     }
@@ -44,12 +44,12 @@ public class DeviceScanResultEntity {
         this.componentId = componentId;
     }
 
-    public List<FileEntity> getFileEntityList() {
-        return fileEntityList;
+    public List<ComponentFileEntity> getScanResult() {
+        return scanResult;
     }
 
-    public void setFileEntityList(List<FileEntity> fileEntityList) {
-        this.fileEntityList = fileEntityList;
+    public void setScanResult(List<ComponentFileEntity> scanResult) {
+        this.scanResult = scanResult;
     }
 
     public List<ComponentFileEntity> getCorrectComponentFiles() {
@@ -68,11 +68,11 @@ public class DeviceScanResultEntity {
         this.modifyedComponentFiles = modifyedComponentFiles;
     }
 
-    public List<FileEntity> getUnknownFiles() {
+    public List<ComponentFileEntity> getUnknownFiles() {
         return unknownFiles;
     }
 
-    public void setUnknownFiles(List<FileEntity> unknownFiles) {
+    public void setUnknownFiles(List<ComponentFileEntity> unknownFiles) {
         this.unknownFiles = unknownFiles;
     }
 }
