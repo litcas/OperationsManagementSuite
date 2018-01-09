@@ -243,12 +243,16 @@ public class DeployPlanService {
         DeviceEntity deviceEntity = deployPlanDetailEntity.getDeviceEntity();
         udpService.sendScanDeviceMessage(deviceEntity.getIp(), deviceEntity.getUDPPort(), id, deployPlanDetailEntity);
         // 查询Redis中的存放的内容
+        int count = 0;
         while (true) {
             if (stringRedisTemplate.hasKey(id)) {
                 return deviceScanResultHandler(deployPlanDetailEntity, Tools.getJsonObject(stringRedisTemplate.opsForValue().get(id), DeviceScanResultEntity.class));
             } else {
-                logger.info("等待客户端上报结果");
-                Thread.sleep(5000);
+                Thread.sleep(30000);
+                count = count + 1;
+                if (count == 5) {
+                    return null;
+                }
             }
         }
     }
