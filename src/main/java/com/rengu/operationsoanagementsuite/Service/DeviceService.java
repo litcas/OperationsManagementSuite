@@ -38,8 +38,7 @@ public class DeviceService {
             throw new CustomizeException(NotificationMessage.DEVICE_IP_NOT_FOUND);
         }
         // 检查Ip是否已经存在
-        if (hasDeviceByIp(deviceEntity.getIp())) {
-
+        if (hasDeviceByIp(projectId, deviceEntity.getIp())) {
             throw new CustomizeException(NotificationMessage.DEVICE_IP_EXISTS);
         }
         deviceEntity.setProjectEntity(projectService.getProject(projectId));
@@ -93,7 +92,7 @@ public class DeviceService {
         return deviceRepository.exists(deviceId);
     }
 
-    private boolean hasDeviceByIp(String deviceIp) {
-        return deviceRepository.findByIp(deviceIp) != null;
+    private boolean hasDeviceByIp(String projectId, String deviceIp) {
+        return deviceRepository.findByIpAndProjectEntityId(projectId, deviceIp) != null;
     }
 }
