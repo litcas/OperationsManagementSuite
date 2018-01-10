@@ -20,6 +20,14 @@ public class ComponentFileEntity {
     private String type;
     private String path;
 
+    public ComponentFileEntity() {
+    }
+
+    public ComponentFileEntity(String path, String MD5) {
+        this.MD5 = MD5;
+        this.path = path;
+    }
+
     public String getId() {
         return id;
     }

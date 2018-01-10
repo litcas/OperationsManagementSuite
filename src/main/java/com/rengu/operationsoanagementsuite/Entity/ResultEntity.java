@@ -1,4 +1,4 @@
-package com.rengu.operationsoanagementsuite.Utils;
+package com.rengu.operationsoanagementsuite.Entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.http.HttpStatus;
@@ -79,5 +79,18 @@ public class ResultEntity<T> {
 
     public void setData(T data) {
         this.data = data;
+    }
+
+    @Override
+    public String toString() {
+        return "ResultEntity{" +
+                "id='" + id + '\'' +
+                ", createTime=" + createTime +
+                ", username='" + username + '\'' +
+                ", type='" + type + '\'' +
+                ", code=" + code +
+                ", message='" + message + '\'' +
+                ", data=" + data +
+                '}';
     }
 }

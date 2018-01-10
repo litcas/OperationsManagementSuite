@@ -19,7 +19,7 @@ public class DeployPlanEntity {
     @Column(nullable = false)
     private String name;
     private String description;
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     private List<DeployPlanDetailEntity> deployPlanDetailEntities;
     @JsonIgnore
     @ManyToOne

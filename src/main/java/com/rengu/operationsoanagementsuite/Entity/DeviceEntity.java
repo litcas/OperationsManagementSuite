@@ -2,9 +2,7 @@ package com.rengu.operationsoanagementsuite.Entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.util.Date;
 import java.util.UUID;
 
@@ -20,8 +18,13 @@ public class DeviceEntity {
     private String name;
     @Column(nullable = false)
     private String ip;
+    private int UDPPort = 3087;
+    private int TCPPort = 3088;
+    @Transient
     private boolean online = false;
     private String description;
+    @ManyToOne
+    private ProjectEntity projectEntity;
 
     public String getId() {
         return id;
@@ -63,6 +66,22 @@ public class DeviceEntity {
         this.ip = ip;
     }
 
+    public int getUDPPort() {
+        return UDPPort;
+    }
+
+    public void setUDPPort(int UDPPort) {
+        this.UDPPort = UDPPort;
+    }
+
+    public int getTCPPort() {
+        return TCPPort;
+    }
+
+    public void setTCPPort(int TCPPort) {
+        this.TCPPort = TCPPort;
+    }
+
     public boolean isOnline() {
         return online;
     }
@@ -77,5 +96,13 @@ public class DeviceEntity {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public ProjectEntity getProjectEntity() {
+        return projectEntity;
+    }
+
+    public void setProjectEntity(ProjectEntity projectEntity) {
+        this.projectEntity = projectEntity;
     }
 }
