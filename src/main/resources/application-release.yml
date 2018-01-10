@@ -1,9 +1,4 @@
 spring:
-  rabbitmq:
-    host: localhost
-    username: rengu
-    password: rengu
-    virtual-host: /OMS
   datasource:
     url: jdbc:mysql://localhost:3306/OperationsManagementSuiteDB
     username: rengu
@@ -12,3 +7,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+  http:
+    multipart:
+      max-file-size: 1024MB
+      max-request-size: 1024MB
