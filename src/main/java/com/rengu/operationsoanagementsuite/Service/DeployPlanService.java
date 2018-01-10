@@ -243,7 +243,6 @@ public class DeployPlanService {
     }
 
     private DeviceScanResultEntity scanDevices(String id, DeployPlanDetailEntity deployPlanDetailEntity) throws IOException, InterruptedException {
-        logger.info("设置的请求id为：" + id);
         DeviceEntity deviceEntity = deployPlanDetailEntity.getDeviceEntity();
         udpService.sendScanDeviceMessage(deviceEntity.getIp(), deviceEntity.getUDPPort(), id, deployPlanDetailEntity);
         // 查询Redis中的存放的内容
