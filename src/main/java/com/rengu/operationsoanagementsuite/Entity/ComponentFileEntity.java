@@ -23,7 +23,7 @@ public class ComponentFileEntity {
     public ComponentFileEntity() {
     }
 
-    public ComponentFileEntity(String MD5, String path) {
+    public ComponentFileEntity(String path, String MD5) {
         this.MD5 = MD5;
         this.path = path;
     }

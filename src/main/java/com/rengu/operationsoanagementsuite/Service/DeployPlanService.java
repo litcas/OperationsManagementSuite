@@ -19,6 +19,7 @@ import org.springframework.util.StringUtils;
 import javax.persistence.criteria.Predicate;
 import javax.transaction.Transactional;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.Socket;
@@ -180,21 +181,24 @@ public class DeployPlanService {
                 ComponentEntity componentEntity = deployPlanDetailEntity.getComponentEntity();
                 for (ComponentFileEntity componentFileEntity : componentEntity.getComponentFileEntities()) {
                     // 发送文件逻辑
-                    // 1、发送文件路径 + 文件名
-                    String deployPath = deployPlanDetailEntity.getDeployPath() + componentFileEntity.getPath();
-                    dataOutputStream.writeUTF(deployPath);
+                    // 1、单个文件发送开始标志
+                    dataOutputStream.write("fileRecvStart".getBytes());
                     dataOutputStream.flush();
-                    // 2、发送文件大小
-                    long size = componentFileEntity.getSize();
-                    dataOutputStream.writeLong(size);
+                    // 2、发送文件路径 + 文件名
+                    String deployPath = deployPlanDetailEntity.getDeployPath() + componentFileEntity.getPath();
+                    dataOutputStream.write(deployPath.getBytes());
                     dataOutputStream.flush();
                     // 3、发送文件实体
                     IOUtils.copy(new FileInputStream(componentEntity.getFilePath() + componentFileEntity.getPath()), dataOutputStream);
                     dataOutputStream.flush();
-                    // 发送文件结束标志
-                    socket.shutdownOutput();
+                    // 4、单个文件发送结束标志
+                    dataOutputStream.write("fileRecvEnd".getBytes());
+                    dataOutputStream.flush();
                 }
             }
+            // 5、发送部署结束标志
+            dataOutputStream.write("DeployEnd".getBytes());
+            dataOutputStream.flush();
             dataOutputStream.close();
             socket.close();
             return new AsyncResult<>(true);
@@ -243,14 +247,16 @@ public class DeployPlanService {
         DeviceEntity deviceEntity = deployPlanDetailEntity.getDeviceEntity();
         udpService.sendScanDeviceMessage(deviceEntity.getIp(), deviceEntity.getUDPPort(), id, deployPlanDetailEntity);
         // 查询Redis中的存放的内容
-        int count = 0;
+        int count = 1;
         while (true) {
             if (stringRedisTemplate.hasKey(id)) {
                 return deviceScanResultHandler(deployPlanDetailEntity, Tools.getJsonObject(stringRedisTemplate.opsForValue().get(id), DeviceScanResultEntity.class));
             } else {
-                Thread.sleep(30000);
+                logger.info("等待客户端上报扫描结果，第" + count + "次重试。");
+                Thread.sleep(10000);
                 count = count + 1;
-                if (count == 5) {
+                if (count == 10) {
+                    logger.info("请求已超时，请求放弃。");
                     return null;
                 }
             }
@@ -285,7 +291,7 @@ public class DeployPlanService {
             String md5 = componentFileEntity.getMD5();
             boolean exists = false;
             for (ComponentFileEntity temp : componentEntity.getComponentFileEntities()) {
-                if (filePath.equals(temp.getPath())) {
+                if (filePath.equals(temp.getPath().replace(File.separator, "/"))) {
                     exists = true;
                     if (md5.equals(temp.getMD5())) {
                         // 一致文件列表
