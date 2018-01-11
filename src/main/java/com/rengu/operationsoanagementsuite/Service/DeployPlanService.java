@@ -155,7 +155,7 @@ public class DeployPlanService {
 
     // 开始部署
     @Transactional
-    public Future<Boolean> startDeploy(String deployplanId, String deviceId) throws IOException {
+    public Future<Boolean> startDeploy(String deployplanId, String deviceId) throws IOException, InterruptedException {
         if (!deployPlanRepository.exists(deployplanId)) {
             throw new CustomizeException(NotificationMessage.DEPLOY_PLAN_NOT_FOUND);
         }
@@ -169,7 +169,7 @@ public class DeployPlanService {
 
     // 异步发送文件
     @Async
-    Future<Boolean> startDeploy(DeviceEntity deviceEntity, List<DeployPlanDetailEntity> deployPlanDetailEntities) throws IOException {
+    Future<Boolean> startDeploy(DeviceEntity deviceEntity, List<DeployPlanDetailEntity> deployPlanDetailEntities) throws IOException, InterruptedException {
         Socket socket = new Socket(deviceEntity.getIp(), deviceEntity.getTCPPort());
         if (socket.isConnected()) {
             DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
@@ -178,17 +178,20 @@ public class DeployPlanService {
                 ComponentEntity componentEntity = deployPlanDetailEntity.getComponentEntity();
                 for (ComponentFileEntity componentFileEntity : componentEntity.getComponentFileEntities()) {
                     // 发送文件逻辑
-                    dataOutputStream.writeBytes("fileRecvStart");
+                    dataOutputStream.write("fileRecvStart".getBytes());
                     // 1、发送文件路径 + 文件名
-                    dataOutputStream.writeBytes(deployPlanDetailEntity.getDeployPath() + componentFileEntity.getPath());
+                    String deployPath = Tools.getString(deployPlanDetailEntity.getDeployPath() + componentFileEntity.getPath(), 255 - (deployPlanDetailEntity.getDeployPath() + componentFileEntity.getPath()).getBytes().length);
+                    logger.info(deployPath + "字节长度：" + deployPath.getBytes().length);
+                    dataOutputStream.write(deployPath.getBytes());
                     // 3、发送文件实体
                     IOUtils.copy(new FileInputStream(componentEntity.getFilePath() + componentFileEntity.getPath()), dataOutputStream);
                     // 4、单个文件发送结束标志
-                    dataOutputStream.writeBytes("fileRecvEnd");
+                    dataOutputStream.write("fileRecvEnd".getBytes());
+                    Thread.sleep(5000);
                 }
             }
             // 5、发送部署结束标志
-            dataOutputStream.writeBytes("DeployEnd");
+            dataOutputStream.write("DeployEnd".getBytes());
             dataOutputStream.flush();
             dataOutputStream.close();
             socket.close();

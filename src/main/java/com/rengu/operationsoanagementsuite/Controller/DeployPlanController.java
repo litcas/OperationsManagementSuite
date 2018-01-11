@@ -74,7 +74,7 @@ public class DeployPlanController {
 
     // 开始部署
     @GetMapping(value = "/deploy/{deployplanId}/devices/{deviceId}")
-    public ResultEntity startDeploy(@AuthenticationPrincipal UserEntity loginUser, @PathVariable("deployplanId") String deployplanId, @PathVariable("deviceId") String deviceId) throws IOException {
+    public ResultEntity startDeploy(@AuthenticationPrincipal UserEntity loginUser, @PathVariable("deployplanId") String deployplanId, @PathVariable("deviceId") String deviceId) throws IOException, InterruptedException {
         return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, deployPlanService.startDeploy(deployplanId, deviceId));
     }
 
