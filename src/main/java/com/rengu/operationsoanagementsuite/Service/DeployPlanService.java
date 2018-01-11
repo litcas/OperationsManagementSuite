@@ -18,10 +18,7 @@ import org.springframework.util.StringUtils;
 
 import javax.persistence.criteria.Predicate;
 import javax.transaction.Transactional;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Date;
@@ -181,23 +178,17 @@ public class DeployPlanService {
                 ComponentEntity componentEntity = deployPlanDetailEntity.getComponentEntity();
                 for (ComponentFileEntity componentFileEntity : componentEntity.getComponentFileEntities()) {
                     // 发送文件逻辑
-                    // 1、单个文件发送开始标志
-                    dataOutputStream.write("fileRecvStart".getBytes());
-                    dataOutputStream.flush();
-                    // 2、发送文件路径 + 文件名
-                    String deployPath = deployPlanDetailEntity.getDeployPath() + componentFileEntity.getPath();
-                    dataOutputStream.write(deployPath.getBytes());
-                    dataOutputStream.flush();
+                    dataOutputStream.writeBytes("fileRecvStart");
+                    // 1、发送文件路径 + 文件名
+                    dataOutputStream.writeBytes(deployPlanDetailEntity.getDeployPath() + componentFileEntity.getPath());
                     // 3、发送文件实体
                     IOUtils.copy(new FileInputStream(componentEntity.getFilePath() + componentFileEntity.getPath()), dataOutputStream);
-                    dataOutputStream.flush();
                     // 4、单个文件发送结束标志
-                    dataOutputStream.write("fileRecvEnd".getBytes());
-                    dataOutputStream.flush();
+                    dataOutputStream.writeBytes("fileRecvEnd");
                 }
             }
             // 5、发送部署结束标志
-            dataOutputStream.write("DeployEnd".getBytes());
+            dataOutputStream.writeBytes("DeployEnd");
             dataOutputStream.flush();
             dataOutputStream.close();
             socket.close();
