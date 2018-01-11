@@ -5,7 +5,7 @@ import com.rengu.operationsoanagementsuite.Entity.ComponentEntity;
 import com.rengu.operationsoanagementsuite.Entity.ComponentFileEntity;
 import com.rengu.operationsoanagementsuite.Exception.CustomizeException;
 import com.rengu.operationsoanagementsuite.Utils.NotificationMessage;
-import com.rengu.operationsoanagementsuite.Utils.Tools;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.stereotype.Service;
@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -39,10 +40,10 @@ public class ComponentFileService {
             // 获取文件扩展名
             ComponentFileEntity componentFileEntity = new ComponentFileEntity();
             componentFileEntity.setName(file.getName());
-            componentFileEntity.setMD5(Tools.getFileMD5(file));
+            componentFileEntity.setMD5(DigestUtils.md5Hex(new FileInputStream(file)));
             componentFileEntity.setType(FilenameUtils.getExtension(file.getName()));
             componentFileEntity.setSize(FileUtils.sizeOf(file));
-            componentFileEntity.setPath(multipartFile.getOriginalFilename());
+            componentFileEntity.setPath(File.separatorChar + multipartFile.getOriginalFilename());
             componentFileEntityList.add(componentFileEntity);
         }
         return componentFileEntityList;
@@ -57,7 +58,7 @@ public class ComponentFileService {
         for (File file : fileCollection) {
             ComponentFileEntity componentFileEntity = new ComponentFileEntity();
             componentFileEntity.setName(file.getName());
-            componentFileEntity.setMD5(Tools.getFileMD5(file));
+            componentFileEntity.setMD5(DigestUtils.md5Hex(new FileInputStream(file)));
             componentFileEntity.setType(FilenameUtils.getExtension(file.getName()));
             componentFileEntity.setSize(FileUtils.sizeOf(file));
             componentFileEntity.setPath(file.getPath());

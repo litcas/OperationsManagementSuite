@@ -1,12 +1,9 @@
 package com.rengu.operationsoanagementsuite.Service;
 
-import com.rengu.operationsoanagementsuite.Configuration.ServerConfiguration;
 import com.rengu.operationsoanagementsuite.Entity.DeviceEntity;
-import com.rengu.operationsoanagementsuite.Entity.DeviceRealInfoEntity;
 import com.rengu.operationsoanagementsuite.Exception.CustomizeException;
 import com.rengu.operationsoanagementsuite.Repository.DeviceRepository;
 import com.rengu.operationsoanagementsuite.Utils.NotificationMessage;
-import com.rengu.operationsoanagementsuite.Utils.UDPUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -41,11 +38,9 @@ public class DeviceService {
             throw new CustomizeException(NotificationMessage.DEVICE_IP_NOT_FOUND);
         }
         // 检查Ip是否已经存在
-        if (hasDeviceByIp(deviceEntity.getIp())) {
-
+        if (hasDeviceByIp(projectId, deviceEntity.getIp())) {
             throw new CustomizeException(NotificationMessage.DEVICE_IP_EXISTS);
         }
-        deviceEntity.setPort(ServerConfiguration.UDP_SEND_PORT);
         deviceEntity.setProjectEntity(projectService.getProject(projectId));
         deviceEntity.setLastModified(new Date());
         return deviceRepository.save(deviceEntity);
@@ -93,25 +88,11 @@ public class DeviceService {
         });
     }
 
-    // 设备在线状态检查
-    private List<DeviceEntity> onlineCheck(List<DeviceEntity> deviceEntities) {
-        List<DeviceRealInfoEntity> onlineDevices = UDPUtils.onlineDevices;
-        for (DeviceEntity deviceEntity : deviceEntities) {
-            for (DeviceRealInfoEntity deviceRealInfoEntity : onlineDevices) {
-                if (deviceEntity.getIp().equals(deviceRealInfoEntity.getIp())) {
-                    deviceEntity.setOnline(true);
-                    break;
-                }
-            }
-        }
-        return deviceEntities;
-    }
-
     public boolean hasDevice(String deviceId) {
         return deviceRepository.exists(deviceId);
     }
 
-    private boolean hasDeviceByIp(String deviceIp) {
-        return deviceRepository.findByIp(deviceIp) != null;
+    private boolean hasDeviceByIp(String projectId, String deviceIp) {
+        return deviceRepository.findByIpAndProjectEntityId(projectId, deviceIp) != null;
     }
 }

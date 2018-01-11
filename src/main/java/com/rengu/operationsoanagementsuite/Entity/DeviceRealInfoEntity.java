@@ -1,22 +1,32 @@
 package com.rengu.operationsoanagementsuite.Entity;
 
+import java.net.InetAddress;
 import java.util.Objects;
 
 public class DeviceRealInfoEntity {
-    private String ip;
+    private InetAddress inetAddress;
+    private int port;
     private int count;
 
-    public DeviceRealInfoEntity(String ip, int count) {
-        this.ip = ip;
-        this.count = count;
+    public DeviceRealInfoEntity(InetAddress inetAddress, int port) {
+        this.inetAddress = inetAddress;
+        this.port = port;
     }
 
-    public String getIp() {
-        return ip;
+    public InetAddress getInetAddress() {
+        return inetAddress;
     }
 
-    public void setIp(String ip) {
-        this.ip = ip;
+    public void setInetAddress(InetAddress inetAddress) {
+        this.inetAddress = inetAddress;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
     }
 
     public int getCount() {
@@ -32,20 +42,12 @@ public class DeviceRealInfoEntity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         DeviceRealInfoEntity that = (DeviceRealInfoEntity) o;
-        return Objects.equals(ip, that.ip);
+        return port == that.port &&
+                Objects.equals(inetAddress, that.inetAddress);
     }
 
     @Override
     public int hashCode() {
-
-        return Objects.hash(ip);
-    }
-
-    @Override
-    public String toString() {
-        return "DeviceRealInfoEntity{" +
-                "ip='" + ip + '\'' +
-                ", count=" + count +
-                '}';
+        return Objects.hash(inetAddress, port);
     }
 }

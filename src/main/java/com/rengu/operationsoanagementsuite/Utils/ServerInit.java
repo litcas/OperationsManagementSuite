@@ -47,8 +47,11 @@ public class ServerInit implements CommandLineRunner {
         if (libraryPath.endsWith("/target/classes/")) {
             serverConfiguration.setComponentLibraryPath(libraryPath.replace("classes/", ServerConfiguration.COMPONENT_LIBRARY_NAME + File.separatorChar));
         }
-        // relese环境组件库路径(OSX)
+        // relese环境组件库路径
         if (libraryPath.endsWith("!/BOOT-INF/classes!/")) {
+            if (libraryPath.startsWith("file:/")) {
+                libraryPath = libraryPath.replace("file:/", "");
+            }
             serverConfiguration.setComponentLibraryPath(new File(libraryPath.replace("!/BOOT-INF/classes!/", "")).getParent() + File.separatorChar + ServerConfiguration.COMPONENT_LIBRARY_NAME + File.separatorChar);
         }
         // 初始化角色

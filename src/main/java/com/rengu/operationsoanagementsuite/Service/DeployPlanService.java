@@ -4,12 +4,13 @@ import com.rengu.operationsoanagementsuite.Entity.*;
 import com.rengu.operationsoanagementsuite.Exception.CustomizeException;
 import com.rengu.operationsoanagementsuite.Repository.DeployPlanRepository;
 import com.rengu.operationsoanagementsuite.Utils.NotificationMessage;
-import com.rengu.operationsoanagementsuite.Utils.UDPUtils;
+import com.rengu.operationsoanagementsuite.Utils.Tools;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,7 @@ import org.springframework.util.StringUtils;
 import javax.persistence.criteria.Predicate;
 import javax.transaction.Transactional;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.Socket;
@@ -42,6 +44,10 @@ public class DeployPlanService {
     private ComponentService componentService;
     @Autowired
     private ProjectService projectService;
+    @Autowired
+    private UDPService udpService;
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
 
     // 保存部署设计
     @Transactional
@@ -135,14 +141,20 @@ public class DeployPlanService {
     }
 
     @Transactional
+    public void deleteDeployPlanDetails(String deployplandetailId) {
+        deployPlanDetailService.deleteDeployPlanDetails(deployplandetailId);
+    }
+
+    @Transactional
     public DeployPlanDetailEntity updateDeployPlanDetails(String deployplandetailId, DeployPlanDetailEntity deployPlanDetailArgs) {
         return deployPlanDetailService.updateDeployPlanDetails(deployplandetailId, deployPlanDetailArgs);
     }
 
     @Transactional
-    public void deleteDeployPlanDetails(String deployplandetailId) {
-        deployPlanDetailService.deleteDeployPlanDetails(deployplandetailId);
+    public List<DeployPlanDetailEntity> getDeployPlanDetails(String deployplanId, String deviceId) {
+        return deployPlanDetailService.getDeployPlanDetails(deployplanId, deviceId);
     }
+
 
     // 开始部署
     @Transactional
@@ -161,7 +173,7 @@ public class DeployPlanService {
     // 异步发送文件
     @Async
     Future<Boolean> startDeploy(DeviceEntity deviceEntity, List<DeployPlanDetailEntity> deployPlanDetailEntities) throws IOException {
-        Socket socket = new Socket(deviceEntity.getIp(), deviceEntity.getPort());
+        Socket socket = new Socket(deviceEntity.getIp(), deviceEntity.getTCPPort());
         if (socket.isConnected()) {
             DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
             // 连接成功
@@ -169,21 +181,24 @@ public class DeployPlanService {
                 ComponentEntity componentEntity = deployPlanDetailEntity.getComponentEntity();
                 for (ComponentFileEntity componentFileEntity : componentEntity.getComponentFileEntities()) {
                     // 发送文件逻辑
-                    // 1、发送文件路径 + 文件名
-                    String deployPath = deployPlanDetailEntity.getDeployPath() + componentFileEntity.getPath();
-                    dataOutputStream.writeUTF(deployPath);
+                    // 1、单个文件发送开始标志
+                    dataOutputStream.write("fileRecvStart".getBytes());
                     dataOutputStream.flush();
-                    // 2、发送文件大小
-                    long size = componentFileEntity.getSize();
-                    dataOutputStream.writeLong(size);
+                    // 2、发送文件路径 + 文件名
+                    String deployPath = deployPlanDetailEntity.getDeployPath() + componentFileEntity.getPath();
+                    dataOutputStream.write(deployPath.getBytes());
                     dataOutputStream.flush();
                     // 3、发送文件实体
                     IOUtils.copy(new FileInputStream(componentEntity.getFilePath() + componentFileEntity.getPath()), dataOutputStream);
                     dataOutputStream.flush();
-                    // 发送文件结束标志
-                    socket.shutdownOutput();
+                    // 4、单个文件发送结束标志
+                    dataOutputStream.write("fileRecvEnd".getBytes());
+                    dataOutputStream.flush();
                 }
             }
+            // 5、发送部署结束标志
+            dataOutputStream.write("DeployEnd".getBytes());
+            dataOutputStream.flush();
             dataOutputStream.close();
             socket.close();
             return new AsyncResult<>(true);
@@ -191,7 +206,7 @@ public class DeployPlanService {
         return new AsyncResult<>(false);
     }
 
-    public void scanDevices(String deployplanId, String deviceId) throws IOException {
+    public List<DeviceScanResultEntity> scanDevices(String deployplanId, String deviceId) throws IOException, InterruptedException {
         // 检查部署设计id参数是否存在
         if (!hasDeployPlans(deployplanId)) {
             throw new CustomizeException(NotificationMessage.DEPLOY_PLAN_NOT_FOUND);
@@ -204,12 +219,14 @@ public class DeployPlanService {
             throw new CustomizeException(NotificationMessage.DEPLOY_PLAN_DETAIL_NOT_FOUND);
         }
         List<DeployPlanDetailEntity> deployPlanDetailEntityList = deployPlanDetailService.getDeployPlanDetails(deployplanId, deviceId);
+        List<DeviceScanResultEntity> deviceScanResultEntityList = new ArrayList<>();
         for (DeployPlanDetailEntity deployPlanDetailEntity : deployPlanDetailEntityList) {
-            scanDevices(UUID.randomUUID().toString(), deployPlanDetailEntity);
+            deviceScanResultEntityList.add(scanDevices(UUID.randomUUID().toString(), deployPlanDetailEntity));
         }
+        return deviceScanResultEntityList;
     }
 
-    public void scanDevices(String deployplanId, String deviceId, String componentId) throws IOException {
+    public DeviceScanResultEntity scanDevices(String deployplanId, String deviceId, String componentId) throws IOException, InterruptedException {
         // 检查部署设计id参数是否存在
         if (!hasDeployPlans(deployplanId)) {
             throw new CustomizeException(NotificationMessage.DEPLOY_PLAN_NOT_FOUND);
@@ -222,14 +239,27 @@ public class DeployPlanService {
             throw new CustomizeException(NotificationMessage.COMPONENT_NOT_FOUND);
         }
         DeployPlanDetailEntity deployPlanDetailEntity = deployPlanDetailService.getDeployPlanDetails(deployplanId, deviceId, componentId);
-        scanDevices(UUID.randomUUID().toString(), deployPlanDetailEntity);
+        return scanDevices(UUID.randomUUID().toString(), deployPlanDetailEntity);
     }
 
-    @Async
-    Future<String> scanDevices(String id, DeployPlanDetailEntity deployPlanDetailEntity) throws IOException {
+    private DeviceScanResultEntity scanDevices(String id, DeployPlanDetailEntity deployPlanDetailEntity) throws IOException, InterruptedException {
         DeviceEntity deviceEntity = deployPlanDetailEntity.getDeviceEntity();
-        UDPUtils.sandMessage(deviceEntity.getIp(), deviceEntity.getPort(), UDPUtils.getScanDeviceMessage(id, deployPlanDetailEntity));
-        return new AsyncResult<>("");
+        udpService.sendScanDeviceMessage(deviceEntity.getIp(), deviceEntity.getUDPPort(), id, deployPlanDetailEntity);
+        // 查询Redis中的存放的内容
+        int count = 1;
+        while (true) {
+            if (stringRedisTemplate.hasKey(id)) {
+                return deviceScanResultHandler(deployPlanDetailEntity, Tools.getJsonObject(stringRedisTemplate.opsForValue().get(id), DeviceScanResultEntity.class));
+            } else {
+                logger.info("等待客户端上报扫描结果，第" + count + "次重试。");
+                Thread.sleep(10000);
+                count = count + 1;
+                if (count == 10) {
+                    logger.info("请求已超时，请求放弃。");
+                    return null;
+                }
+            }
+        }
     }
 
     // 添加部署设计信息
@@ -244,6 +274,43 @@ public class DeployPlanService {
             }
         }
         return deployPlanDetailEntityList;
+    }
+
+    private DeviceScanResultEntity deviceScanResultHandler(DeployPlanDetailEntity deployPlanDetailEntity, DeviceScanResultEntity deviceScanResultEntity) {
+
+        ComponentEntity componentEntity = deployPlanDetailEntity.getComponentEntity();
+        String deployPath = deployPlanDetailEntity.getDeployPath();
+
+        List<ComponentFileEntity> correctComponentFiles = new ArrayList<>();
+        List<ComponentFileEntity> modifyedComponentFiles = new ArrayList<>();
+        List<ComponentFileEntity> unknownFiles = new ArrayList<>();
+
+        for (ComponentFileEntity componentFileEntity : deviceScanResultEntity.getScanResult()) {
+            String filePath = componentFileEntity.getPath().replace(deployPath, "");
+            String md5 = componentFileEntity.getMD5();
+            boolean exists = false;
+            for (ComponentFileEntity temp : componentEntity.getComponentFileEntities()) {
+                if (filePath.equals(temp.getPath().replace(File.separator, "/"))) {
+                    exists = true;
+                    if (md5.equals(temp.getMD5())) {
+                        // 一致文件列表
+                        correctComponentFiles.add(temp);
+                        break;
+                    } else {
+                        // 不一致文件列表
+                        modifyedComponentFiles.add(temp);
+                        break;
+                    }
+                }
+            }
+            if (!exists) {
+                unknownFiles.add(componentFileEntity);
+            }
+        }
+        deviceScanResultEntity.setCorrectComponentFiles(correctComponentFiles);
+        deviceScanResultEntity.setModifyedComponentFiles(modifyedComponentFiles);
+        deviceScanResultEntity.setUnknownFiles(unknownFiles);
+        return deviceScanResultEntity;
     }
 
     private boolean hasDeployPlans(String deployplanId) {

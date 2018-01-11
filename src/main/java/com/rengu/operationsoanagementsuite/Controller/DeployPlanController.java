@@ -52,18 +52,25 @@ public class DeployPlanController {
         return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, deployPlanService.addDeployPlanDetail(deployplanId, deviceId, componentId, deployPath));
     }
 
-    // 修改部署信息
-    @PatchMapping(value = "/deployplandetails/{deployplandetailId}")
-    public ResultEntity updateDeployPlanDetails(@AuthenticationPrincipal UserEntity loginUser, @PathVariable("deployplandetailId") String deployplandetailId, DeployPlanDetailEntity deployPlanDetailArgs) {
-        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, deployPlanService.updateDeployPlanDetails(deployplandetailId, deployPlanDetailArgs));
-    }
-
     // 删除部署信息
     @DeleteMapping(value = "/deployplandetails/{deployplandetailId}")
     public ResultEntity deleteDeployPlanDetails(@AuthenticationPrincipal UserEntity loginUser, @PathVariable("deployplandetailId") String deployplandetailId) {
         deployPlanService.deleteDeployPlanDetails(deployplandetailId);
         return ResultUtils.resultBuilder(HttpStatus.NO_CONTENT, ResultUtils.HTTPRESPONSE, loginUser, NotificationMessage.deployplandetailDeleteMessage(deployplandetailId));
     }
+
+    // 修改部署信息
+    @PatchMapping(value = "/deployplandetails/{deployplandetailId}")
+    public ResultEntity updateDeployPlanDetails(@AuthenticationPrincipal UserEntity loginUser, @PathVariable("deployplandetailId") String deployplandetailId, DeployPlanDetailEntity deployPlanDetailArgs) {
+        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, deployPlanService.updateDeployPlanDetails(deployplandetailId, deployPlanDetailArgs));
+    }
+
+    // 查询部署信息
+    @GetMapping(value = "/{deployplanId}/devices/{deviceId}")
+    public ResultEntity getDeployPlanDetails(@AuthenticationPrincipal UserEntity loginUser, @PathVariable("deployplanId") String deployplanId, @PathVariable("deviceId") String deviceId) {
+        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, deployPlanService.getDeployPlanDetails(deployplanId, deviceId));
+    }
+
 
     // 开始部署
     @GetMapping(value = "/deploy/{deployplanId}/devices/{deviceId}")
@@ -73,15 +80,13 @@ public class DeployPlanController {
 
     // 扫描设备
     @GetMapping(value = "/scan/{deployplanId}/devices/{deviceId}")
-    public ResultEntity scanDevices(@AuthenticationPrincipal UserEntity loginUser, @PathVariable("deployplanId") String deployplanId, @PathVariable("deviceId") String deviceId) throws IOException {
-        deployPlanService.scanDevices(deployplanId, deviceId);
-        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, "扫描开始");
+    public ResultEntity scanDevices(@AuthenticationPrincipal UserEntity loginUser, @PathVariable("deployplanId") String deployplanId, @PathVariable("deviceId") String deviceId) throws IOException, InterruptedException {
+        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, deployPlanService.scanDevices(deployplanId, deviceId));
     }
 
     // 扫描设备
     @GetMapping(value = "/scan/{deployplanId}/devices/{deviceId}/components/{componentId}")
-    public ResultEntity scanDevices(@AuthenticationPrincipal UserEntity loginUser, @PathVariable("deployplanId") String deployplanId, @PathVariable("deviceId") String deviceId, @PathVariable("componentId") String componentId) throws IOException {
-        deployPlanService.scanDevices(deployplanId, deviceId, componentId);
-        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, "扫描开始");
+    public ResultEntity scanDevices(@AuthenticationPrincipal UserEntity loginUser, @PathVariable("deployplanId") String deployplanId, @PathVariable("deviceId") String deviceId, @PathVariable("componentId") String componentId) throws IOException, InterruptedException {
+        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, deployPlanService.scanDevices(deployplanId, deviceId, componentId));
     }
 }

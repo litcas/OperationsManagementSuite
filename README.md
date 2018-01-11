@@ -24,3 +24,6 @@
     ```
     CREATE DATABASE OperationsManagementSuiteDB;
     ```
+### Redis安装配置
+
+* 安装Redis数据库。

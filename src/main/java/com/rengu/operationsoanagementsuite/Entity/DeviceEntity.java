@@ -18,7 +18,8 @@ public class DeviceEntity {
     private String name;
     @Column(nullable = false)
     private String ip;
-    private int port;
+    private int UDPPort = 3087;
+    private int TCPPort = 3088;
     @Transient
     private boolean online = false;
     private String description;
@@ -65,12 +66,20 @@ public class DeviceEntity {
         this.ip = ip;
     }
 
-    public int getPort() {
-        return port;
+    public int getUDPPort() {
+        return UDPPort;
     }
 
-    public void setPort(int port) {
-        this.port = port;
+    public void setUDPPort(int UDPPort) {
+        this.UDPPort = UDPPort;
+    }
+
+    public int getTCPPort() {
+        return TCPPort;
+    }
+
+    public void setTCPPort(int TCPPort) {
+        this.TCPPort = TCPPort;
     }
 
     public boolean isOnline() {

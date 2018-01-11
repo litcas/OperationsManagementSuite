@@ -59,6 +59,8 @@ public class ComponentService {
         componentEntity.setFilePath(getEntityPath(componentEntity));
         List<ComponentFileEntity> componentFileEntityList = componentFileService.saveComponentFiles(componentEntity, multipartFiles);
         componentEntity.setComponentFileEntities(addComponentFile(componentEntity, componentFileEntityList));
+        // 创建实体文件存放文件夹
+        new File(componentEntity.getFilePath()).mkdirs();
         componentEntity.setSize(FileUtils.sizeOf(new File(componentEntity.getFilePath())));
         componentEntity.setDeleted(false);
         componentEntity.setLastModified(new Date());
@@ -140,7 +142,7 @@ public class ComponentService {
                 logger.info("文件：" + tempFolderPath + ServerConfiguration.EXPORT_COMPONENT_INFO_NAME + "不存在，导出文件已损坏，" + multipartFile.getOriginalFilename() + "导入失败。");
                 throw new FileNotFoundException("文件：" + tempFolderPath + ServerConfiguration.EXPORT_COMPONENT_INFO_NAME + "不存在，导出文件已损坏，" + multipartFile.getOriginalFilename() + "导入失败。");
             }
-            ComponentEntity componentEntity = Tools.readJsonFile(jsonFile, ComponentEntity.class);
+            ComponentEntity componentEntity = Tools.getJsonObject(jsonFile, ComponentEntity.class);
             // 检查组件是否存在
             if (hasComponent(componentEntity.getName(), componentEntity.getVersion())) {
                 logger.info("组件名称为：" + componentEntity.getName() + "版本号：" + componentEntity.getVersion() + "已存在，导入失败。");
@@ -179,7 +181,7 @@ public class ComponentService {
         }
         ComponentEntity componentEntity = componentRepository.findOne(componentId);
         // 1.生成组件信息的json描述文件到缓存文件夹。
-        Tools.writeJsonFile(componentEntity, new File(tempFolderPath + ServerConfiguration.EXPORT_COMPONENT_INFO_NAME));
+        Tools.getJsonFile(componentEntity, new File(tempFolderPath + ServerConfiguration.EXPORT_COMPONENT_INFO_NAME));
         // 2.复制组件的实体文件到缓存文件夹。
         FileUtils.copyDirectory(new File(componentEntity.getFilePath()), new File(tempFolderPath + ServerConfiguration.EXPORT_ENTITY_FILE_NAME));
         // 3.压缩文件
