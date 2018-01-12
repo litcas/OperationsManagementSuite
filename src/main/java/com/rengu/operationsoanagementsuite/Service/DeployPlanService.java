@@ -18,7 +18,10 @@ import org.springframework.util.StringUtils;
 
 import javax.persistence.criteria.Predicate;
 import javax.transaction.Transactional;
-import java.io.*;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Date;
@@ -137,6 +140,26 @@ public class DeployPlanService {
         return deployPlanDetailEntity;
     }
 
+    // 单个设备绑定多个组件及路径
+    @Transactional
+    public List<DeployPlanDetailEntity> addDeployPlanDetail(String deployplanId, String deviceId, String[] componentIds, String[] deployPaths) {
+        List<DeployPlanDetailEntity> deployPlanDetailEntityList = new ArrayList<>();
+        for (int i = 0; i <= componentIds.length; i++) {
+            deployPlanDetailEntityList.add(addDeployPlanDetail(deployplanId, deviceId, componentIds[i], deployPaths[i]));
+        }
+        return deployPlanDetailEntityList;
+    }
+
+    // 多个设备绑定多个组件及路径
+    @Transactional
+    public List<DeployPlanDetailEntity> addDeployPlanDetail(String deployplanId, String deviceIds[], String[] componentIds, String[] deployPaths) {
+        List<DeployPlanDetailEntity> deployPlanDetailEntityList = new ArrayList<>();
+        for (int i = 0; i <= deviceIds.length; i++) {
+            deployPlanDetailEntityList.add(addDeployPlanDetail(deployplanId, deviceIds[i], componentIds[i], deployPaths[i]));
+        }
+        return deployPlanDetailEntityList;
+    }
+
     @Transactional
     public void deleteDeployPlanDetails(String deployplandetailId) {
         deployPlanDetailService.deleteDeployPlanDetails(deployplandetailId);
@@ -181,7 +204,6 @@ public class DeployPlanService {
                     dataOutputStream.write("fileRecvStart".getBytes());
                     // 1、发送文件路径 + 文件名
                     String deployPath = Tools.getString(deployPlanDetailEntity.getDeployPath() + componentFileEntity.getPath(), 255 - (deployPlanDetailEntity.getDeployPath() + componentFileEntity.getPath()).getBytes().length);
-                    logger.info(deployPath + "字节长度：" + deployPath.getBytes().length);
                     dataOutputStream.write(deployPath.getBytes());
                     // 3、发送文件实体
                     IOUtils.copy(new FileInputStream(componentEntity.getFilePath() + componentFileEntity.getPath()), dataOutputStream);

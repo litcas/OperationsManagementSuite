@@ -52,6 +52,18 @@ public class DeployPlanController {
         return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, deployPlanService.addDeployPlanDetail(deployplanId, deviceId, componentId, deployPath));
     }
 
+    // 创建部署信息
+    @PostMapping(value = "/{deployplanId}/deployplandetails/devices/{deviceId}")
+    public ResultEntity AddDeployPlanDetail(@AuthenticationPrincipal UserEntity loginUser, @PathVariable("deployplanId") String deployplanId, @PathVariable("deviceId") String deviceId, @RequestParam(value = "componentIds") String[] componentIds, @RequestParam(value = "deployPaths") String[] deployPaths) {
+        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, deployPlanService.addDeployPlanDetail(deployplanId, deviceId, componentIds, deployPaths));
+    }
+
+    // 创建部署信息
+    @PostMapping(value = "/{deployplanId}/deployplandetails")
+    public ResultEntity AddDeployPlanDetail(@AuthenticationPrincipal UserEntity loginUser, @PathVariable("deployplanId") String deployplanId, @RequestParam("deviceIds") String[] deviceIds, @RequestParam(value = "componentIds") String[] componentIds, @RequestParam(value = "deployPaths") String[] deployPaths) {
+        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, deployPlanService.addDeployPlanDetail(deployplanId, deviceIds, componentIds, deployPaths));
+    }
+
     // 删除部署信息
     @DeleteMapping(value = "/deployplandetails/{deployplandetailId}")
     public ResultEntity deleteDeployPlanDetails(@AuthenticationPrincipal UserEntity loginUser, @PathVariable("deployplandetailId") String deployplandetailId) {
