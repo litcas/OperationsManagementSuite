@@ -126,7 +126,7 @@ public class ComponentService {
         for (MultipartFile multipartFile : multipartFiles) {
             // 在系统缓存文件中建立操作目录
             String id = UUID.randomUUID().toString();
-            String tempFolderPath = FileUtils.getTempDirectoryPath() + id + File.separator;
+            String tempFolderPath = FileUtils.getTempDirectoryPath() + id + "/";
             if (!new File(tempFolderPath).mkdirs()) {
                 logger.info("在路径：" + tempFolderPath + "无法正确生成缓存文件夹，" + multipartFile.getOriginalFilename() + "导入失败");
                 throw new FileNotFoundException("在路径：" + tempFolderPath + "无法正确生成缓存文件夹，" + multipartFile.getOriginalFilename() + "导入失败");
@@ -174,7 +174,7 @@ public class ComponentService {
         }
         // 在系统缓存文件中建立操作目录
         String id = UUID.randomUUID().toString();
-        String tempFolderPath = FileUtils.getTempDirectoryPath() + id + File.separator;
+        String tempFolderPath = FileUtils.getTempDirectoryPath() + id + "/";
         if (!new File(tempFolderPath).mkdirs()) {
             logger.info("在路径：" + tempFolderPath + "无法正确生成缓存文件夹，导出失败");
             throw new FileNotFoundException("在路径：" + tempFolderPath + "无法正确生成缓存文件夹，导出失败");
@@ -195,7 +195,7 @@ public class ComponentService {
             logger.info(NotificationMessage.COMPONENT_NOT_FOUND);
             throw new CustomizeException(NotificationMessage.COMPONENT_NOT_FOUND);
         }
-        return serverConfiguration.getComponentLibraryPath() + componentEntity.getName() + ServerConfiguration.SEPARATOR + componentEntity.getVersion() + File.separatorChar;
+        return serverConfiguration.getComponentLibraryPath() + componentEntity.getName() + ServerConfiguration.SEPARATOR + componentEntity.getVersion() + "/";
     }
 
     private List<ComponentFileEntity> addComponentFile(ComponentEntity componentEntity, List<ComponentFileEntity> componentFileEntities) {

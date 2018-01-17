@@ -140,6 +140,26 @@ public class DeployPlanService {
         return deployPlanDetailEntity;
     }
 
+    // 单个设备绑定多个组件及路径
+    @Transactional
+    public List<DeployPlanDetailEntity> addDeployPlanDetail(String deployplanId, String deviceId, String[] componentIds, String[] deployPaths) {
+        List<DeployPlanDetailEntity> deployPlanDetailEntityList = new ArrayList<>();
+        for (int i = 0; i <= componentIds.length; i++) {
+            deployPlanDetailEntityList.add(addDeployPlanDetail(deployplanId, deviceId, componentIds[i], deployPaths[i]));
+        }
+        return deployPlanDetailEntityList;
+    }
+
+    // 多个设备绑定多个组件及路径
+    @Transactional
+    public List<DeployPlanDetailEntity> addDeployPlanDetail(String deployplanId, String deviceIds[], String[] componentIds, String[] deployPaths) {
+        List<DeployPlanDetailEntity> deployPlanDetailEntityList = new ArrayList<>();
+        for (int i = 0; i <= deviceIds.length; i++) {
+            deployPlanDetailEntityList.add(addDeployPlanDetail(deployplanId, deviceIds[i], componentIds[i], deployPaths[i]));
+        }
+        return deployPlanDetailEntityList;
+    }
+
     @Transactional
     public void deleteDeployPlanDetails(String deployplandetailId) {
         deployPlanDetailService.deleteDeployPlanDetails(deployplandetailId);
@@ -158,7 +178,7 @@ public class DeployPlanService {
 
     // 开始部署
     @Transactional
-    public Future<Boolean> startDeploy(String deployplanId, String deviceId) throws IOException {
+    public Future<Boolean> startDeploy(String deployplanId, String deviceId) throws IOException, InterruptedException {
         if (!deployPlanRepository.exists(deployplanId)) {
             throw new CustomizeException(NotificationMessage.DEPLOY_PLAN_NOT_FOUND);
         }
@@ -172,7 +192,7 @@ public class DeployPlanService {
 
     // 异步发送文件
     @Async
-    Future<Boolean> startDeploy(DeviceEntity deviceEntity, List<DeployPlanDetailEntity> deployPlanDetailEntities) throws IOException {
+    Future<Boolean> startDeploy(DeviceEntity deviceEntity, List<DeployPlanDetailEntity> deployPlanDetailEntities) throws IOException, InterruptedException {
         Socket socket = new Socket(deviceEntity.getIp(), deviceEntity.getTCPPort());
         if (socket.isConnected()) {
             DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
@@ -181,19 +201,15 @@ public class DeployPlanService {
                 ComponentEntity componentEntity = deployPlanDetailEntity.getComponentEntity();
                 for (ComponentFileEntity componentFileEntity : componentEntity.getComponentFileEntities()) {
                     // 发送文件逻辑
-                    // 1、单个文件发送开始标志
                     dataOutputStream.write("fileRecvStart".getBytes());
-                    dataOutputStream.flush();
-                    // 2、发送文件路径 + 文件名
-                    String deployPath = deployPlanDetailEntity.getDeployPath() + componentFileEntity.getPath();
+                    // 1、发送文件路径 + 文件名
+                    String deployPath = Tools.getString(deployPlanDetailEntity.getDeployPath() + componentFileEntity.getPath(), 255 - (deployPlanDetailEntity.getDeployPath() + componentFileEntity.getPath()).getBytes().length);
                     dataOutputStream.write(deployPath.getBytes());
-                    dataOutputStream.flush();
                     // 3、发送文件实体
                     IOUtils.copy(new FileInputStream(componentEntity.getFilePath() + componentFileEntity.getPath()), dataOutputStream);
-                    dataOutputStream.flush();
                     // 4、单个文件发送结束标志
                     dataOutputStream.write("fileRecvEnd".getBytes());
-                    dataOutputStream.flush();
+                    Thread.sleep(5000);
                 }
             }
             // 5、发送部署结束标志

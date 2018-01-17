@@ -17,6 +17,7 @@ public class ResultLogService {
 
     // 引入日志记录类
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
     @Autowired
     private ResultLogRepository resultLogRepository;
 

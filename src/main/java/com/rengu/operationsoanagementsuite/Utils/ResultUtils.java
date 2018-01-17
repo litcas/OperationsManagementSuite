@@ -8,12 +8,11 @@ public class ResultUtils {
 
     // 定义返回类型
     public static final String HTTPRESPONSE = "HTTP";
-    public static final String UDP = "UDP";
     public static final String ERROR = "ERROR";
 
     // 创建ResultEntity
-    private static ResultEntity resultBuilder(HttpStatus httpStatus, String type, String username, Object object) {
-        ResultEntity resultEntity = new ResultEntity();
+    private static ResultEntity<Object> resultBuilder(HttpStatus httpStatus, String type, String username, Object object) {
+        ResultEntity<Object> resultEntity = new ResultEntity<>();
         resultEntity.setCode(httpStatus.value());
         resultEntity.setMessage(httpStatus.getReasonPhrase());
         resultEntity.setType(type);
@@ -22,7 +21,7 @@ public class ResultUtils {
         return resultEntity;
     }
 
-    public static ResultEntity resultBuilder(HttpStatus httpStatus, String type, UserEntity loginUser, Object object) {
+    public static ResultEntity<Object> resultBuilder(HttpStatus httpStatus, String type, UserEntity loginUser, Object object) {
         String username = loginUser == null ? "" : loginUser.getUsername();
         return resultBuilder(httpStatus, type, username, object);
     }
