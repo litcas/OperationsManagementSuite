@@ -1,9 +1,5 @@
 package com.rengu.operationsoanagementsuite.Service;
 
-import com.rengu.operationsoanagementsuite.Configuration.ServerConfiguration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.net.InterfaceAddress;
@@ -16,11 +12,6 @@ import java.util.Properties;
 
 @Service
 public class SystemService {
-
-    // 引入日志记录类
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
-    @Autowired
-    private ServerConfiguration serverConfiguration;
 
     // 返回系统信息
     public Properties getSystemInfo() {
@@ -49,11 +40,6 @@ public class SystemService {
             networkEntityList.add(networkEntity);
         }
         return networkEntityList;
-    }
-
-    // 返回服务器配置信息
-    public ServerConfiguration getServerConfiguration() {
-        return serverConfiguration;
     }
 
     private class InetAddress {

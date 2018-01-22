@@ -1,10 +1,12 @@
 package com.rengu.operationsoanagementsuite.Utils;
 
+import com.rengu.operationsoanagementsuite.Exception.CustomizeException;
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 
 import java.io.File;
@@ -14,16 +16,36 @@ import java.util.Collection;
 
 public class CompressUtils {
 
-    // todo 统一压缩和解压缩zip文件使用的类库
+    private static final String ZIP = "zip";
 
-    public static File compressToZip(String srcDirPath, String zipFilePath) throws IOException {
-        return compressToZip(new File(srcDirPath), new File(zipFilePath));
+    // 压缩方法
+    public static File compress(File srcDir, File compressFile) throws IOException {
+        if (!srcDir.isDirectory()) {
+            throw new CustomizeException(srcDir.getAbsolutePath() + "不是文件夹");
+        }
+        String extension = FilenameUtils.getExtension(compressFile.getName());
+        switch (extension) {
+            case ZIP:
+                return compressZip(srcDir, compressFile);
+            default:
+                throw new CustomizeException(NotificationMessage.COMPRESS_FAILED);
+        }
     }
 
-    // 压缩文件到zip格式
-    private static File compressToZip(File srcDir, File zipFile) throws IOException {
+    // 解压方法
+    public static File decompress(File compressFile, File outputDir) throws ZipException {
+        String extension = FilenameUtils.getExtension(compressFile.getName());
+        switch (extension) {
+            case ZIP:
+                return decompressZip(compressFile, outputDir);
+            default:
+                throw new CustomizeException(NotificationMessage.COMPRESS_FAILED);
+        }
+    }
+
+    private static File compressZip(File srcDir, File compressFile) throws IOException {
         String tempFolderPath = srcDir.getPath();
-        ZipArchiveOutputStream zipArchiveOutputStream = new ZipArchiveOutputStream(zipFile);
+        ZipArchiveOutputStream zipArchiveOutputStream = new ZipArchiveOutputStream(compressFile);
         Collection<File> fileCollection = FileUtils.listFiles(srcDir, null, true);
         for (File file : fileCollection) {
             FileInputStream fileInputStream = new FileInputStream(file);
@@ -35,29 +57,21 @@ public class CompressUtils {
         }
         zipArchiveOutputStream.finish();
         zipArchiveOutputStream.close();
-        return zipFile;
+        return compressFile;
     }
 
-    // 解压缩zip文件到指定目录
-    public static File decompressZip(File srcFile, File destDir, String password) throws ZipException {
+    private static File decompressZip(File compressFile, File outputDir) throws ZipException {
         // 首先创建ZipFile指向磁盘上的.zip文件
-        ZipFile zipFile = new ZipFile(srcFile);
-        // 设置文件名编码，在GBK系统中需要设置
-//        zipFile.setFileNameCharset("GBK");
+        ZipFile zipFile = new ZipFile(compressFile);
         if (!zipFile.isValidZipFile()) {
             // 验证.zip文件是否合法，包括文件是否存在、是否为zip文件、是否被损坏等
             throw new ZipException("压缩文件验证失败，解压缩失败.");
         }
-        if (destDir.isDirectory() && !destDir.exists()) {
-            destDir.mkdir();
-        }
-        // 设置密码
-        if (zipFile.isEncrypted()) {
-            zipFile.setPassword(password.toCharArray());
+        if (outputDir.isDirectory() && !outputDir.exists()) {
+            outputDir.mkdir();
         }
         // 将文件抽出到解压目录(解压)
-        zipFile.extractAll(destDir.getPath());
-        return destDir;
+        zipFile.extractAll(outputDir.getAbsolutePath());
+        return outputDir;
     }
-
 }

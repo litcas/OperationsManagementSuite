@@ -8,57 +8,46 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import javax.persistence.criteria.Predicate;
 import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 public class RoleService {
 
+    public static final String USER_ROLE_NAME = "ROLE_USER";
+    public static final String ADMIN_ROLE_NAME = "ROLE_ADMIN";
+
     @Autowired
     private RoleRepository roleRepository;
 
+    // 保存角色
     @Transactional
-    public RoleEntity saveRoles(String name) {
-        if (StringUtils.isEmpty(name)) {
+    public RoleEntity saveRoles(RoleEntity roleEntity) {
+        // 检查角色名称参数是否存在
+        if (StringUtils.isEmpty(roleEntity.getName())) {
             throw new CustomizeException(NotificationMessage.ROLE_NAME_NOT_FOUND);
         }
-        if (roleRepository.findByName(name) != null) {
+        // 检查角色是否存在
+        if (hasRole(roleEntity.getName())) {
             throw new CustomizeException(NotificationMessage.ROLE_EXISTS);
         }
-        RoleEntity roleEntity = new RoleEntity();
-        roleEntity.setName(name);
         return roleRepository.save(roleEntity);
     }
 
+    // 查询角色
     @Transactional
-    public RoleEntity getRoles(String roleId) {
-        return roleRepository.findOne(roleId);
-    }
-
-    @Transactional
-    public List<RoleEntity> getRoles(RoleEntity roleArgs) {
-        return roleRepository.findAll((root, query, cb) -> {
-            List<Predicate> predicateList = new ArrayList<>();
-            if (roleArgs != null) {
-                if (!StringUtils.isEmpty(roleArgs.getName())) {
-                    predicateList.add(cb.like(root.get("name"), roleArgs.getName()));
-                }
-            }
-            return cb.and(predicateList.toArray(new Predicate[predicateList.size()]));
-        });
-    }
-
-    @Transactional
-    public RoleEntity getRolesByName(String name) {
+    public RoleEntity getRoles(String name) {
+        // 检查角色名称参数是否存在
         if (StringUtils.isEmpty(name)) {
             throw new CustomizeException(NotificationMessage.ROLE_NAME_NOT_FOUND);
+        }
+        // 检查角色是否存在
+        if (!hasRole(name)) {
+            throw new CustomizeException(NotificationMessage.ROLE_NOT_FOUND);
         }
         return roleRepository.findByName(name);
     }
 
-    public boolean hasRoles(String roleId) {
-        return roleRepository.exists(roleId);
+    public boolean hasRole(String name) {
+        return roleRepository.findByName(name) != null;
     }
 }
