@@ -14,7 +14,7 @@ import java.io.File;
 import java.util.Objects;
 
 @Component
-@Order(value = 2)
+@Order(value = 1)
 public class ApplicationInit implements CommandLineRunner {
 
     private final RoleService roleService;

@@ -2,31 +2,31 @@ package com.rengu.operationsoanagementsuite.Entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.Transient;
 import java.io.Serializable;
 import java.util.Date;
-import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
 @Entity
-public class ComponentEntity implements Serializable {
+public class DeviceEntity implements Serializable {
     @Id
     private String id = UUID.randomUUID().toString();
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime = new Date();
     private String name;
-    private String version;
+    private String ip;
     private String description;
-    private String filePath;
+    private int UDPPort = 3087;
+    private int TCPPort = 3088;
     private String deployPath;
-    private long size;
-    private boolean deleted = false;
-    @OneToMany(cascade = CascadeType.ALL)
-    private List<ComponentDetailEntity> componentDetailEntities;
+    @Transient
+    private boolean online = false;
+    @ManyToOne
+    private ProjectEntity projectEntity;
 
     public String getId() {
         return id;
@@ -52,12 +52,12 @@ public class ComponentEntity implements Serializable {
         this.name = name;
     }
 
-    public String getVersion() {
-        return version;
+    public String getIp() {
+        return ip;
     }
 
-    public void setVersion(String version) {
-        this.version = version;
+    public void setIp(String ip) {
+        this.ip = ip;
     }
 
     public String getDescription() {
@@ -68,12 +68,20 @@ public class ComponentEntity implements Serializable {
         this.description = description;
     }
 
-    public String getFilePath() {
-        return filePath;
+    public int getUDPPort() {
+        return UDPPort;
     }
 
-    public void setFilePath(String filePath) {
-        this.filePath = filePath;
+    public void setUDPPort(int UDPPort) {
+        this.UDPPort = UDPPort;
+    }
+
+    public int getTCPPort() {
+        return TCPPort;
+    }
+
+    public void setTCPPort(int TCPPort) {
+        this.TCPPort = TCPPort;
     }
 
     public String getDeployPath() {
@@ -84,35 +92,27 @@ public class ComponentEntity implements Serializable {
         this.deployPath = deployPath;
     }
 
-    public long getSize() {
-        return size;
+    public boolean isOnline() {
+        return online;
     }
 
-    public void setSize(long size) {
-        this.size = size;
+    public void setOnline(boolean online) {
+        this.online = online;
     }
 
-    public boolean isDeleted() {
-        return deleted;
+    public ProjectEntity getProjectEntity() {
+        return projectEntity;
     }
 
-    public void setDeleted(boolean deleted) {
-        this.deleted = deleted;
-    }
-
-    public List<ComponentDetailEntity> getComponentDetailEntities() {
-        return componentDetailEntities;
-    }
-
-    public void setComponentDetailEntities(List<ComponentDetailEntity> componentDetailEntities) {
-        this.componentDetailEntities = componentDetailEntities;
+    public void setProjectEntity(ProjectEntity projectEntity) {
+        this.projectEntity = projectEntity;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        ComponentEntity that = (ComponentEntity) o;
+        DeviceEntity that = (DeviceEntity) o;
         return Objects.equals(id, that.id);
     }
 

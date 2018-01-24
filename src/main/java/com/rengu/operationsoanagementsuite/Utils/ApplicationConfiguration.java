@@ -8,7 +8,6 @@ public class ApplicationConfiguration {
     private String defultUsername = "admin";
     private String defultPassword = "admin";
     private String componentLibraryName = "CL";
-    private String separator = "-";
     private String jsonFileName = "export.json";
     private String compressFileName = "ExportComponent.zip";
     // 不可修改项-自动从运行环境获取
@@ -36,14 +35,6 @@ public class ApplicationConfiguration {
 
     public void setComponentLibraryName(String componentLibraryName) {
         this.componentLibraryName = componentLibraryName;
-    }
-
-    public String getSeparator() {
-        return separator;
-    }
-
-    public void setSeparator(String separator) {
-        this.separator = separator;
     }
 
     public String getJsonFileName() {

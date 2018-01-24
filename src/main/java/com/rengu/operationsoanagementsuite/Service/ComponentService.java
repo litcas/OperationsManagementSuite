@@ -35,7 +35,7 @@ public class ComponentService {
     private ComponentDetailService componentDetailService;
 
     @Transactional
-    public ComponentEntity saveComponents(ComponentEntity componentArgs, MultipartFile[] multipartFiles) throws IOException {
+    public ComponentEntity saveComponents(ComponentEntity componentArgs, MultipartFile[] componentFiles) throws IOException {
         if (StringUtils.isEmpty(componentArgs.getName())) {
             throw new CustomizeException(NotificationMessage.COMPONENT_NAME_NOT_FOUND);
         }
@@ -45,8 +45,9 @@ public class ComponentService {
         if (hasNameAndVersion(componentArgs.getName(), componentArgs.getVersion())) {
             throw new CustomizeException(NotificationMessage.COMPONENT_EXISTS);
         }
-        componentArgs.setPath(getPath(componentArgs, null));
-        componentArgs.setComponentDetailEntities(addComponentDetails(componentArgs, componentDetailService.getComponentDetails(componentArgs, multipartFiles)));
+        componentArgs.setDeployPath(getDeployPath(componentArgs));
+        componentArgs.setFilePath(getFilePath(componentArgs, null));
+        componentArgs.setComponentDetailEntities(addComponentDetails(componentArgs, componentDetailService.getComponentDetails(componentArgs, componentFiles)));
         componentArgs.setSize(getSize(componentArgs));
         return componentRepository.save(componentArgs);
     }
@@ -62,12 +63,12 @@ public class ComponentService {
     }
 
     @Transactional
-    public List<ComponentEntity> getomponents(boolean isShowHistory) {
+    public List<ComponentEntity> getComponents(boolean isShowHistory) {
         return isShowHistory ? componentRepository.findAll() : componentRepository.findByDeleted(false);
     }
 
     @Transactional
-    public ComponentEntity getomponents(String componentId) {
+    public ComponentEntity getComponents(String componentId) {
         if (!hasComponent(componentId)) {
             throw new CustomizeException(NotificationMessage.COMPONENT_NOT_FOUND);
         }
@@ -87,10 +88,9 @@ public class ComponentService {
             // 1、写入Json文件
             JsonUtils.writeJsonFile(componentEntity, new File(cacheDirPath + applicationConfiguration.getJsonFileName()));
             // 2、复制实体文件到缓存目录
-            FileUtils.copyDirectory(new File(applicationConfiguration.getComponentLibraryPath() + componentEntity.getPath()), new File(cacheDirPath + "/" + componentEntity.getName() + applicationConfiguration.getSeparator() + componentEntity.getVersion() + "/"));
-            // 3、压缩文件
-            String path = FileUtils.getTempDirectoryPath() + applicationConfiguration.getCompressFileName();
-            return CompressUtils.compress(cacheDir, new File(path));
+            FileUtils.copyDirectory(new File(applicationConfiguration.getComponentLibraryPath() + componentEntity.getFilePath()), new File(cacheDirPath + "/" + componentEntity.getId() + "/"));
+            // 4、压缩文件
+            return CompressUtils.compress(cacheDir, new File(FileUtils.getTempDirectoryPath() + applicationConfiguration.getCompressFileName()));
         } else {
             throw new FileNotFoundException(NotificationMessage.CACHE_CREAT_FAILED);
         }
@@ -113,8 +113,8 @@ public class ComponentService {
             if (hasNameAndVersion(componentEntity.getName(), componentEntity.getVersion())) {
                 throw new CustomizeException(NotificationMessage.COMPONENT_EXISTS);
             }
-            componentEntity.setPath(getPath(componentEntity, null));
-            componentEntity.setComponentDetailEntities(addComponentDetails(componentEntity, componentDetailService.getComponentDetails(componentEntity, new File(cacheDir + componentEntity.getPath()))));
+            componentEntity.setFilePath(getFilePath(componentEntity, null));
+            componentEntity.setComponentDetailEntities(addComponentDetails(componentEntity, componentDetailService.getComponentDetails(componentEntity, new File(cacheDir + componentEntity.getFilePath()))));
             componentEntity.setSize(getSize(componentEntity));
             componentEntityList.add(componentRepository.save(componentEntity));
         }
@@ -134,15 +134,24 @@ public class ComponentService {
         return componentDetailEntityList;
     }
 
-    public String getPath(ComponentEntity componentEntity, String path) {
+    public String getFilePath(ComponentEntity componentEntity, String path) {
         if (path == null) {
             path = "";
         }
-        return path + "/" + componentEntity.getName() + applicationConfiguration.getSeparator() + componentEntity.getVersion() + "/";
+        return path + "/" + componentEntity.getId() + "/";
+    }
+
+    public String getDeployPath(ComponentEntity componentEntity) {
+        if (StringUtils.isEmpty(componentEntity.getDeployPath())) {
+            throw new CustomizeException(NotificationMessage.COMPONENT_DEPLOY_PATH_NOT_FOUND);
+        }
+        // 替换斜线方向
+        String deployPath = componentEntity.getDeployPath().replace("\\", "/");
+        return deployPath.startsWith("/") ? deployPath : "/" + deployPath;
     }
 
     public long getSize(ComponentEntity componentEntity) {
-        return FileUtils.sizeOfDirectory(new File(applicationConfiguration.getComponentLibraryPath() + componentEntity.getPath()));
+        return FileUtils.sizeOfDirectory(new File(applicationConfiguration.getComponentLibraryPath() + componentEntity.getFilePath()));
     }
 
     public boolean hasNameAndVersion(String name, String version) {

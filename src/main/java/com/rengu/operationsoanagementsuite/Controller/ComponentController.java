@@ -29,8 +29,8 @@ public class ComponentController {
 
     // 保存组件
     @PostMapping
-    public ResultEntity saveComponents(@AuthenticationPrincipal UserEntity loginUser, ComponentEntity componentArgs, @RequestParam(value = "componentfiles") MultipartFile[] multipartFiles) throws IOException {
-        return ResultUtils.resultBuilder(loginUser, HttpStatus.CREATED, componentService.saveComponents(componentArgs, multipartFiles));
+    public ResultEntity saveComponents(@AuthenticationPrincipal UserEntity loginUser, ComponentEntity componentArgs, @RequestParam(value = "componentfiles") MultipartFile[] componentFiles) throws IOException {
+        return ResultUtils.resultBuilder(loginUser, HttpStatus.CREATED, componentService.saveComponents(componentArgs, componentFiles));
     }
 
     // 删除组件
@@ -44,19 +44,19 @@ public class ComponentController {
 
     // 查询所有组件
     @GetMapping
-    public ResultEntity getomponents(@AuthenticationPrincipal UserEntity loginUser, @RequestParam(value = "isShowHistory") boolean isShowHistory) {
-        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, componentService.getomponents(isShowHistory));
+    public ResultEntity getComponents(@AuthenticationPrincipal UserEntity loginUser, @RequestParam(value = "isShowHistory") boolean isShowHistory) {
+        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, componentService.getComponents(isShowHistory));
     }
 
     // 查询组件
     @GetMapping(value = "/{componentId}")
-    public ResultEntity getomponents(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "componentId") String componentId) {
-        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, componentService.getomponents(componentId));
+    public ResultEntity getComponents(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "componentId") String componentId) {
+        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, componentService.getComponents(componentId));
     }
 
     // 导出组件
     @GetMapping(value = "/export/{componentId}")
-    public void exportComponents(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "componentId") String componentId, HttpServletResponse httpServletResponse) throws IOException {
+    public void exportComponents(@PathVariable(value = "componentId") String componentId, HttpServletResponse httpServletResponse) throws IOException {
         File exportComponents = componentService.exportComponents(componentId);
         //判断文件类型
         String mimeType = URLConnection.guessContentTypeFromName(exportComponents.getName());

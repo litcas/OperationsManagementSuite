@@ -72,9 +72,6 @@ public class UserService implements UserDetailsService {
 
     @Transactional
     public void deleteUsers(String userId) {
-        if (StringUtils.isEmpty(userId)) {
-            throw new CustomizeException(NotificationMessage.USER_ID_NOT_FOUND);
-        }
         if (!hasUser(userId)) {
             throw new CustomizeException(NotificationMessage.USER_NOT_FOUND);
         }
@@ -104,9 +101,6 @@ public class UserService implements UserDetailsService {
 
     @Transactional
     public UserEntity getUsers(String userId) {
-        if (StringUtils.isEmpty(userId)) {
-            throw new CustomizeException(NotificationMessage.USER_ID_NOT_FOUND);
-        }
         if (!hasUser(userId)) {
             throw new CustomizeException(NotificationMessage.USER_NOT_FOUND);
         }
@@ -115,9 +109,6 @@ public class UserService implements UserDetailsService {
 
     @Transactional
     public String forgotPassword(String userId) {
-        if (StringUtils.isEmpty(userId)) {
-            throw new CustomizeException(NotificationMessage.USER_ID_NOT_FOUND);
-        }
         if (!hasUser(userId)) {
             throw new CustomizeException(NotificationMessage.USER_NOT_FOUND);
         }

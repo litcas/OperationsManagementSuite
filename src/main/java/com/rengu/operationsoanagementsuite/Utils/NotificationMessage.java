@@ -26,8 +26,26 @@ public class NotificationMessage {
     public static final String COMPONENT_NOT_FOUND = "component不存在。";
     public static final String COMPONENT_NAME_NOT_FOUND = "component.name不存在。";
     public static final String COMPONENT_VERSION_NOT_FOUND = "component.version不存在。";
+    public static final String COMPONENT_DEPLOY_PATH_NOT_FOUND = "component.deploypath不存在。";
     public static final String COMPONENT_FILE_NOT_FOUND = "component.file不存在。";
     public static final String COMPONENT_DELETE = "component已删除。";
+
+    // 部署设计相关错误信息
+    public static final String DEPLOYMENT_DESIGN_EXISTS = "deploymentdesign已存在";
+    public static final String DEPLOYMENT_DESIGN_NOT_FOUND = "deploymentdesign不存在";
+    public static final String DEPLOYMENT_DESIGN_NAME_NOT_FOUND = "deploymentdesign.name不存在";
+    public static final String DEPLOYMENT_DESIGN_DELETED = "deploymentdesign已删除";
+
+    // 部署设计详情相关错误信息
+    public static final String DEPLOYMENT_DESIGN_DETAIL_NOT_FOUND = "deploymentdesigndetail不存在";
+    public static final String DEPLOYMENT_DESIGN_DETAIL_DELETED = "deploymentdesigndetail已删除";
+
+    // 设备相关错误
+    public static final String DEVICE_EXISTS = "device已存在";
+    public static final String DEVICE_NOT_FOUND = "device已存在";
+    public static final String DEVICE_IP_NOT_FOUND = "device.ip不存在";
+    public static final String DEVICE_DEPLOY_PATH_NOT_FOUND = "device.deploypath不存在";
+    public static final String DEVICE_DELETED = "device已删除";
 
     // 通用错误
     public static final String CACHE_CREAT_FAILED = "缓存文件创建失败。";
