@@ -198,6 +198,25 @@ public class ComponentService {
         return serverConfiguration.getComponentLibraryPath() + componentEntity.getName() + ServerConfiguration.SEPARATOR + componentEntity.getVersion() + "/";
     }
 
+    public ComponentEntity copyComponents(String componentId) throws IOException {
+        if (!hasComponent(componentId)) {
+            throw new CustomizeException(NotificationMessage.COMPONENT_NOT_FOUND);
+        }
+        ComponentEntity componentArgs = componentRepository.findOne(componentId);
+        ComponentEntity componentEntity = new ComponentEntity();
+        BeanUtils.copyProperties(componentArgs, componentEntity, "id", "createTime", "lastModified", "filePath", "size", "deleted", "componentFileEntities");
+        componentEntity.setName(componentArgs.getName() + "-副本");
+        componentEntity.setFilePath(getEntityPath(componentEntity));
+        new File(componentEntity.getFilePath()).mkdirs();
+        FileUtils.copyDirectory(new File(componentArgs.getFilePath()), new File(componentEntity.getFilePath()));
+        List<ComponentFileEntity> componentFileEntityList = componentFileService.saveComponentFiles(componentEntity, new File(componentEntity.getFilePath()));
+        componentEntity.setComponentFileEntities(addComponentFile(componentEntity, componentFileEntityList));
+        componentEntity.setSize(FileUtils.sizeOf(new File(componentEntity.getFilePath())));
+        componentEntity.setDeleted(false);
+        componentEntity.setLastModified(new Date());
+        return componentRepository.save(componentEntity);
+    }
+
     private List<ComponentFileEntity> addComponentFile(ComponentEntity componentEntity, List<ComponentFileEntity> componentFileEntities) {
         List<ComponentFileEntity> componentFileEntityList = componentEntity.getComponentFileEntities();
         if (componentFileEntityList == null) {

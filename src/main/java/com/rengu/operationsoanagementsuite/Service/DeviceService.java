@@ -88,11 +88,35 @@ public class DeviceService {
         });
     }
 
+    @Transactional
+    public DeviceEntity copyDevice(String deviceId) {
+        if (!hasDevice(deviceId)) {
+            throw new CustomizeException(NotificationMessage.DEVICE_NOT_FOUND);
+        }
+        DeviceEntity deviceArgs = deviceRepository.findOne(deviceId);
+        DeviceEntity deviceEntity = new DeviceEntity();
+        BeanUtils.copyProperties(deviceArgs, deviceEntity, "id", "createTime", "lastModified");
+        if (!StringUtils.isEmpty(deviceEntity.getIp())) {
+            String ip = deviceEntity.getIp();
+            while (true) {
+                if (hasDeviceByIp(ip, deviceEntity.getProjectEntity().getId())) {
+                    String[] strings = ip.split("\\.");
+                    int temp = Integer.parseInt(strings[3]) + 1;
+                    ip = strings[0] + "." + strings[1] + "." + strings[2] + "." + temp;
+                } else {
+                    deviceEntity.setIp(ip);
+                    break;
+                }
+            }
+        }
+        return deviceRepository.save(deviceEntity);
+    }
+
     public boolean hasDevice(String deviceId) {
         return deviceRepository.exists(deviceId);
     }
 
-    private boolean hasDeviceByIp(String projectId, String deviceIp) {
-        return deviceRepository.findByIpAndProjectEntityId(projectId, deviceIp) != null;
+    private boolean hasDeviceByIp(String deviceIp, String projectId) {
+        return deviceRepository.findByIpAndProjectEntityId(deviceIp, projectId) != null;
     }
 }

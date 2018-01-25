@@ -118,7 +118,12 @@ public class DeployPlanService {
     }
 
     @Transactional
-    public DeployPlanDetailEntity addDeployPlanDetail(String deployplanId, String deviceId, String componentId, String deployPath) {
+    public List<DeployPlanDetailEntity> getDeployPlans(String deployplanId, String deviceId) {
+        return deployPlanDetailService.getDeployPlanDetails(deployplanId,deviceId);
+    }
+
+    @Transactional
+    public DeployPlanDetailEntity addDeployPlanDetail(String deployplanId, String deviceId, String componentId) {
         if (!hasDeployPlans(deployplanId)) {
             throw new CustomizeException(NotificationMessage.DEPLOY_PLAN_NOT_FOUND);
         }
@@ -128,12 +133,10 @@ public class DeployPlanService {
         if (!componentService.hasComponent(componentId)) {
             throw new CustomizeException(NotificationMessage.COMPONENT_NOT_FOUND);
         }
-        if (StringUtils.isEmpty(deployPath)) {
-            throw new CustomizeException(NotificationMessage.DEPLOY_PLAN_DEPLOY_PATH_NOT_FOUND);
-        }
         DeployPlanEntity deployPlanEntity = deployPlanRepository.findOne(deployplanId);
         DeviceEntity deviceEntity = deviceService.getDevice(deviceId);
         ComponentEntity componentEntity = componentService.getComponent(componentId);
+        String deployPath = deviceEntity.getPath() + componentEntity.getDeployPath();
         DeployPlanDetailEntity deployPlanDetailEntity = deployPlanDetailService.saveDeployPlanDetails(deployPlanEntity, deviceEntity, componentEntity, deployPath);
         deployPlanEntity.setDeployPlanDetailEntities(addDeployPlanDetails(deployPlanEntity, deployPlanDetailEntity));
         deployPlanRepository.save(deployPlanEntity);
@@ -142,20 +145,20 @@ public class DeployPlanService {
 
     // 单个设备绑定多个组件及路径
     @Transactional
-    public List<DeployPlanDetailEntity> addDeployPlanDetail(String deployplanId, String deviceId, String[] componentIds, String[] deployPaths) {
+    public List<DeployPlanDetailEntity> addDeployPlanDetail(String deployplanId, String deviceId, String[] componentIds) {
         List<DeployPlanDetailEntity> deployPlanDetailEntityList = new ArrayList<>();
         for (int i = 0; i <= componentIds.length; i++) {
-            deployPlanDetailEntityList.add(addDeployPlanDetail(deployplanId, deviceId, componentIds[i], deployPaths[i]));
+            deployPlanDetailEntityList.add(addDeployPlanDetail(deployplanId, deviceId, componentIds[i]));
         }
         return deployPlanDetailEntityList;
     }
 
     // 多个设备绑定多个组件及路径
     @Transactional
-    public List<DeployPlanDetailEntity> addDeployPlanDetail(String deployplanId, String deviceIds[], String[] componentIds, String[] deployPaths) {
+    public List<DeployPlanDetailEntity> addDeployPlanDetail(String deployplanId, String deviceIds[], String[] componentIds) {
         List<DeployPlanDetailEntity> deployPlanDetailEntityList = new ArrayList<>();
-        for (int i = 0; i <= deviceIds.length; i++) {
-            deployPlanDetailEntityList.add(addDeployPlanDetail(deployplanId, deviceIds[i], componentIds[i], deployPaths[i]));
+        for (int i = 0; i < deviceIds.length; i++) {
+            deployPlanDetailEntityList.add(addDeployPlanDetail(deployplanId, deviceIds[i], componentIds[i]));
         }
         return deployPlanDetailEntityList;
     }

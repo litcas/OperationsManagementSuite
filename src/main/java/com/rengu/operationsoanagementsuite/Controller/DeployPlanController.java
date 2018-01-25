@@ -48,20 +48,20 @@ public class DeployPlanController {
 
     // 创建部署信息
     @PutMapping(value = "/{deployplanId}/devices/{deviceId}/components/{componentId}")
-    public ResultEntity AddDeployPlanDetail(@AuthenticationPrincipal UserEntity loginUser, @PathVariable("deployplanId") String deployplanId, @PathVariable("deviceId") String deviceId, @PathVariable("componentId") String componentId, @RequestParam(value = "deployPath") String deployPath) {
-        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, deployPlanService.addDeployPlanDetail(deployplanId, deviceId, componentId, deployPath));
+    public ResultEntity AddDeployPlanDetail(@AuthenticationPrincipal UserEntity loginUser, @PathVariable("deployplanId") String deployplanId, @PathVariable("deviceId") String deviceId, @PathVariable("componentId") String componentId) {
+        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, deployPlanService.addDeployPlanDetail(deployplanId, deviceId, componentId));
     }
 
     // 创建部署信息
     @PostMapping(value = "/{deployplanId}/deployplandetails/devices/{deviceId}")
-    public ResultEntity AddDeployPlanDetail(@AuthenticationPrincipal UserEntity loginUser, @PathVariable("deployplanId") String deployplanId, @PathVariable("deviceId") String deviceId, @RequestParam(value = "componentIds") String[] componentIds, @RequestParam(value = "deployPaths") String[] deployPaths) {
-        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, deployPlanService.addDeployPlanDetail(deployplanId, deviceId, componentIds, deployPaths));
+    public ResultEntity AddDeployPlanDetail(@AuthenticationPrincipal UserEntity loginUser, @PathVariable("deployplanId") String deployplanId, @PathVariable("deviceId") String deviceId, @RequestParam(value = "componentIds") String[] componentIds) {
+        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, deployPlanService.addDeployPlanDetail(deployplanId, deviceId, componentIds));
     }
 
     // 创建部署信息
     @PostMapping(value = "/{deployplanId}/deployplandetails")
-    public ResultEntity AddDeployPlanDetail(@AuthenticationPrincipal UserEntity loginUser, @PathVariable("deployplanId") String deployplanId, @RequestParam("deviceIds") String[] deviceIds, @RequestParam(value = "componentIds") String[] componentIds, @RequestParam(value = "deployPaths") String[] deployPaths) {
-        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, deployPlanService.addDeployPlanDetail(deployplanId, deviceIds, componentIds, deployPaths));
+    public ResultEntity AddDeployPlanDetail(@AuthenticationPrincipal UserEntity loginUser, @PathVariable("deployplanId") String deployplanId, @RequestParam("deviceIds") String[] deviceIds, @RequestParam(value = "componentIds") String[] componentIds) {
+        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, deployPlanService.addDeployPlanDetail(deployplanId, deviceIds, componentIds));
     }
 
     // 删除部署信息

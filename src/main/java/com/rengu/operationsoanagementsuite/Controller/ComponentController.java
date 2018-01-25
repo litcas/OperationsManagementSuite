@@ -79,4 +79,9 @@ public class ComponentController {
         IOUtils.copy(new FileInputStream(exportComponents), httpServletResponse.getOutputStream());
         httpServletResponse.flushBuffer();
     }
+
+    @PostMapping(value = "/copy/{componentId}")
+    public ResultEntity copyComponents(@AuthenticationPrincipal UserEntity loginUser, @PathVariable String componentId) throws IOException {
+        return ResultUtils.resultBuilder(HttpStatus.CREATED, ResultUtils.HTTPRESPONSE, loginUser, componentService.copyComponents(componentId));
+    }
 }
