@@ -7,9 +7,11 @@ public class ApplicationConfiguration {
 
     private String defultUsername = "admin";
     private String defultPassword = "admin";
-    private String componentLibraryName = "CL";
+    private String componentLibraryName = "lib";
     private String jsonFileName = "export.json";
     private String compressFileName = "ExportComponent.zip";
+    private int hearbeatSendPort = 3086;
+    private int hearbeatReceivePort = 6004;
     // 不可修改项-自动从运行环境获取
     private String componentLibraryPath = "";
 
@@ -51,6 +53,22 @@ public class ApplicationConfiguration {
 
     public void setCompressFileName(String compressFileName) {
         this.compressFileName = compressFileName;
+    }
+
+    public int getHearbeatSendPort() {
+        return hearbeatSendPort;
+    }
+
+    public void setHearbeatSendPort(int hearbeatSendPort) {
+        this.hearbeatSendPort = hearbeatSendPort;
+    }
+
+    public int getHearbeatReceivePort() {
+        return hearbeatReceivePort;
+    }
+
+    public void setHearbeatReceivePort(int hearbeatReceivePort) {
+        this.hearbeatReceivePort = hearbeatReceivePort;
     }
 
     public String getComponentLibraryPath() {

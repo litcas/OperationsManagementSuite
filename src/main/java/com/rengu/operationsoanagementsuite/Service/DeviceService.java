@@ -3,6 +3,7 @@ package com.rengu.operationsoanagementsuite.Service;
 import com.rengu.operationsoanagementsuite.Entity.DeviceEntity;
 import com.rengu.operationsoanagementsuite.Exception.CustomizeException;
 import com.rengu.operationsoanagementsuite.Repository.DeviceRepository;
+import com.rengu.operationsoanagementsuite.Utils.HeartbeatEntity;
 import com.rengu.operationsoanagementsuite.Utils.NotificationMessage;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -18,6 +20,7 @@ public class DeviceService {
     private DeviceRepository deviceRepository;
     @Autowired
     private ProjectService projectService;
+    public static List<HeartbeatEntity> onlineDevices = new ArrayList<>();
 
     @Transactional
     public DeviceEntity saveDevices(String projectId, DeviceEntity deviceArgs) {
@@ -63,7 +66,7 @@ public class DeviceService {
         if (!hasDevices(deviceId)) {
             throw new CustomizeException(NotificationMessage.DEVICE_NOT_FOUND);
         }
-        return deviceRepository.findOne(deviceId);
+        return onlineChecker(deviceRepository.findOne(deviceId), onlineDevices);
     }
 
     @Transactional
@@ -71,12 +74,12 @@ public class DeviceService {
         if (!projectService.hasProject(projectId)) {
             throw new CustomizeException(NotificationMessage.PROJECT_NOT_FOUND);
         }
-        return deviceRepository.findByProjectEntityId(projectId);
+        return onlineChecker(deviceRepository.findByProjectEntityId(projectId), onlineDevices);
     }
 
     @Transactional
     public List<DeviceEntity> getDevices() {
-        return deviceRepository.findAll();
+        return onlineChecker(deviceRepository.findAll(), onlineDevices);
     }
 
     // 调整路径分隔符
@@ -87,6 +90,32 @@ public class DeviceService {
         // 替换斜线方向
         String deployPath = deviceEntity.getDeployPath().replace("\\", "/");
         return deployPath.endsWith("/") ? deployPath : deployPath + "/";
+    }
+
+    public DeviceEntity onlineChecker(DeviceEntity deviceEntity, List<HeartbeatEntity> onlineDevices) {
+        if (onlineDevices != null && onlineDevices.size() != 0) {
+            for (HeartbeatEntity heartbeatEntity : onlineDevices) {
+                if (deviceEntity.getIp().equals(heartbeatEntity.getInetAddress().getHostAddress())) {
+                    deviceEntity.setOnline(true);
+                    break;
+                }
+            }
+        }
+        return deviceEntity;
+    }
+
+    public List<DeviceEntity> onlineChecker(List<DeviceEntity> deviceEntityList, List<HeartbeatEntity> onlineDevices) {
+        for (DeviceEntity deviceEntity : deviceEntityList) {
+            if (onlineDevices != null && onlineDevices.size() != 0) {
+                for (HeartbeatEntity heartbeatEntity : onlineDevices) {
+                    if (deviceEntity.getIp().equals(heartbeatEntity.getInetAddress().getHostAddress())) {
+                        deviceEntity.setOnline(true);
+                        break;
+                    }
+                }
+            }
+        }
+        return deviceEntityList;
     }
 
     public boolean hasDevices(String deviceId) {

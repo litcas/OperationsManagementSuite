@@ -5,10 +5,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import java.io.Serializable;
 import java.util.Date;
-import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -22,8 +20,6 @@ public class DeploymentDesignEntity implements Serializable {
     private String description;
     @ManyToOne
     private ProjectEntity projectEntity;
-    @OneToMany
-    private List<DeploymentDesignDetailEntity> deploymentDesignDetailEntities;
 
     public String getId() {
         return id;
@@ -63,14 +59,6 @@ public class DeploymentDesignEntity implements Serializable {
 
     public void setProjectEntity(ProjectEntity projectEntity) {
         this.projectEntity = projectEntity;
-    }
-
-    public List<DeploymentDesignDetailEntity> getDeploymentDesignDetailEntities() {
-        return deploymentDesignDetailEntities;
-    }
-
-    public void setDeploymentDesignDetailEntities(List<DeploymentDesignDetailEntity> deploymentDesignDetailEntities) {
-        this.deploymentDesignDetailEntities = deploymentDesignDetailEntities;
     }
 
     @Override

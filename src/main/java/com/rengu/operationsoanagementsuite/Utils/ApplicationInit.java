@@ -4,6 +4,7 @@ import com.rengu.operationsoanagementsuite.Entity.RoleEntity;
 import com.rengu.operationsoanagementsuite.Entity.UserEntity;
 import com.rengu.operationsoanagementsuite.Service.RoleService;
 import com.rengu.operationsoanagementsuite.Service.UserService;
+import com.rengu.operationsoanagementsuite.Task.HeartbeatTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.ClassUtils;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Objects;
 
 @Component
@@ -20,12 +22,14 @@ public class ApplicationInit implements CommandLineRunner {
     private final RoleService roleService;
     private final UserService userService;
     private final ApplicationConfiguration applicationConfiguration;
+    private final HeartbeatTask heartbeatTask;
 
     @Autowired
-    public ApplicationInit(RoleService roleService, UserService userService, ApplicationConfiguration applicationConfiguration) {
+    public ApplicationInit(RoleService roleService, UserService userService, ApplicationConfiguration applicationConfiguration, HeartbeatTask heartbeatTask) {
         this.roleService = roleService;
         this.userService = userService;
         this.applicationConfiguration = applicationConfiguration;
+        this.heartbeatTask = heartbeatTask;
     }
 
     /**
@@ -35,7 +39,7 @@ public class ApplicationInit implements CommandLineRunner {
      * @throws Exception on error
      */
     @Override
-    public void run(String... args) {
+    public void run(String... args) throws IOException {
         // 1、创建用户和管理员角色
         if (!roleService.hasRole(RoleService.USER_ROLE_NAME)) {
             RoleEntity roleEntity = new RoleEntity();
@@ -67,5 +71,6 @@ public class ApplicationInit implements CommandLineRunner {
             }
             applicationConfiguration.setComponentLibraryPath(new File(libraryPath.replace("!/BOOT-INF/classes!/", "")).getParent() + "/" + applicationConfiguration.getComponentLibraryName() + "/");
         }
+        heartbeatTask.HeartbeatHandler();
     }
 }
