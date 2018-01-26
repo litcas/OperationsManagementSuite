@@ -48,6 +48,8 @@ public class DeployPlanService {
     private UDPService udpService;
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
+    @Autowired
+    private DeployLogService deployLogService;
 
     // 保存部署设计
     @Transactional
@@ -119,7 +121,7 @@ public class DeployPlanService {
 
     @Transactional
     public List<DeployPlanDetailEntity> getDeployPlans(String deployplanId, String deviceId) {
-        return deployPlanDetailService.getDeployPlanDetails(deployplanId,deviceId);
+        return deployPlanDetailService.getDeployPlanDetails(deployplanId, deviceId);
     }
 
     @Transactional
@@ -200,6 +202,12 @@ public class DeployPlanService {
         if (socket.isConnected()) {
             DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
             // 连接成功
+            long fileNum = 0;
+            for (DeployPlanDetailEntity deployPlanDetailEntity : deployPlanDetailEntities) {
+                ComponentEntity componentEntity = deployPlanDetailEntity.getComponentEntity();
+                fileNum = fileNum + componentEntity.getComponentFileEntities().size();
+            }
+            DeployLogEntity deployLogEntity = deployLogService.saveDeployLog(fileNum, deviceEntity);
             for (DeployPlanDetailEntity deployPlanDetailEntity : deployPlanDetailEntities) {
                 ComponentEntity componentEntity = deployPlanDetailEntity.getComponentEntity();
                 for (ComponentFileEntity componentFileEntity : componentEntity.getComponentFileEntities()) {
@@ -212,6 +220,7 @@ public class DeployPlanService {
                     IOUtils.copy(new FileInputStream(componentEntity.getFilePath() + componentFileEntity.getPath()), dataOutputStream);
                     // 4、单个文件发送结束标志
                     dataOutputStream.write("fileRecvEnd".getBytes());
+                    deployLogService.updateDeployLog(deployLogEntity, deployLogEntity.getFinishedNum() + 1);
                     Thread.sleep(5000);
                 }
             }
@@ -220,6 +229,7 @@ public class DeployPlanService {
             dataOutputStream.flush();
             dataOutputStream.close();
             socket.close();
+            deployLogService.updateDeployLog(deployLogEntity, true);
             return new AsyncResult<>(true);
         }
         return new AsyncResult<>(false);
