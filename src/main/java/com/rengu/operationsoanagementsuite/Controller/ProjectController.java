@@ -91,6 +91,6 @@ public class ProjectController {
     // 查看部署日志
     @GetMapping("/{projectId}/deploylog")
     public ResultEntity getDeploylogs(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "projectId") String projectId) {
-        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, deployLogService.getDeployLog(projectId));
+        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, deployLogService.getDeployLogs(projectId));
     }
 }

@@ -6,13 +6,13 @@ import com.rengu.operationsoanagementsuite.Repository.DeployPlanRepository;
 import com.rengu.operationsoanagementsuite.Utils.NotificationMessage;
 import com.rengu.operationsoanagementsuite.Utils.Tools;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.Future;
 
 @Service
 public class DeployPlanService {
@@ -142,6 +141,7 @@ public class DeployPlanService {
         DeployPlanDetailEntity deployPlanDetailEntity = deployPlanDetailService.saveDeployPlanDetails(deployPlanEntity, deviceEntity, componentEntity, deployPath);
         deployPlanEntity.setDeployPlanDetailEntities(addDeployPlanDetails(deployPlanEntity, deployPlanDetailEntity));
         deployPlanRepository.save(deployPlanEntity);
+        deployLogService.saveDeployLog(deployPlanEntity, deviceEntity, componentEntity);
         return deployPlanDetailEntity;
     }
 
@@ -183,7 +183,7 @@ public class DeployPlanService {
 
     // 开始部署
     @Transactional
-    public Future<Boolean> startDeploy(String deployplanId, String deviceId) throws IOException, InterruptedException {
+    public void startDeploy(String deployplanId, String deviceId) throws IOException, InterruptedException {
         if (!deployPlanRepository.exists(deployplanId)) {
             throw new CustomizeException(NotificationMessage.DEPLOY_PLAN_NOT_FOUND);
         }
@@ -192,25 +192,23 @@ public class DeployPlanService {
         }
         DeviceEntity deviceEntity = deviceService.getDevice(deviceId);
         List<DeployPlanDetailEntity> deployPlanDetailEntityList = deployPlanDetailService.getDeployPlanDetails(deployplanId, deviceId);
-        return startDeploy(deviceEntity, deployPlanDetailEntityList);
+        DeployLogEntity deployLogEntity = deployLogService.getDeployLogs(deployPlanRepository.findOne(deployplanId), deviceEntity);
+        startDeploy(deviceEntity, deployPlanDetailEntityList, deployLogEntity);
     }
 
     // 异步发送文件
     @Async
-    Future<Boolean> startDeploy(DeviceEntity deviceEntity, List<DeployPlanDetailEntity> deployPlanDetailEntities) throws IOException, InterruptedException {
+    void startDeploy(DeviceEntity deviceEntity, List<DeployPlanDetailEntity> deployPlanDetailEntities, DeployLogEntity deployLogEntity) throws IOException, InterruptedException {
         Socket socket = new Socket(deviceEntity.getIp(), deviceEntity.getTCPPort());
         if (socket.isConnected()) {
+            deployLogService.updateDeployLogsStarted(deployLogEntity, true);
             DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
             // 连接成功
-            long fileNum = 0;
-            for (DeployPlanDetailEntity deployPlanDetailEntity : deployPlanDetailEntities) {
-                ComponentEntity componentEntity = deployPlanDetailEntity.getComponentEntity();
-                fileNum = fileNum + componentEntity.getComponentFileEntities().size();
-            }
-            DeployLogEntity deployLogEntity = deployLogService.saveDeployLog(fileNum, deviceEntity);
+            int fileCount = 0;
             for (DeployPlanDetailEntity deployPlanDetailEntity : deployPlanDetailEntities) {
                 ComponentEntity componentEntity = deployPlanDetailEntity.getComponentEntity();
                 for (ComponentFileEntity componentFileEntity : componentEntity.getComponentFileEntities()) {
+                    Date start = new Date();
                     // 发送文件逻辑
                     dataOutputStream.write("fileRecvStart".getBytes());
                     // 1、发送文件路径 + 文件名
@@ -220,8 +218,11 @@ public class DeployPlanService {
                     IOUtils.copy(new FileInputStream(componentEntity.getFilePath() + componentFileEntity.getPath()), dataOutputStream);
                     // 4、单个文件发送结束标志
                     dataOutputStream.write("fileRecvEnd".getBytes());
-                    deployLogService.updateDeployLog(deployLogEntity, deployLogEntity.getFinishedNum() + 1);
-                    Thread.sleep(5000);
+                    Thread.sleep(1000);
+                    Date end = new Date();
+                    double sendSpeed = componentFileEntity.getSize() / Integer.parseInt(DurationFormatUtils.formatPeriod(start.getTime(), end.getTime(), "s"));
+                    fileCount = fileCount + 1;
+                    deployLogService.updateDeployLogsSpeedAndFinishedNums(deployLogEntity, sendSpeed, fileCount, componentFileEntity.getSize());
                 }
             }
             // 5、发送部署结束标志
@@ -229,10 +230,8 @@ public class DeployPlanService {
             dataOutputStream.flush();
             dataOutputStream.close();
             socket.close();
-            deployLogService.updateDeployLog(deployLogEntity, true);
-            return new AsyncResult<>(true);
+            deployLogService.updateDeployLogsFinished(deployLogEntity, true);
         }
-        return new AsyncResult<>(false);
     }
 
     public List<DeviceScanResultEntity> scanDevices(String deployplanId, String deviceId) throws IOException, InterruptedException {

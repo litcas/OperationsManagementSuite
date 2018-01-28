@@ -1,8 +1,10 @@
 package com.rengu.operationsoanagementsuite.Service;
 
 import com.rengu.operationsoanagementsuite.Entity.DeviceEntity;
+import com.rengu.operationsoanagementsuite.Entity.DeviceRealInfoEntity;
 import com.rengu.operationsoanagementsuite.Exception.CustomizeException;
 import com.rengu.operationsoanagementsuite.Repository.DeviceRepository;
+import com.rengu.operationsoanagementsuite.Task.HearBeatTask;
 import com.rengu.operationsoanagementsuite.Utils.NotificationMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,6 +66,9 @@ public class DeviceService {
             throw new CustomizeException(NotificationMessage.DEVICE_EXISTS);
         }
         DeviceEntity deviceEntity = deviceRepository.findOne(deviceId);
+        if (!hasDeviceByIp(deviceArgs.getIp(), deviceEntity.getProjectEntity().getId())) {
+            throw new CustomizeException(NotificationMessage.DEVICE_EXISTS);
+        }
         BeanUtils.copyProperties(deviceArgs, deviceEntity, "id", "createTime", "projectEntity");
         deviceEntity.setLastModified(new Date());
         return deviceRepository.save(deviceEntity);
@@ -76,7 +81,7 @@ public class DeviceService {
 
     // 查询设备
     public List<DeviceEntity> getDevices(String projectId, DeviceEntity deviceArgs) {
-        return deviceRepository.findAll((root, query, cb) -> {
+        return onlineChecker(deviceRepository.findAll((root, query, cb) -> {
             List<Predicate> predicateList = new ArrayList<>();
             if (!StringUtils.isEmpty(projectId)) {
                 predicateList.add(cb.equal(root.get("projectEntity").get("id"), projectId));
@@ -85,7 +90,7 @@ public class DeviceService {
                 predicateList.add(cb.like(root.get("name"), deviceArgs.getName()));
             }
             return cb.and(predicateList.toArray(new Predicate[predicateList.size()]));
-        });
+        }));
     }
 
     @Transactional
@@ -110,6 +115,18 @@ public class DeviceService {
             }
         }
         return deviceRepository.save(deviceEntity);
+    }
+
+    public List<DeviceEntity> onlineChecker(List<DeviceEntity> deviceEntities) {
+        for (DeviceEntity deviceEntity : deviceEntities) {
+            for (DeviceRealInfoEntity deviceRealInfoEntity : HearBeatTask.onlineDevices) {
+                if (deviceEntity.getIp().equals(deviceRealInfoEntity.getInetAddress().getHostAddress())) {
+                    deviceEntity.setOnline(true);
+                    break;
+                }
+            }
+        }
+        return deviceEntities;
     }
 
     public boolean hasDevice(String deviceId) {

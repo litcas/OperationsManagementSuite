@@ -5,7 +5,9 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -14,13 +16,21 @@ public class DeployLogEntity {
     private String id = UUID.randomUUID().toString();
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime = new Date();
-    private long fileNum;
-    private long finishedNum = 0;
+    private boolean started = false;
     private boolean finished = false;
-    @ManyToOne
-    private ProjectEntity projectEntity;
+    private long size;
+    private long finishedSize;
+    private double speed = 0;
+    private int fileNums;
+    private int finishedNums;
     @ManyToOne
     private DeviceEntity deviceEntity;
+    @ManyToOne
+    private DeployPlanEntity deployPlanEntity;
+    @OneToMany
+    private List<ComponentEntity> componentEntities;
+    @ManyToOne
+    private ProjectEntity projectEntity;
 
     public String getId() {
         return id;
@@ -38,20 +48,12 @@ public class DeployLogEntity {
         this.createTime = createTime;
     }
 
-    public long getFileNum() {
-        return fileNum;
+    public boolean isStarted() {
+        return started;
     }
 
-    public void setFileNum(long fileNum) {
-        this.fileNum = fileNum;
-    }
-
-    public long getFinishedNum() {
-        return finishedNum;
-    }
-
-    public void setFinishedNum(long finishedNum) {
-        this.finishedNum = finishedNum;
+    public void setStarted(boolean started) {
+        this.started = started;
     }
 
     public boolean isFinished() {
@@ -62,12 +64,44 @@ public class DeployLogEntity {
         this.finished = finished;
     }
 
-    public ProjectEntity getProjectEntity() {
-        return projectEntity;
+    public long getSize() {
+        return size;
     }
 
-    public void setProjectEntity(ProjectEntity projectEntity) {
-        this.projectEntity = projectEntity;
+    public void setSize(long size) {
+        this.size = size;
+    }
+
+    public long getFinishedSize() {
+        return finishedSize;
+    }
+
+    public void setFinishedSize(long finishedSize) {
+        this.finishedSize = finishedSize;
+    }
+
+    public double getSpeed() {
+        return speed;
+    }
+
+    public void setSpeed(double speed) {
+        this.speed = speed;
+    }
+
+    public int getFileNums() {
+        return fileNums;
+    }
+
+    public void setFileNums(int fileNums) {
+        this.fileNums = fileNums;
+    }
+
+    public int getFinishedNums() {
+        return finishedNums;
+    }
+
+    public void setFinishedNums(int finishedNums) {
+        this.finishedNums = finishedNums;
     }
 
     public DeviceEntity getDeviceEntity() {
@@ -76,5 +110,29 @@ public class DeployLogEntity {
 
     public void setDeviceEntity(DeviceEntity deviceEntity) {
         this.deviceEntity = deviceEntity;
+    }
+
+    public DeployPlanEntity getDeployPlanEntity() {
+        return deployPlanEntity;
+    }
+
+    public void setDeployPlanEntity(DeployPlanEntity deployPlanEntity) {
+        this.deployPlanEntity = deployPlanEntity;
+    }
+
+    public List<ComponentEntity> getComponentEntities() {
+        return componentEntities;
+    }
+
+    public void setComponentEntities(List<ComponentEntity> componentEntities) {
+        this.componentEntities = componentEntities;
+    }
+
+    public ProjectEntity getProjectEntity() {
+        return projectEntity;
+    }
+
+    public void setProjectEntity(ProjectEntity projectEntity) {
+        this.projectEntity = projectEntity;
     }
 }

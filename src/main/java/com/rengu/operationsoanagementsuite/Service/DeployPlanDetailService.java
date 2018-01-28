@@ -6,6 +6,7 @@ import com.rengu.operationsoanagementsuite.Entity.DeployPlanEntity;
 import com.rengu.operationsoanagementsuite.Entity.DeviceEntity;
 import com.rengu.operationsoanagementsuite.Exception.CustomizeException;
 import com.rengu.operationsoanagementsuite.Repository.DeployPlanDetailRepository;
+import com.rengu.operationsoanagementsuite.Repository.DeployPlanRepository;
 import com.rengu.operationsoanagementsuite.Utils.NotificationMessage;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,10 @@ public class DeployPlanDetailService {
 
     @Autowired
     private DeployPlanDetailRepository deployPlanDetailRepository;
+    @Autowired
+    private DeployPlanRepository deployPlanRepository;
+    @Autowired
+    private DeployLogService deployLogService;
 
     // 创建部署设计信息
     public DeployPlanDetailEntity saveDeployPlanDetails(DeployPlanEntity deployPlanEntity, DeviceEntity deviceEntity, ComponentEntity componentEntity, String deployPath) {
@@ -27,6 +32,13 @@ public class DeployPlanDetailService {
         deployPlanDetailEntity.setDeployPath(deployPath);
         deployPlanDetailEntity.setDeployPlanEntity(deployPlanEntity);
         return deployPlanDetailEntity;
+    }
+
+    public DeployPlanDetailEntity getDeployPlanDetails(String deployplandetailId) {
+        if (!hasDeployplandetail(deployplandetailId)) {
+            throw new CustomizeException(NotificationMessage.DEPLOY_PLAN_DETAIL_NOT_FOUND);
+        }
+        return deployPlanDetailRepository.findOne(deployplandetailId);
     }
 
     public List<DeployPlanDetailEntity> getDeployPlanDetails(String deployplanId, String deviceId) {
@@ -50,6 +62,11 @@ public class DeployPlanDetailService {
         if (!hasDeployplandetail(deployplandetailId)) {
             throw new CustomizeException(NotificationMessage.DEPLOY_PLAN_DETAIL_NOT_FOUND);
         }
+        DeployPlanDetailEntity deployPlanDetailEntity = deployPlanDetailRepository.findOne(deployplandetailId);
+        DeployPlanEntity deployPlanEntity = deployPlanDetailEntity.getDeployPlanEntity();
+        deployPlanEntity.getDeployPlanDetailEntities().remove(deployPlanDetailEntity);
+        deployLogService.deleteDeployLog(deployPlanDetailEntity);
+        deployPlanRepository.save(deployPlanEntity);
         deployPlanDetailRepository.delete(deployplandetailId);
     }
 
