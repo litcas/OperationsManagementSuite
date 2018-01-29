@@ -12,6 +12,7 @@ public class ApplicationConfiguration {
     private String compressFileName = "ExportComponent.zip";
     private int hearbeatSendPort = 3086;
     private int hearbeatReceivePort = 6004;
+    private int tcpReceivePort = 6005;
     // 不可修改项-自动从运行环境获取
     private String componentLibraryPath = "";
 
@@ -69,6 +70,14 @@ public class ApplicationConfiguration {
 
     public void setHearbeatReceivePort(int hearbeatReceivePort) {
         this.hearbeatReceivePort = hearbeatReceivePort;
+    }
+
+    public int getTcpReceivePort() {
+        return tcpReceivePort;
+    }
+
+    public void setTcpReceivePort(int tcpReceivePort) {
+        this.tcpReceivePort = tcpReceivePort;
     }
 
     public String getComponentLibraryPath() {

@@ -5,6 +5,7 @@ import com.rengu.operationsoanagementsuite.Entity.UserEntity;
 import com.rengu.operationsoanagementsuite.Service.RoleService;
 import com.rengu.operationsoanagementsuite.Service.UserService;
 import com.rengu.operationsoanagementsuite.Task.HeartbeatTask;
+import com.rengu.operationsoanagementsuite.Task.TcpReceiveTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
@@ -23,6 +24,8 @@ public class ApplicationInit implements CommandLineRunner {
     private final UserService userService;
     private final ApplicationConfiguration applicationConfiguration;
     private final HeartbeatTask heartbeatTask;
+    @Autowired
+    private TcpReceiveTask tcpReceiveTask;
 
     @Autowired
     public ApplicationInit(RoleService roleService, UserService userService, ApplicationConfiguration applicationConfiguration, HeartbeatTask heartbeatTask) {
@@ -72,5 +75,6 @@ public class ApplicationInit implements CommandLineRunner {
             applicationConfiguration.setComponentLibraryPath(new File(libraryPath.replace("!/BOOT-INF/classes!/", "")).getParent() + "/" + applicationConfiguration.getComponentLibraryName() + "/");
         }
         heartbeatTask.HeartbeatHandler();
+        tcpReceiveTask.TCPReceiver();
     }
 }

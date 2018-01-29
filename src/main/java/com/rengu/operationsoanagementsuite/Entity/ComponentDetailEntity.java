@@ -16,10 +16,18 @@ public class ComponentDetailEntity implements Serializable {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime = new Date();
     private String name;
-    private String MD5;
-    private long size;
     private String type;
     private String path;
+    private String MD5;
+    private long size;
+
+    public ComponentDetailEntity() {
+    }
+
+    public ComponentDetailEntity(String path, String MD5) {
+        this.path = path;
+        this.MD5 = MD5;
+    }
 
     public String getId() {
         return id;

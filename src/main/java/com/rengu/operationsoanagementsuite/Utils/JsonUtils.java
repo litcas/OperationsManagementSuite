@@ -1,5 +1,6 @@
 package com.rengu.operationsoanagementsuite.Utils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.File;
@@ -16,5 +17,16 @@ public class JsonUtils {
     public static <T> T readJsonFile(File jsonFile, Class<T> classType) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         return objectMapper.readValue(jsonFile, classType);
+    }
+
+    public static String getJsonString(Object object) throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.writeValueAsString(object);
+    }
+
+    // 读取Json文件
+    public static <T> T readJsonString(String jsonString, Class<T> classType) throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.readValue(jsonString, classType);
     }
 }
