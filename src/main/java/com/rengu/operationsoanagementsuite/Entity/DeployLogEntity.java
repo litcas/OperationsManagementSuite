@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -19,7 +19,7 @@ public class DeployLogEntity {
     private boolean started = false;
     private boolean finished = false;
     private long size;
-    private long finishedSize;
+    private double remainingTime;
     private double speed = 0;
     private int fileNums;
     private int finishedNums;
@@ -27,7 +27,7 @@ public class DeployLogEntity {
     private DeviceEntity deviceEntity;
     @ManyToOne
     private DeployPlanEntity deployPlanEntity;
-    @OneToMany
+    @ManyToMany
     private List<ComponentEntity> componentEntities;
     @ManyToOne
     private ProjectEntity projectEntity;
@@ -72,12 +72,12 @@ public class DeployLogEntity {
         this.size = size;
     }
 
-    public long getFinishedSize() {
-        return finishedSize;
+    public double getRemainingTime() {
+        return remainingTime;
     }
 
-    public void setFinishedSize(long finishedSize) {
-        this.finishedSize = finishedSize;
+    public void setRemainingTime(double remainingTime) {
+        this.remainingTime = remainingTime;
     }
 
     public double getSpeed() {

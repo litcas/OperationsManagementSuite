@@ -52,10 +52,10 @@ public class DeployLogService {
     }
 
     @Transactional
-    public DeployLogEntity updateDeployLogsSpeedAndFinishedNums(DeployLogEntity deployLogEntity, double speed, int finishedNum, long finishedSize) {
+    public DeployLogEntity updateDeployLogsSpeedAndFinishedNums(DeployLogEntity deployLogEntity, double speed, int finishedNum, double remainingTime) {
         deployLogEntity.setSpeed(speed);
         deployLogEntity.setFinishedNums(finishedNum);
-        deployLogEntity.setFinishedSize(deployLogEntity.getFinishedSize() + finishedSize);
+        deployLogEntity.setRemainingTime(remainingTime);
         return deployLogRepository.save(deployLogEntity);
     }
 

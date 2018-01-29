@@ -205,6 +205,7 @@ public class DeployPlanService {
             DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
             // 连接成功
             int fileCount = 0;
+            long remainingSize = deployLogEntity.getSize();
             for (DeployPlanDetailEntity deployPlanDetailEntity : deployPlanDetailEntities) {
                 ComponentEntity componentEntity = deployPlanDetailEntity.getComponentEntity();
                 for (ComponentFileEntity componentFileEntity : componentEntity.getComponentFileEntities()) {
@@ -221,8 +222,10 @@ public class DeployPlanService {
                     Thread.sleep(1000);
                     Date end = new Date();
                     double sendSpeed = componentFileEntity.getSize() / Integer.parseInt(DurationFormatUtils.formatPeriod(start.getTime(), end.getTime(), "s"));
+                    remainingSize = remainingSize - componentFileEntity.getSize();
+                    double remainingTime = remainingSize / sendSpeed;
                     fileCount = fileCount + 1;
-                    deployLogService.updateDeployLogsSpeedAndFinishedNums(deployLogEntity, sendSpeed, fileCount, componentFileEntity.getSize());
+                    deployLogService.updateDeployLogsSpeedAndFinishedNums(deployLogEntity, sendSpeed, fileCount, remainingTime);
                 }
             }
             // 5、发送部署结束标志
@@ -322,19 +325,23 @@ public class DeployPlanService {
                     exists = true;
                     if (md5.equals(temp.getMD5())) {
                         // 一致文件列表
+                        deviceScanResultEntity.setHasCorrectComponentFiles(true);
                         correctComponentFiles.add(temp);
                         break;
                     } else {
                         // 不一致文件列表
+                        deviceScanResultEntity.setHasModifyedComponentFiles(true);
                         modifyedComponentFiles.add(temp);
                         break;
                     }
                 }
             }
             if (!exists) {
+                deviceScanResultEntity.setHasUnknownFiles(true);
                 unknownFiles.add(componentFileEntity);
             }
         }
+        deviceScanResultEntity.setHasMissingFile(deviceScanResultEntity.getScanResult().size() - unknownFiles.size() != componentEntity.getComponentFileEntities().size());
         deviceScanResultEntity.setCorrectComponentFiles(correctComponentFiles);
         deviceScanResultEntity.setModifyedComponentFiles(modifyedComponentFiles);
         deviceScanResultEntity.setUnknownFiles(unknownFiles);
