@@ -245,6 +245,6 @@ public class ComponentService {
     }
 
     private boolean hasName(String name) {
-        return componentRepository.findByName(name) != null;
+        return componentRepository.findByName(name).size() != 0;
     }
 }

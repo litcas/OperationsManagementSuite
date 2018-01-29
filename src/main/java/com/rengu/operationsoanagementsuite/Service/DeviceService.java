@@ -100,7 +100,8 @@ public class DeviceService {
         }
         DeviceEntity deviceArgs = deviceRepository.findOne(deviceId);
         DeviceEntity deviceEntity = new DeviceEntity();
-        BeanUtils.copyProperties(deviceArgs, deviceEntity, "id", "createTime", "lastModified");
+        BeanUtils.copyProperties(deviceArgs, deviceEntity, "id", "createTime", "lastModified", "name");
+        deviceEntity.setName(deviceArgs.getName() + "-副本");
         if (!StringUtils.isEmpty(deviceEntity.getIp())) {
             String ip = deviceEntity.getIp();
             while (true) {
