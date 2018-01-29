@@ -28,7 +28,7 @@ public class DeployLogService {
                 List<Predicate> predicates = new ArrayList<>();
 
                 // 根据工程名称查询
-                if(deployLogArgs.getProjectEntity().getName() != null)
+                if(deployLogArgs.getProjectEntity()!= null && deployLogArgs.getProjectEntity().getName() != null)
                 {
                     predicates.add(criteriaBuilder.like(root.get("projectEntity").get("name").as(String.class),"%"+deployLogArgs.getProjectEntity().getName()+"%"));
                 }
@@ -42,19 +42,22 @@ public class DeployLogService {
                 }
 
                 // 根据设备IP地址判断
-                if(deployLogArgs.getDeviceEntity().getIp() != null)
+                if(deployLogArgs.getDeviceEntity() != null)
                 {
-                    predicates.add(criteriaBuilder.like(root.get("deviceEntity").get("ip").as(String.class),"%"+deployLogArgs.getDeviceEntity().getIp()+"%"));
-                }
+                    if(deployLogArgs.getDeviceEntity().getIp() != null)
+                    {
+                        predicates.add(criteriaBuilder.like(root.get("deviceEntity").get("ip").as(String.class),"%"+deployLogArgs.getDeviceEntity().getIp()+"%"));
+                    }
 
-                // 根据设备名称查询
-                if(deployLogArgs.getDeviceEntity().getName() != null)
-                {
-                    predicates.add(criteriaBuilder.like(root.get("deviceEntity").get("name").as(String.class),"%"+deployLogArgs.getDeviceEntity().getName()+"%"));
+                    // 根据设备名称查询
+                    if(deployLogArgs.getDeviceEntity().getName() != null)
+                    {
+                        predicates.add(criteriaBuilder.like(root.get("deviceEntity").get("name").as(String.class),"%"+deployLogArgs.getDeviceEntity().getName()+"%"));
+                    }
                 }
 
                 // 根据软件名称查询
-                if( deployLogArgs.getComponentEntity().getName() != null)
+                if(deployLogArgs.getComponentEntity() != null && deployLogArgs.getComponentEntity().getName() != null)
                 {
                     predicates.add(criteriaBuilder.like(root.get("componentEntity").get("name").as(String.class),"%"+deployLogArgs.getComponentEntity().getName()+"%"));
                 }
