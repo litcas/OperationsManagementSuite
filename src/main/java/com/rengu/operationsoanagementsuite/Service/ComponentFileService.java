@@ -50,6 +50,22 @@ public class ComponentFileService {
     }
 
     @Transactional
+    public List<ComponentFileEntity> saveComponentFiles(ComponentEntity componentEntity, File srcDir) throws IOException {
+        Collection<File> fileCollection = FileUtils.listFiles(srcDir, null, true);
+        List<ComponentFileEntity> componentFileEntityList = new ArrayList<>();
+        for (File file : fileCollection) {
+            ComponentFileEntity componentFileEntity = new ComponentFileEntity();
+            componentFileEntity.setName(file.getName());
+            componentFileEntity.setMD5(DigestUtils.md5Hex(new FileInputStream(file)));
+            componentFileEntity.setType(FilenameUtils.getExtension(file.getName()));
+            componentFileEntity.setSize(FileUtils.sizeOf(file));
+            componentFileEntity.setPath(file.getPath().replace(componentEntity.getFilePath(), "/"));
+            componentFileEntityList.add(componentFileEntity);
+        }
+        return addComponentFile(componentEntity, componentFileEntityList);
+    }
+
+    @Transactional
     public List<ComponentFileEntity> createComponentFile(ComponentEntity componentEntity, File srcDir) throws IOException {
         File componentFile = new File(srcDir.getAbsolutePath() + "/" + ServerConfiguration.EXPORT_ENTITY_FILE_NAME);
         FileUtils.copyDirectory(componentFile, new File(componentEntity.getFilePath()));

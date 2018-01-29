@@ -7,5 +7,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface DeviceRepository extends JpaRepository<DeviceEntity, String>, JpaSpecificationExecutor<DeviceEntity> {
-    DeviceEntity findByIpAndProjectEntityId(String projectId, String deviceIp);
+    DeviceEntity findByIpAndProjectEntityId(String deviceIp,String projectId);
 }

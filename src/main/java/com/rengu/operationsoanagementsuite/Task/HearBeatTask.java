@@ -29,7 +29,7 @@ public class HearBeatTask {
     // 心跳报文发送端口
     private static final int HEARBEAT_SEND_PORT = 3086;
     // 在线设备
-    private static List<DeviceRealInfoEntity> onlineDevices = new ArrayList<>();
+    public static List<DeviceRealInfoEntity> onlineDevices = new ArrayList<>();
     @Autowired
     private UDPService udpService;
 

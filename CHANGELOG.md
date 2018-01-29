@@ -3,6 +3,14 @@
 
 ## [Unreleased]
 ### Added
+- 实现一个设备绑定多个组件和组件的部署路径接口。
+- 实现多个设备绑定多个组件和组件的部署路径接口。
+### Changed
+### Fixed
+### Removed
+
+## 0.0.5 - SNAPSHOT - 2018-1-12
+### Added
 ### Changed
 ### Fixed
 ### Removed

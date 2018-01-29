@@ -13,8 +13,8 @@ public class UDPService {
     // 服务器地址广播报文代码
     private static final String HEARBEAT_CODE = "S101";
 
-    public void sendScanDeviceMessage(String ip, int port, String id, DeployPlanDetailEntity deployPlanDetailEntity) throws IOException {
-        String message = getScanDeviceMessage(id, deployPlanDetailEntity);
+    public void sendScanDeviceMessage(String ip, int port, String id, DeployPlanDetailEntity deployPlanDetailEntity, String[] extensions) throws IOException {
+        String message = getScanDeviceMessage(id, deployPlanDetailEntity, extensions);
         sandMessage(ip, port, message);
     }
 
@@ -44,12 +44,21 @@ public class UDPService {
     }
 
     // 生成扫描报文
-    private String getScanDeviceMessage(String id, DeployPlanDetailEntity deployPlanDetailEntity) {
+    private String getScanDeviceMessage(String id, DeployPlanDetailEntity deployPlanDetailEntity, String... extensions) {
         String codeType = Tools.getString("S102", 4);
         String requestId = Tools.getString(id, 37);
         String deviceId = Tools.getString(deployPlanDetailEntity.getDeviceEntity().getId(), 37);
         String componentId = Tools.getString(deployPlanDetailEntity.getComponentEntity().getId(), 37);
-        String extension = Tools.getString("exe", 10);
+        String extension = Tools.getString("", 128);
+        if (extensions.length != 0) {
+            for (int i = 0; i < extensions.length; i++) {
+                if (i == extensions.length) {
+                    extension = extension + extensions[i];
+                } else {
+                    extension = extension + extensions[i] + ",";
+                }
+            }
+        }
         String deployPath = Tools.getString(deployPlanDetailEntity.getDeployPath(), 256);
         return codeType + requestId + deviceId + componentId + extension + deployPath;
     }
