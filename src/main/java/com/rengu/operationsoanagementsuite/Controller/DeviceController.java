@@ -33,13 +33,13 @@ public class DeviceController {
 
     // 查询设备
     @GetMapping(value = "/{deviceId}")
-    public ResultEntity updateDevices(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deviceId") String deviceId) {
+    public ResultEntity getDevices(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deviceId") String deviceId) {
         return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, deviceService.getDevices(deviceId));
     }
 
     // 查询设备
     @GetMapping
-    public ResultEntity updateDevices(@AuthenticationPrincipal UserEntity loginUser) {
+    public ResultEntity getDevices(@AuthenticationPrincipal UserEntity loginUser) {
         return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, deviceService.getDevices());
     }
 }

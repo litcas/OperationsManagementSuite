@@ -39,10 +39,10 @@ public class ProjectController {
         return ResultUtils.resultBuilder(loginUser, HttpStatus.NO_CONTENT, NotificationMessage.PROJECT_DELETE);
     }
 
-    // 保存工程
+    // 修改工程
     @PatchMapping(value = "/{projectId}")
     public ResultEntity updateProjects(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "projectId") String projectId, ProjectEntity projectArgs) {
-        return ResultUtils.resultBuilder(loginUser, HttpStatus.CREATED, projectService.saveProjects(projectArgs, loginUser));
+        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, projectService.updateProjects(projectId, projectArgs));
     }
 
     // 查询工程
