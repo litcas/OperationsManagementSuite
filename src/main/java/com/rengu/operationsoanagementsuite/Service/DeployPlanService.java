@@ -234,7 +234,7 @@ public class DeployPlanService {
         }
     }
 
-    public List<DeviceScanResultEntity> scanDevices(String deployplanId, String deviceId) throws IOException, InterruptedException {
+    public List<DeviceScanResultEntity> scanDevices(String deployplanId, String deviceId, String[] extensions) throws IOException, InterruptedException {
         // 检查部署设计id参数是否存在
         if (!hasDeployPlans(deployplanId)) {
             throw new CustomizeException(NotificationMessage.DEPLOY_PLAN_NOT_FOUND);
@@ -249,12 +249,12 @@ public class DeployPlanService {
         List<DeployPlanDetailEntity> deployPlanDetailEntityList = deployPlanDetailService.getDeployPlanDetails(deployplanId, deviceId);
         List<DeviceScanResultEntity> deviceScanResultEntityList = new ArrayList<>();
         for (DeployPlanDetailEntity deployPlanDetailEntity : deployPlanDetailEntityList) {
-            deviceScanResultEntityList.add(scanDevices(UUID.randomUUID().toString(), deployPlanDetailEntity));
+            deviceScanResultEntityList.add(scanDevices(UUID.randomUUID().toString(), deployPlanDetailEntity, extensions));
         }
         return deviceScanResultEntityList;
     }
 
-    public DeviceScanResultEntity scanDevices(String deployplanId, String deviceId, String componentId) throws IOException, InterruptedException {
+    public DeviceScanResultEntity scanDevices(String deployplanId, String deviceId, String componentId, String[] extensions) throws IOException, InterruptedException {
         // 检查部署设计id参数是否存在
         if (!hasDeployPlans(deployplanId)) {
             throw new CustomizeException(NotificationMessage.DEPLOY_PLAN_NOT_FOUND);
@@ -267,12 +267,12 @@ public class DeployPlanService {
             throw new CustomizeException(NotificationMessage.COMPONENT_NOT_FOUND);
         }
         DeployPlanDetailEntity deployPlanDetailEntity = deployPlanDetailService.getDeployPlanDetails(deployplanId, deviceId, componentId);
-        return scanDevices(UUID.randomUUID().toString(), deployPlanDetailEntity);
+        return scanDevices(UUID.randomUUID().toString(), deployPlanDetailEntity, extensions);
     }
 
-    private DeviceScanResultEntity scanDevices(String id, DeployPlanDetailEntity deployPlanDetailEntity) throws IOException, InterruptedException {
+    private DeviceScanResultEntity scanDevices(String id, DeployPlanDetailEntity deployPlanDetailEntity, String[] extensions) throws IOException, InterruptedException {
         DeviceEntity deviceEntity = deployPlanDetailEntity.getDeviceEntity();
-        udpService.sendScanDeviceMessage(deviceEntity.getIp(), deviceEntity.getUDPPort(), id, deployPlanDetailEntity);
+        udpService.sendScanDeviceMessage(deviceEntity.getIp(), deviceEntity.getUDPPort(), id, deployPlanDetailEntity, extensions);
         // 查询Redis中的存放的内容
         int count = 1;
         while (true) {

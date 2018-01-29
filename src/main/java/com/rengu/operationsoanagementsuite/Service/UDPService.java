@@ -13,8 +13,8 @@ public class UDPService {
     // 服务器地址广播报文代码
     private static final String HEARBEAT_CODE = "S101";
 
-    public void sendScanDeviceMessage(String ip, int port, String id, DeployPlanDetailEntity deployPlanDetailEntity) throws IOException {
-        String message = getScanDeviceMessage(id, deployPlanDetailEntity);
+    public void sendScanDeviceMessage(String ip, int port, String id, DeployPlanDetailEntity deployPlanDetailEntity, String[] extensions) throws IOException {
+        String message = getScanDeviceMessage(id, deployPlanDetailEntity, extensions);
         sandMessage(ip, port, message);
     }
 
