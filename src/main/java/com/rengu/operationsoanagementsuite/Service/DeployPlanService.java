@@ -6,13 +6,13 @@ import com.rengu.operationsoanagementsuite.Repository.DeployPlanRepository;
 import com.rengu.operationsoanagementsuite.Utils.NotificationMessage;
 import com.rengu.operationsoanagementsuite.Utils.Tools;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.Future;
 
 @Service
 public class DeployPlanService {
@@ -48,6 +47,8 @@ public class DeployPlanService {
     private UDPService udpService;
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
+    @Autowired
+    private DeployLogService deployLogService;
 
     // 保存部署设计
     @Transactional
@@ -118,7 +119,12 @@ public class DeployPlanService {
     }
 
     @Transactional
-    public DeployPlanDetailEntity addDeployPlanDetail(String deployplanId, String deviceId, String componentId, String deployPath) {
+    public List<DeployPlanDetailEntity> getDeployPlans(String deployplanId, String deviceId) {
+        return deployPlanDetailService.getDeployPlanDetails(deployplanId, deviceId);
+    }
+
+    @Transactional
+    public DeployPlanDetailEntity addDeployPlanDetail(String deployplanId, String deviceId, String componentId) {
         if (!hasDeployPlans(deployplanId)) {
             throw new CustomizeException(NotificationMessage.DEPLOY_PLAN_NOT_FOUND);
         }
@@ -128,34 +134,33 @@ public class DeployPlanService {
         if (!componentService.hasComponent(componentId)) {
             throw new CustomizeException(NotificationMessage.COMPONENT_NOT_FOUND);
         }
-        if (StringUtils.isEmpty(deployPath)) {
-            throw new CustomizeException(NotificationMessage.DEPLOY_PLAN_DEPLOY_PATH_NOT_FOUND);
-        }
         DeployPlanEntity deployPlanEntity = deployPlanRepository.findOne(deployplanId);
         DeviceEntity deviceEntity = deviceService.getDevice(deviceId);
         ComponentEntity componentEntity = componentService.getComponent(componentId);
+        String deployPath = deviceEntity.getPath() + componentEntity.getDeployPath();
         DeployPlanDetailEntity deployPlanDetailEntity = deployPlanDetailService.saveDeployPlanDetails(deployPlanEntity, deviceEntity, componentEntity, deployPath);
         deployPlanEntity.setDeployPlanDetailEntities(addDeployPlanDetails(deployPlanEntity, deployPlanDetailEntity));
         deployPlanRepository.save(deployPlanEntity);
+        deployLogService.saveDeployLog(deployPlanEntity, deviceEntity, componentEntity);
         return deployPlanDetailEntity;
     }
 
     // 单个设备绑定多个组件及路径
     @Transactional
-    public List<DeployPlanDetailEntity> addDeployPlanDetail(String deployplanId, String deviceId, String[] componentIds, String[] deployPaths) {
+    public List<DeployPlanDetailEntity> addDeployPlanDetail(String deployplanId, String deviceId, String[] componentIds) {
         List<DeployPlanDetailEntity> deployPlanDetailEntityList = new ArrayList<>();
         for (int i = 0; i <= componentIds.length; i++) {
-            deployPlanDetailEntityList.add(addDeployPlanDetail(deployplanId, deviceId, componentIds[i], deployPaths[i]));
+            deployPlanDetailEntityList.add(addDeployPlanDetail(deployplanId, deviceId, componentIds[i]));
         }
         return deployPlanDetailEntityList;
     }
 
     // 多个设备绑定多个组件及路径
     @Transactional
-    public List<DeployPlanDetailEntity> addDeployPlanDetail(String deployplanId, String deviceIds[], String[] componentIds, String[] deployPaths) {
+    public List<DeployPlanDetailEntity> addDeployPlanDetail(String deployplanId, String deviceIds[], String[] componentIds) {
         List<DeployPlanDetailEntity> deployPlanDetailEntityList = new ArrayList<>();
-        for (int i = 0; i <= deviceIds.length; i++) {
-            deployPlanDetailEntityList.add(addDeployPlanDetail(deployplanId, deviceIds[i], componentIds[i], deployPaths[i]));
+        for (int i = 0; i < deviceIds.length; i++) {
+            deployPlanDetailEntityList.add(addDeployPlanDetail(deployplanId, deviceIds[i], componentIds[i]));
         }
         return deployPlanDetailEntityList;
     }
@@ -178,7 +183,7 @@ public class DeployPlanService {
 
     // 开始部署
     @Transactional
-    public Future<Boolean> startDeploy(String deployplanId, String deviceId) throws IOException, InterruptedException {
+    public void startDeploy(String deployplanId, String deviceId) throws IOException, InterruptedException {
         if (!deployPlanRepository.exists(deployplanId)) {
             throw new CustomizeException(NotificationMessage.DEPLOY_PLAN_NOT_FOUND);
         }
@@ -187,19 +192,24 @@ public class DeployPlanService {
         }
         DeviceEntity deviceEntity = deviceService.getDevice(deviceId);
         List<DeployPlanDetailEntity> deployPlanDetailEntityList = deployPlanDetailService.getDeployPlanDetails(deployplanId, deviceId);
-        return startDeploy(deviceEntity, deployPlanDetailEntityList);
+        DeployLogEntity deployLogEntity = deployLogService.getDeployLogs(deployPlanRepository.findOne(deployplanId), deviceEntity);
+        startDeploy(deviceEntity, deployPlanDetailEntityList, deployLogEntity);
     }
 
     // 异步发送文件
     @Async
-    Future<Boolean> startDeploy(DeviceEntity deviceEntity, List<DeployPlanDetailEntity> deployPlanDetailEntities) throws IOException, InterruptedException {
+    void startDeploy(DeviceEntity deviceEntity, List<DeployPlanDetailEntity> deployPlanDetailEntities, DeployLogEntity deployLogEntity) throws IOException, InterruptedException {
         Socket socket = new Socket(deviceEntity.getIp(), deviceEntity.getTCPPort());
         if (socket.isConnected()) {
+            deployLogService.updateDeployLogsStarted(deployLogEntity, true);
             DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
             // 连接成功
+            int fileCount = 0;
+            long remainingSize = deployLogEntity.getSize();
             for (DeployPlanDetailEntity deployPlanDetailEntity : deployPlanDetailEntities) {
                 ComponentEntity componentEntity = deployPlanDetailEntity.getComponentEntity();
                 for (ComponentFileEntity componentFileEntity : componentEntity.getComponentFileEntities()) {
+                    Date start = new Date();
                     // 发送文件逻辑
                     dataOutputStream.write("fileRecvStart".getBytes());
                     // 1、发送文件路径 + 文件名
@@ -209,7 +219,13 @@ public class DeployPlanService {
                     IOUtils.copy(new FileInputStream(componentEntity.getFilePath() + componentFileEntity.getPath()), dataOutputStream);
                     // 4、单个文件发送结束标志
                     dataOutputStream.write("fileRecvEnd".getBytes());
-                    Thread.sleep(5000);
+                    Thread.sleep(1000);
+                    Date end = new Date();
+                    double sendSpeed = componentFileEntity.getSize() / Integer.parseInt(DurationFormatUtils.formatPeriod(start.getTime(), end.getTime(), "s"));
+                    remainingSize = remainingSize - componentFileEntity.getSize();
+                    double remainingTime = remainingSize / sendSpeed;
+                    fileCount = fileCount + 1;
+                    deployLogService.updateDeployLogsSpeedAndFinishedNums(deployLogEntity, sendSpeed, fileCount, remainingTime);
                 }
             }
             // 5、发送部署结束标志
@@ -217,12 +233,11 @@ public class DeployPlanService {
             dataOutputStream.flush();
             dataOutputStream.close();
             socket.close();
-            return new AsyncResult<>(true);
+            deployLogService.updateDeployLogsFinished(deployLogEntity, true);
         }
-        return new AsyncResult<>(false);
     }
 
-    public List<DeviceScanResultEntity> scanDevices(String deployplanId, String deviceId) throws IOException, InterruptedException {
+    public List<DeviceScanResultEntity> scanDevices(String deployplanId, String deviceId, String[] extensions) throws IOException, InterruptedException {
         // 检查部署设计id参数是否存在
         if (!hasDeployPlans(deployplanId)) {
             throw new CustomizeException(NotificationMessage.DEPLOY_PLAN_NOT_FOUND);
@@ -237,12 +252,12 @@ public class DeployPlanService {
         List<DeployPlanDetailEntity> deployPlanDetailEntityList = deployPlanDetailService.getDeployPlanDetails(deployplanId, deviceId);
         List<DeviceScanResultEntity> deviceScanResultEntityList = new ArrayList<>();
         for (DeployPlanDetailEntity deployPlanDetailEntity : deployPlanDetailEntityList) {
-            deviceScanResultEntityList.add(scanDevices(UUID.randomUUID().toString(), deployPlanDetailEntity));
+            deviceScanResultEntityList.add(scanDevices(UUID.randomUUID().toString(), deployPlanDetailEntity, extensions));
         }
         return deviceScanResultEntityList;
     }
 
-    public DeviceScanResultEntity scanDevices(String deployplanId, String deviceId, String componentId) throws IOException, InterruptedException {
+    public DeviceScanResultEntity scanDevices(String deployplanId, String deviceId, String componentId, String[] extensions) throws IOException, InterruptedException {
         // 检查部署设计id参数是否存在
         if (!hasDeployPlans(deployplanId)) {
             throw new CustomizeException(NotificationMessage.DEPLOY_PLAN_NOT_FOUND);
@@ -255,12 +270,12 @@ public class DeployPlanService {
             throw new CustomizeException(NotificationMessage.COMPONENT_NOT_FOUND);
         }
         DeployPlanDetailEntity deployPlanDetailEntity = deployPlanDetailService.getDeployPlanDetails(deployplanId, deviceId, componentId);
-        return scanDevices(UUID.randomUUID().toString(), deployPlanDetailEntity);
+        return scanDevices(UUID.randomUUID().toString(), deployPlanDetailEntity, extensions);
     }
 
-    private DeviceScanResultEntity scanDevices(String id, DeployPlanDetailEntity deployPlanDetailEntity) throws IOException, InterruptedException {
+    private DeviceScanResultEntity scanDevices(String id, DeployPlanDetailEntity deployPlanDetailEntity, String[] extensions) throws IOException, InterruptedException {
         DeviceEntity deviceEntity = deployPlanDetailEntity.getDeviceEntity();
-        udpService.sendScanDeviceMessage(deviceEntity.getIp(), deviceEntity.getUDPPort(), id, deployPlanDetailEntity);
+        udpService.sendScanDeviceMessage(deviceEntity.getIp(), deviceEntity.getUDPPort(), id, deployPlanDetailEntity, extensions);
         // 查询Redis中的存放的内容
         int count = 1;
         while (true) {
@@ -310,19 +325,23 @@ public class DeployPlanService {
                     exists = true;
                     if (md5.equals(temp.getMD5())) {
                         // 一致文件列表
+                        deviceScanResultEntity.setHasCorrectComponentFiles(true);
                         correctComponentFiles.add(temp);
                         break;
                     } else {
                         // 不一致文件列表
+                        deviceScanResultEntity.setHasModifyedComponentFiles(true);
                         modifyedComponentFiles.add(temp);
                         break;
                     }
                 }
             }
             if (!exists) {
+                deviceScanResultEntity.setHasUnknownFiles(true);
                 unknownFiles.add(componentFileEntity);
             }
         }
+        deviceScanResultEntity.setHasMissingFile(deviceScanResultEntity.getScanResult().size() - unknownFiles.size() != componentEntity.getComponentFileEntities().size());
         deviceScanResultEntity.setCorrectComponentFiles(correctComponentFiles);
         deviceScanResultEntity.setModifyedComponentFiles(modifyedComponentFiles);
         deviceScanResultEntity.setUnknownFiles(unknownFiles);

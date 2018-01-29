@@ -81,19 +81,19 @@ public class ComponentService {
 
     // 更新组件信息
     @Transactional
-    public ComponentEntity updateComponents(String componentId, ComponentEntity componentArgs) {
+    public ComponentEntity updateComponents(String componentId, MultipartFile[] multipartFiles) throws IOException {
         if (!hasComponent(componentId)) {
             throw new CustomizeException(NotificationMessage.COMPONENT_NOT_FOUND);
         }
-        // 查询需要修改的组件
         ComponentEntity componentEntity = getComponent(componentId);
-        BeanUtils.copyProperties(componentArgs, componentEntity, "id", "createTime", "componentFileEntities");
-        // todo 添加对组件实体文件的修改功能
-        // 设置组件大小
+        List<ComponentFileEntity> componentFileEntityList = componentFileService.saveComponentFiles(componentEntity, multipartFiles);
+        componentEntity.setComponentFileEntities(addComponentFile(componentEntity, componentFileEntityList));
+        // 创建实体文件存放文件夹
+        new File(componentEntity.getFilePath()).mkdirs();
         componentEntity.setSize(FileUtils.sizeOf(new File(componentEntity.getFilePath())));
+        componentEntity.setDeleted(false);
         componentEntity.setLastModified(new Date());
-        componentRepository.save(componentEntity);
-        return componentEntity;
+        return componentRepository.save(componentEntity);
     }
 
     // 根据id查询组件信息
@@ -198,6 +198,31 @@ public class ComponentService {
         return serverConfiguration.getComponentLibraryPath() + componentEntity.getName() + ServerConfiguration.SEPARATOR + componentEntity.getVersion() + "/";
     }
 
+    public ComponentEntity copyComponents(String componentId) throws IOException {
+        if (!hasComponent(componentId)) {
+            throw new CustomizeException(NotificationMessage.COMPONENT_NOT_FOUND);
+        }
+        ComponentEntity componentArgs = componentRepository.findOne(componentId);
+        ComponentEntity componentEntity = new ComponentEntity();
+        BeanUtils.copyProperties(componentArgs, componentEntity, "id", "createTime", "lastModified", "filePath", "size", "deleted", "componentFileEntities");
+        int i = 1;
+        String name = componentArgs.getName() + "-副本(" + i + ")";
+        while (hasName(name)) {
+            i = i + 1;
+            name = componentArgs.getName() + "-副本(" + i + ")";
+        }
+        componentEntity.setName(name);
+        componentEntity.setFilePath(getEntityPath(componentEntity));
+        new File(componentEntity.getFilePath()).mkdirs();
+        FileUtils.copyDirectory(new File(componentArgs.getFilePath()), new File(componentEntity.getFilePath()));
+        List<ComponentFileEntity> componentFileEntityList = componentFileService.saveComponentFiles(componentEntity, new File(componentEntity.getFilePath()));
+        componentEntity.setComponentFileEntities(addComponentFile(componentEntity, componentFileEntityList));
+        componentEntity.setSize(FileUtils.sizeOf(new File(componentEntity.getFilePath())));
+        componentEntity.setDeleted(false);
+        componentEntity.setLastModified(new Date());
+        return componentRepository.save(componentEntity);
+    }
+
     private List<ComponentFileEntity> addComponentFile(ComponentEntity componentEntity, List<ComponentFileEntity> componentFileEntities) {
         List<ComponentFileEntity> componentFileEntityList = componentEntity.getComponentFileEntities();
         if (componentFileEntityList == null) {
@@ -219,4 +244,7 @@ public class ComponentService {
         return componentRepository.findByNameAndVersionAndDeleted(name, version, false) != null;
     }
 
+    private boolean hasName(String name) {
+        return componentRepository.findByName(name).size() != 0;
+    }
 }

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Entity
@@ -21,6 +22,7 @@ public class ComponentEntity {
     private String version;
     private String description;
     private String filePath;
+    private String deployPath;
     private long size;
     private boolean deleted = false;
     @OneToMany(cascade = CascadeType.ALL)
@@ -82,6 +84,14 @@ public class ComponentEntity {
         this.filePath = filePath;
     }
 
+    public String getDeployPath() {
+        return deployPath;
+    }
+
+    public void setDeployPath(String deployPath) {
+        this.deployPath = deployPath;
+    }
+
     public long getSize() {
         return size;
     }
@@ -104,5 +114,18 @@ public class ComponentEntity {
 
     public void setComponentFileEntities(List<ComponentFileEntity> componentFileEntities) {
         this.componentFileEntities = componentFileEntities;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ComponentEntity that = (ComponentEntity) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

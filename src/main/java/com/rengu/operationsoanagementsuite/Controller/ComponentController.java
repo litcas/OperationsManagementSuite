@@ -39,8 +39,8 @@ public class ComponentController {
 
     // 更新组件
     @PatchMapping(value = "/{componentId}")
-    public ResultEntity updateComponents(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "componentId") String componentId, ComponentEntity componentArgs) {
-        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, componentService.updateComponents(componentId, componentArgs));
+    public ResultEntity updateComponents(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "componentId") String componentId, @RequestParam(value = "componentfile") MultipartFile[] multipartFiles) throws IOException {
+        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, componentService.updateComponents(componentId, multipartFiles));
     }
 
     // 查询组件
@@ -78,5 +78,10 @@ public class ComponentController {
         // 文件流输出
         IOUtils.copy(new FileInputStream(exportComponents), httpServletResponse.getOutputStream());
         httpServletResponse.flushBuffer();
+    }
+
+    @PostMapping(value = "/copy/{componentId}")
+    public ResultEntity copyComponents(@AuthenticationPrincipal UserEntity loginUser, @PathVariable String componentId) throws IOException {
+        return ResultUtils.resultBuilder(HttpStatus.CREATED, ResultUtils.HTTPRESPONSE, loginUser, componentService.copyComponents(componentId));
     }
 }

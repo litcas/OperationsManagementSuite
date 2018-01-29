@@ -1,7 +1,7 @@
 package com.rengu.operationsoanagementsuite.Controller;
 
 import com.rengu.operationsoanagementsuite.Entity.*;
-import com.rengu.operationsoanagementsuite.Service.ComponentService;
+import com.rengu.operationsoanagementsuite.Service.DeployLogService;
 import com.rengu.operationsoanagementsuite.Service.DeployPlanService;
 import com.rengu.operationsoanagementsuite.Service.DeviceService;
 import com.rengu.operationsoanagementsuite.Service.ProjectService;
@@ -24,7 +24,7 @@ public class ProjectController {
     @Autowired
     private DeviceService deviceService;
     @Autowired
-    private ComponentService componentService;
+    private DeployLogService deployLogService;
 
     // 保存工程
     @PostMapping
@@ -86,5 +86,11 @@ public class ProjectController {
     @GetMapping("/{projectId}/deployplan")
     public ResultEntity getDeployPlans(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "projectId") String projectId, DeployPlanEntity deployPlanArgs) {
         return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, deployPlanService.getDeployPlans(projectId, deployPlanArgs));
+    }
+
+    // 查看部署日志
+    @GetMapping("/{projectId}/deploylog")
+    public ResultEntity getDeploylogs(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "projectId") String projectId) {
+        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, deployLogService.getDeployLogs(projectId));
     }
 }

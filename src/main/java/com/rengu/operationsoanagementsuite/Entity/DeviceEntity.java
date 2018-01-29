@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.Objects;
 import java.util.UUID;
 
 @Entity
@@ -20,6 +21,7 @@ public class DeviceEntity {
     private String ip;
     private int UDPPort = 3087;
     private int TCPPort = 3088;
+    private String path;
     @Transient
     private boolean online = false;
     private String description;
@@ -82,6 +84,14 @@ public class DeviceEntity {
         this.TCPPort = TCPPort;
     }
 
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
+
     public boolean isOnline() {
         return online;
     }
@@ -104,5 +114,18 @@ public class DeviceEntity {
 
     public void setProjectEntity(ProjectEntity projectEntity) {
         this.projectEntity = projectEntity;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        DeviceEntity that = (DeviceEntity) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

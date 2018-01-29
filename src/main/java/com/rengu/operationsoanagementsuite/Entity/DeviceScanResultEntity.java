@@ -10,6 +10,10 @@ public class DeviceScanResultEntity {
     private List<ComponentFileEntity> correctComponentFiles;
     private List<ComponentFileEntity> modifyedComponentFiles;
     private List<ComponentFileEntity> unknownFiles;
+    private boolean hasCorrectComponentFiles;
+    private boolean hasModifyedComponentFiles;
+    private boolean hasUnknownFiles;
+    private boolean hasMissingFile;
 
     public DeviceScanResultEntity() {
     }
@@ -74,5 +78,37 @@ public class DeviceScanResultEntity {
 
     public void setUnknownFiles(List<ComponentFileEntity> unknownFiles) {
         this.unknownFiles = unknownFiles;
+    }
+
+    public boolean isHasCorrectComponentFiles() {
+        return hasCorrectComponentFiles;
+    }
+
+    public void setHasCorrectComponentFiles(boolean hasCorrectComponentFiles) {
+        this.hasCorrectComponentFiles = hasCorrectComponentFiles;
+    }
+
+    public boolean isHasModifyedComponentFiles() {
+        return hasModifyedComponentFiles;
+    }
+
+    public void setHasModifyedComponentFiles(boolean hasModifyedComponentFiles) {
+        this.hasModifyedComponentFiles = hasModifyedComponentFiles;
+    }
+
+    public boolean isHasUnknownFiles() {
+        return hasUnknownFiles;
+    }
+
+    public void setHasUnknownFiles(boolean hasUnknownFiles) {
+        this.hasUnknownFiles = hasUnknownFiles;
+    }
+
+    public boolean isHasMissingFile() {
+        return hasMissingFile;
+    }
+
+    public void setHasMissingFile(boolean hasMissingFile) {
+        this.hasMissingFile = hasMissingFile;
     }
 }

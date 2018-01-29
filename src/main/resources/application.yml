@@ -1,5 +1,5 @@
 spring:
   profiles:
-    active: release
+    active: debug
 server:
   display-name: Operations Management Suite
