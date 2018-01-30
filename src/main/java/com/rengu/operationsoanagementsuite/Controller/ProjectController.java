@@ -48,25 +48,25 @@ public class ProjectController {
     // 查询工程
     @GetMapping
     public ResultEntity getProjects(@AuthenticationPrincipal UserEntity loginUser) {
-        return ResultUtils.resultBuilder(loginUser, HttpStatus.CREATED, projectService.getProjects(loginUser));
+        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, projectService.getProjects(loginUser));
     }
 
     // 查询工程
     @GetMapping(value = "/{projectId}")
     public ResultEntity getProjects(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "projectId") String projectId) {
-        return ResultUtils.resultBuilder(loginUser, HttpStatus.CREATED, projectService.getProjects(projectId));
+        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, projectService.getProjects(projectId));
     }
 
     // 保存部署设计
     @PostMapping(value = "/{projectId}/deploymentdesigns")
     public ResultEntity saveDeploymentDesigns(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "projectId") String projectId, DeploymentDesignEntity deploymentDesignArgs) {
-        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, deploymentDesignService.saveDeploymentDesigns(projectId, deploymentDesignArgs));
+        return ResultUtils.resultBuilder(loginUser, HttpStatus.CREATED, deploymentDesignService.saveDeploymentDesigns(projectId, deploymentDesignArgs));
     }
 
     // 查询部署设计
     @GetMapping(value = "/{projectId}/deploymentdesigns")
     public ResultEntity getDeploymentDesigns(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "projectId") String projectId) {
-        return ResultUtils.resultBuilder(loginUser, HttpStatus.NO_CONTENT, deploymentDesignService.getDeploymentDesignsByProjectId(projectId));
+        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, deploymentDesignService.getDeploymentDesignsByProjectId(projectId));
     }
 
     // 保存设备

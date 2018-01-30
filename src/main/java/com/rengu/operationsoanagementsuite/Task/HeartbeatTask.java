@@ -34,7 +34,7 @@ public class HeartbeatTask {
     }
 
     // 心跳广播服务器ip地址
-    @Scheduled(fixedRate = 3000)
+    @Scheduled(fixedRate = 5000)
     public void heartbeatBroadcast() throws IOException {
         Enumeration<NetworkInterface> networkInterfaceEnumeration = NetworkInterface.getNetworkInterfaces();
         while (networkInterfaceEnumeration.hasMoreElements()) {
@@ -48,9 +48,9 @@ public class HeartbeatTask {
     }
 
     // 检查设备在线状态
-    @Scheduled(fixedRate = 3000)
+    @Scheduled(fixedRate = 5000)
     public void heartbeatMonitor() {
-        Iterator<HeartbeatEntity> heartbeatEntityIterator = DeviceService.onlineDevices.iterator();
+        Iterator<HeartbeatEntity> heartbeatEntityIterator = DeviceService.onlineHeartbeats.iterator();
         while (heartbeatEntityIterator.hasNext()) {
             HeartbeatEntity heartbeatEntity = heartbeatEntityIterator.next();
             heartbeatEntity.setCount(heartbeatEntity.getCount() - 1);
@@ -69,13 +69,13 @@ public class HeartbeatTask {
         while (!datagramSocket.isClosed()) {
             datagramSocket.receive(datagramPacket);
             HeartbeatEntity heartbeatEntity = new HeartbeatEntity(datagramPacket.getAddress());
-            if (DeviceService.onlineDevices.indexOf(heartbeatEntity) == -1) {
+            if (DeviceService.onlineHeartbeats.indexOf(heartbeatEntity) == -1) {
                 // 新发现的设备
-                DeviceService.onlineDevices.add(heartbeatEntity);
+                DeviceService.onlineHeartbeats.add(heartbeatEntity);
                 logger.info(heartbeatEntity.getInetAddress().getHostAddress() + "--->已连线服务器。");
             } else {
                 // 已在线的设备
-                DeviceService.onlineDevices.get(DeviceService.onlineDevices.indexOf(heartbeatEntity)).setCount(3);
+                DeviceService.onlineHeartbeats.get(DeviceService.onlineHeartbeats.indexOf(heartbeatEntity)).setCount(3);
             }
         }
     }

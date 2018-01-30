@@ -20,7 +20,7 @@ public class DeviceService {
     private DeviceRepository deviceRepository;
     @Autowired
     private ProjectService projectService;
-    public static List<HeartbeatEntity> onlineDevices = new ArrayList<>();
+    public static List<HeartbeatEntity> onlineHeartbeats = new ArrayList<>();
 
     @Transactional
     public DeviceEntity saveDevices(String projectId, DeviceEntity deviceArgs) {
@@ -66,7 +66,7 @@ public class DeviceService {
         if (!hasDevices(deviceId)) {
             throw new CustomizeException(NotificationMessage.DEVICE_NOT_FOUND);
         }
-        return onlineChecker(deviceRepository.findOne(deviceId), onlineDevices);
+        return onlineChecker(deviceRepository.findOne(deviceId), onlineHeartbeats);
     }
 
     @Transactional
@@ -74,12 +74,12 @@ public class DeviceService {
         if (!projectService.hasProject(projectId)) {
             throw new CustomizeException(NotificationMessage.PROJECT_NOT_FOUND);
         }
-        return onlineChecker(deviceRepository.findByProjectEntityId(projectId), onlineDevices);
+        return onlineChecker(deviceRepository.findByProjectEntityId(projectId), onlineHeartbeats);
     }
 
     @Transactional
     public List<DeviceEntity> getDevices() {
-        return onlineChecker(deviceRepository.findAll(), onlineDevices);
+        return onlineChecker(deviceRepository.findAll(), onlineHeartbeats);
     }
 
     // 调整路径分隔符
@@ -105,14 +105,15 @@ public class DeviceService {
     }
 
     public List<DeviceEntity> onlineChecker(List<DeviceEntity> deviceEntityList, List<HeartbeatEntity> onlineDevices) {
-        for (DeviceEntity deviceEntity : deviceEntityList) {
-            if (onlineDevices != null && onlineDevices.size() != 0) {
+        if (onlineDevices != null && onlineDevices.size() != 0) {
+            for (DeviceEntity deviceEntity : deviceEntityList) {
                 for (HeartbeatEntity heartbeatEntity : onlineDevices) {
                     if (deviceEntity.getIp().equals(heartbeatEntity.getInetAddress().getHostAddress())) {
                         deviceEntity.setOnline(true);
                         break;
                     }
                 }
+
             }
         }
         return deviceEntityList;
