@@ -1,10 +1,7 @@
 package com.rengu.operationsoanagementsuite.Controller;
 
 import com.rengu.operationsoanagementsuite.Entity.*;
-import com.rengu.operationsoanagementsuite.Service.DeployLogService;
-import com.rengu.operationsoanagementsuite.Service.DeployPlanService;
-import com.rengu.operationsoanagementsuite.Service.DeviceService;
-import com.rengu.operationsoanagementsuite.Service.ProjectService;
+import com.rengu.operationsoanagementsuite.Service.*;
 import com.rengu.operationsoanagementsuite.Utils.NotificationMessage;
 import com.rengu.operationsoanagementsuite.Utils.ResultUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +22,8 @@ public class ProjectController {
     private DeviceService deviceService;
     @Autowired
     private DeployLogService deployLogService;
+    @Autowired
+    private BaselineService baselineService;
 
     // 保存工程
     @PostMapping
@@ -92,5 +91,17 @@ public class ProjectController {
     @GetMapping("/{projectId}/deploylog")
     public ResultEntity getDeploylogs(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "projectId") String projectId) {
         return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, deployLogService.getDeployLogs(projectId));
+    }
+
+    // 建立基线
+    @PostMapping(value = "/{projectId}/deployplan/{deployplanId}/baselines")
+    public ResultEntity saveBaselines(@AuthenticationPrincipal UserEntity loginUser, @PathVariable("projectId") String projectId, @PathVariable("deployplanId") String deployplanId, BaselineEntity baselineArgs) {
+        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, baselineService.saveBaselines(projectId, deployplanId, baselineArgs));
+    }
+
+    // 查询基线
+    @GetMapping(value = "/{projectId}/baselines")
+    public ResultEntity getBaselines(@AuthenticationPrincipal UserEntity loginUser, @PathVariable("projectId") String projectId) {
+        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, baselineService.getBaselinesByProjectId(projectId));
     }
 }

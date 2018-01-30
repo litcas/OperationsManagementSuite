@@ -22,11 +22,13 @@ public class DeviceEntity {
     private int UDPPort = 3087;
     private int TCPPort = 3088;
     private String path;
-    @Transient
-    private boolean online = false;
     private String description;
     @ManyToOne
     private ProjectEntity projectEntity;
+    @Transient
+    private boolean online = false;
+    @Transient
+    private boolean virtual = false;
 
     public String getId() {
         return id;
@@ -92,14 +94,6 @@ public class DeviceEntity {
         this.path = path;
     }
 
-    public boolean isOnline() {
-        return online;
-    }
-
-    public void setOnline(boolean online) {
-        this.online = online;
-    }
-
     public String getDescription() {
         return description;
     }
@@ -114,6 +108,22 @@ public class DeviceEntity {
 
     public void setProjectEntity(ProjectEntity projectEntity) {
         this.projectEntity = projectEntity;
+    }
+
+    public boolean isOnline() {
+        return online;
+    }
+
+    public void setOnline(boolean online) {
+        this.online = online;
+    }
+
+    public boolean isVirtual() {
+        return virtual;
+    }
+
+    public void setVirtual(boolean virtual) {
+        this.virtual = virtual;
     }
 
     @Override

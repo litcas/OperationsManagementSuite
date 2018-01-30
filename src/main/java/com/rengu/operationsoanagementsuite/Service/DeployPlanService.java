@@ -348,7 +348,7 @@ public class DeployPlanService {
         return deviceScanResultEntity;
     }
 
-    private boolean hasDeployPlans(String deployplanId) {
+    public boolean hasDeployPlans(String deployplanId) {
         return deployPlanRepository.exists(deployplanId);
     }
 
