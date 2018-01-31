@@ -2,6 +2,7 @@ package com.rengu.operationsoanagementsuite.Service;
 
 import com.rengu.operationsoanagementsuite.Entity.*;
 import com.rengu.operationsoanagementsuite.Exception.CustomizeException;
+import com.rengu.operationsoanagementsuite.Repository.DeployLogRepository;
 import com.rengu.operationsoanagementsuite.Repository.DeployPlanRepository;
 import com.rengu.operationsoanagementsuite.Utils.NotificationMessage;
 import com.rengu.operationsoanagementsuite.Utils.Tools;
@@ -49,6 +50,8 @@ public class DeployPlanService {
     private StringRedisTemplate stringRedisTemplate;
     @Autowired
     private DeployLogService deployLogService;
+    @Autowired
+    private DeployLogRepository deployLogRepository;
 
     // 保存部署设计
     @Transactional
@@ -75,6 +78,10 @@ public class DeployPlanService {
     public void deleteDeployPlans(String deployplanId) {
         if (!hasDeployPlans(deployplanId)) {
             throw new CustomizeException(NotificationMessage.DEPLOY_PLAN_NOT_FOUND);
+        }
+        List<DeployLogEntity> deployLogEntities = deployLogRepository.findByDeployPlanEntityId(deployplanId);
+        if (deployLogEntities.size() != 0) {
+            deployLogRepository.delete(deployLogEntities);
         }
         deployPlanRepository.delete(deployplanId);
     }

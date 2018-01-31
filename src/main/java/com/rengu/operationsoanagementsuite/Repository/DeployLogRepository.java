@@ -14,5 +14,7 @@ public interface DeployLogRepository extends JpaRepository<DeployLogEntity, Stri
 
     List<DeployLogEntity> findByProjectEntityId(String projectId);
 
+    List<DeployLogEntity> findByDeployPlanEntityId(String deployPlanId);
+
     List<DeployLogEntity> findByDeviceEntityId(String deviceId);
 }
