@@ -44,7 +44,7 @@ public class NotificationMessage {
     public static final String DEVICE_EXISTS = "device已存在";
     public static final String DEVICE_NOT_FOUND = "device已存在";
     public static final String DEVICE_IP_NOT_FOUND = "device.ip不存在";
-    public static final String DEVICE_DEPLOY_PATH_NOT_FOUND = "device.deploypath不存在";
+    public static final String DEVICE_DEPLOY_PATH_NOT_FOUND = "device.deployPath不存在";
     public static final String DEVICE_DELETED = "device已删除";
 
     // 通用错误

@@ -25,8 +25,23 @@ public class DeviceEntity implements Serializable {
     private String deployPath;
     @Transient
     private boolean online = false;
+    @Transient
+    private boolean virtual = false;
     @ManyToOne
     private ProjectEntity projectEntity;
+
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null || getClass() != object.getClass()) return false;
+        DeviceEntity that = (DeviceEntity) object;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 
     public String getId() {
         return id;
@@ -100,24 +115,19 @@ public class DeviceEntity implements Serializable {
         this.online = online;
     }
 
+    public boolean isVirtual() {
+        return virtual;
+    }
+
+    public void setVirtual(boolean virtual) {
+        this.virtual = virtual;
+    }
+
     public ProjectEntity getProjectEntity() {
         return projectEntity;
     }
 
     public void setProjectEntity(ProjectEntity projectEntity) {
         this.projectEntity = projectEntity;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        DeviceEntity that = (DeviceEntity) o;
-        return Objects.equals(id, that.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
     }
 }

@@ -75,7 +75,7 @@ public class HeartbeatTask {
                 logger.info(heartbeatEntity.getInetAddress().getHostAddress() + "--->已连线服务器。");
             } else {
                 // 已在线的设备
-                DeviceService.onlineHeartbeats.get(DeviceService.onlineHeartbeats.indexOf(heartbeatEntity)).setCount(3);
+                DeviceService.onlineHeartbeats.get(DeviceService.onlineHeartbeats.indexOf(heartbeatEntity)).setCount(applicationConfiguration.getDeviceLogoutDelay());
             }
         }
     }

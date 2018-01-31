@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -48,19 +49,22 @@ public class UserService implements UserDetailsService {
     }
 
     @Transactional
-    public UserEntity saveUsers(UserEntity userEntity, RoleEntity... roleEntities) {
+    public UserEntity saveUsers(UserEntity userArgs, RoleEntity... roleEntities) {
         // 检查用户名是否存在
-        if (StringUtils.isEmpty(userEntity.getUsername())) {
+        if (StringUtils.isEmpty(userArgs.getUsername())) {
             throw new CustomizeException(NotificationMessage.USER_USERNAME_NOT_FOUND);
         }
         // 检查密码是否存在
-        if (StringUtils.isEmpty(userEntity.getPassword())) {
+        if (StringUtils.isEmpty(userArgs.getPassword())) {
             throw new CustomizeException(NotificationMessage.USER_PASSWORD_NOT_FOUND);
         }
         // 检查用户名是否存在
-        if (hasUsername(userEntity.getUsername())) {
+        if (hasUsername(userArgs.getUsername())) {
             throw new CustomizeException(NotificationMessage.USER_EXISTS);
         }
+        UserEntity userEntity = new UserEntity();
+        BeanUtils.copyProperties(userArgs, userEntity, "id", "createTime", "accountNonExpired", "accountNonLocked", "credentialsNonExpired", "enabled", "roleEntities");
+        userEntity.setPassword(new BCryptPasswordEncoder().encode(userEntity.getPassword()).trim());
         userEntity.setRoleEntities(addRoles(userEntity, roleEntities));
         return userRepository.save(userEntity);
     }
@@ -114,7 +118,7 @@ public class UserService implements UserDetailsService {
         }
         UserEntity userEntity = userRepository.findOne(userId);
         String password = UUID.randomUUID().toString();
-        userEntity.setPassword(password);
+        userEntity.setPassword(new BCryptPasswordEncoder().encode(password));
         userRepository.save(userEntity);
         return userEntity.getUsername() + "的密码已被重置为：" + password;
     }

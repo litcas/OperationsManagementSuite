@@ -1,6 +1,7 @@
 package com.rengu.operationsoanagementsuite.Utils;
 
 import java.net.InetAddress;
+import java.util.Objects;
 
 public class HeartbeatEntity {
     private InetAddress inetAddress;
@@ -25,5 +26,18 @@ public class HeartbeatEntity {
 
     public void setCount(int count) {
         this.count = count;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null || getClass() != object.getClass()) return false;
+        HeartbeatEntity that = (HeartbeatEntity) object;
+        return Objects.equals(inetAddress, that.inetAddress);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(inetAddress);
     }
 }

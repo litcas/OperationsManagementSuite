@@ -42,4 +42,9 @@ public class DeviceController {
     public ResultEntity getDevices(@AuthenticationPrincipal UserEntity loginUser) {
         return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, deviceService.getDevices());
     }
+
+    @PostMapping(value = "/{deviceId}/copy")
+    public ResultEntity copyDevices(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deviceId") String deviceId) {
+        return ResultUtils.resultBuilder(loginUser, HttpStatus.CREATED, deviceService.copyDevices(deviceId));
+    }
 }

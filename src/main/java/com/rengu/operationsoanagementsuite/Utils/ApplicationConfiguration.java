@@ -13,6 +13,7 @@ public class ApplicationConfiguration {
     private int hearbeatSendPort = 3086;
     private int hearbeatReceivePort = 6004;
     private int tcpReceivePort = 6005;
+    private int deviceLogoutDelay = 5;
     // 不可修改项-自动从运行环境获取
     private String componentLibraryPath = "";
 
@@ -78,6 +79,14 @@ public class ApplicationConfiguration {
 
     public void setTcpReceivePort(int tcpReceivePort) {
         this.tcpReceivePort = tcpReceivePort;
+    }
+
+    public int getDeviceLogoutDelay() {
+        return deviceLogoutDelay;
+    }
+
+    public void setDeviceLogoutDelay(int deviceLogoutDelay) {
+        this.deviceLogoutDelay = deviceLogoutDelay;
     }
 
     public String getComponentLibraryPath() {
