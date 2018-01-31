@@ -38,8 +38,8 @@ public class ComponentDetailService {
         return getComponentDetails(componentEntity, new File(cacheFilePath));
     }
 
-    public List<ComponentDetailEntity> getComponentDetails(ComponentEntity componentEntity, File cacheDir) throws IOException {
-        Collection<File> fileCollection = FileUtils.listFiles(cacheDir, null, true);
+    public List<ComponentDetailEntity> getComponentDetails(ComponentEntity componentEntity, File srcDir) throws IOException {
+        Collection<File> fileCollection = FileUtils.listFiles(srcDir, null, true);
         List<ComponentDetailEntity> componentDetailEntityList = new ArrayList<>();
         for (File file : fileCollection) {
             // 从缓存文件中复制到组件库目录

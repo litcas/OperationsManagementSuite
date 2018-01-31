@@ -55,7 +55,7 @@ public class ComponentController {
     }
 
     // 导出组件
-    @GetMapping(value = "/export/{componentId}")
+    @GetMapping(value = "/{componentId}/export")
     public void exportComponents(@PathVariable(value = "componentId") String componentId, HttpServletResponse httpServletResponse) throws IOException {
         File exportComponents = componentService.exportComponents(componentId);
         //判断文件类型
@@ -75,5 +75,10 @@ public class ComponentController {
     @PostMapping(value = "/import")
     public ResultEntity importComponents(@AuthenticationPrincipal UserEntity loginUser, @RequestParam(value = "importComponents") MultipartFile[] multipartFiles) throws IOException, ZipException {
         return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, componentService.importComponents(multipartFiles));
+    }
+
+    @PostMapping(value = "/{componentId}/copy")
+    public ResultEntity copyComponents(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "componentId") String componentId) throws IOException {
+        return ResultUtils.resultBuilder(loginUser, HttpStatus.CREATED, componentService.copyComponents(componentId));
     }
 }
