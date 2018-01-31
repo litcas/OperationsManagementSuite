@@ -156,7 +156,7 @@ public class DeviceService {
         for (DeviceRealInfoEntity deviceRealInfoEntity : unknowDevices) {
             DeviceEntity deviceEntity = new DeviceEntity();
             deviceEntity.setName(deviceRealInfoEntity.getInetAddress().getHostName());
-            deviceEntity.setIp(deviceRealInfoEntity.getInetAddress().getHostName());
+            deviceEntity.setIp(deviceRealInfoEntity.getInetAddress().getHostAddress());
             deviceEntity.setVirtual(true);
             deviceEntity.setOnline(true);
             deviceEntities.add(deviceEntity);
