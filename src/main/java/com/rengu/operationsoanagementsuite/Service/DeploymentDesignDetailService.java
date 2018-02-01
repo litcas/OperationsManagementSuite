@@ -25,27 +25,25 @@ public class DeploymentDesignDetailService {
 
     @Transactional
     public DeploymentDesignDetailEntity saveDeploymentDesignDetails(String deploymentDesignId, String deviceId, String componentId) {
-        String deployPath = deviceService.getDevices(deviceId).getDeployPath() + componentService.getComponents(componentId).getDeployPath();
-        return saveDeploymentDesignDetails(deploymentDesignId, deviceId, componentId, deployPath);
+        return saveDeploymentDesignDetail(deploymentDesignId, deviceId, componentId);
     }
 
     @Transactional
     public List<DeploymentDesignDetailEntity> saveDeploymentDesignDetails(String deploymentDesignId, String deviceId, String[] componentIds) {
         List<DeploymentDesignDetailEntity> deploymentDesignDetailEntityList = new ArrayList<>();
         for (String componentId : componentIds) {
-            String deployPath = deviceService.getDevices(deviceId).getDeployPath() + componentService.getComponents(componentId).getDeployPath();
-            deploymentDesignDetailEntityList.add(saveDeploymentDesignDetails(deploymentDesignId, deviceId, componentId, deployPath));
+            deploymentDesignDetailEntityList.add(saveDeploymentDesignDetails(deploymentDesignId, deviceId, componentId));
         }
         return deploymentDesignDetailEntityList;
     }
 
     @Transactional
-    public DeploymentDesignDetailEntity saveDeploymentDesignDetails(String deploymentDesignId, String deviceId, String componentId, String deployPath) {
+    public DeploymentDesignDetailEntity saveDeploymentDesignDetail(String deploymentDesignId, String deviceId, String componentId) {
         DeploymentDesignDetailEntity deploymentDesignDetailEntity = new DeploymentDesignDetailEntity();
         deploymentDesignDetailEntity.setDeploymentDesignEntity(deploymentDesignService.getDeploymentDesigns(deploymentDesignId));
         deploymentDesignDetailEntity.setDeviceEntity(deviceService.getDevices(deviceId));
         deploymentDesignDetailEntity.setComponentEntity(componentService.getComponents(componentId));
-        deploymentDesignDetailEntity.setDeployPath(deployPath);
+        deploymentDesignDetailEntity.setDeployPath((deviceService.getDevices(deviceId).getDeployPath() + componentService.getComponents(componentId).getDeployPath()).replace("//", "/"));
         return deploymentDesignDetailRepository.save(deploymentDesignDetailEntity);
     }
 
@@ -68,7 +66,16 @@ public class DeploymentDesignDetailService {
     }
 
     @Transactional
-    public List<DeploymentDesignDetailEntity> getDeploymentDesignDetails(String deploymentDesignId, String deviceId) {
+    public List<DeploymentDesignDetailEntity> getDeploymentDesignDetailsByDeploymentDesignId(String deploymentDesignId) {
+        if (!deploymentDesignService.hasDeploymentDesigns(deploymentDesignId)) {
+            throw new CustomizeException(NotificationMessage.DEPLOYMENT_DESIGN_NOT_FOUND);
+        }
+        return deploymentDesignDetailRepository.findByDeploymentDesignEntityId(deploymentDesignId);
+    }
+
+    // 按设备id查询
+    @Transactional
+    public List<DeploymentDesignDetailEntity> getDeploymentDesignDetailsByDeploymentDesignEntityIdAndDeviceEntityId(String deploymentDesignId, String deviceId) {
         if (!deploymentDesignService.hasDeploymentDesigns(deploymentDesignId)) {
             throw new CustomizeException(NotificationMessage.DEPLOYMENT_DESIGN_NOT_FOUND);
         }
@@ -78,13 +85,33 @@ public class DeploymentDesignDetailService {
         return deploymentDesignDetailRepository.findByDeploymentDesignEntityIdAndDeviceEntityId(deploymentDesignId, deviceId);
     }
 
+    // 按组件id查询
     @Transactional
-    public List<DeploymentDesignDetailEntity> getDeploymentDesignDetailsByDeploymentDesignId(String deploymentDesignId) {
+    public List<DeploymentDesignDetailEntity> getDeploymentDesignDetailsByDeploymentDesignEntityIdAndComponentEntityId(String deploymentDesignId, String componentId) {
         if (!deploymentDesignService.hasDeploymentDesigns(deploymentDesignId)) {
             throw new CustomizeException(NotificationMessage.DEPLOYMENT_DESIGN_NOT_FOUND);
         }
-        return deploymentDesignDetailRepository.findByDeploymentDesignEntityId(deploymentDesignId);
+        if (!componentService.hasComponent(componentId)) {
+            throw new CustomizeException(NotificationMessage.COMPONENT_NOT_FOUND);
+        }
+        return deploymentDesignDetailRepository.findByDeploymentDesignEntityIdAndComponentEntityId(deploymentDesignId, componentId);
     }
+
+    // 按设备id和组件id查询
+    @Transactional
+    public List<DeploymentDesignDetailEntity> getDeploymentDesignDetailsByDeploymentDesignEntityIdAndDeviceEntityIdAndComponentEntityId(String deploymentDesignId, String deviceId, String componentId) {
+        if (!deploymentDesignService.hasDeploymentDesigns(deploymentDesignId)) {
+            throw new CustomizeException(NotificationMessage.DEPLOYMENT_DESIGN_NOT_FOUND);
+        }
+        if (!deviceService.hasDevices(deviceId)) {
+            throw new CustomizeException(NotificationMessage.DEVICE_NOT_FOUND);
+        }
+        if (!componentService.hasComponent(componentId)) {
+            throw new CustomizeException(NotificationMessage.COMPONENT_NOT_FOUND);
+        }
+        return deploymentDesignDetailRepository.findByDeploymentDesignEntityIdAndDeviceEntityIdAndComponentEntityId(deploymentDesignId, deviceId, componentId);
+    }
+
 
     public boolean hasDeploymentDesignDetail(String deploymentdesigndetailId) {
         return deploymentDesignDetailRepository.exists(deploymentdesigndetailId);

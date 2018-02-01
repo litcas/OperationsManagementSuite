@@ -65,7 +65,10 @@ public class DeviceService {
 
     @Transactional
     public DeviceEntity getDevices(String deviceId) {
-        return onlineChecker(getDevices(deviceId));
+        if (!hasDevices(deviceId)) {
+            throw new CustomizeException(NotificationMessage.DEVICE_NOT_FOUND);
+        }
+        return onlineChecker(deviceRepository.findOne(deviceId));
     }
 
     @Transactional

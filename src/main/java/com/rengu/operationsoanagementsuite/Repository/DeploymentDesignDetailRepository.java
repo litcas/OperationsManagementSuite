@@ -12,4 +12,9 @@ public interface DeploymentDesignDetailRepository extends JpaRepository<Deployme
     List<DeploymentDesignDetailEntity> findByDeploymentDesignEntityId(String deploymentDesignId);
 
     List<DeploymentDesignDetailEntity> findByDeploymentDesignEntityIdAndDeviceEntityId(String deploymentDesignId, String deviceId);
+
+    List<DeploymentDesignDetailEntity> findByDeploymentDesignEntityIdAndComponentEntityId(String deploymentDesignId, String componentId);
+
+    List<DeploymentDesignDetailEntity> findByDeploymentDesignEntityIdAndDeviceEntityIdAndComponentEntityId(String deploymentDesignId, String deviceId, String componentId);
+
 }

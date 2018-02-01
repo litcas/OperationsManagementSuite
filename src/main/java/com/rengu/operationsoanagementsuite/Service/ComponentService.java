@@ -82,7 +82,7 @@ public class ComponentService {
             // 1、写入Json文件
             JsonUtils.writeJsonFile(componentEntity, new File(cacheDirPath + applicationConfiguration.getJsonFileName()));
             // 2、复制实体文件到缓存目录
-            FileUtils.copyDirectory(new File(applicationConfiguration.getComponentLibraryPath() + componentEntity.getFilePath()), new File(cacheDirPath + "/" + componentEntity.getId() + "/"));
+            FileUtils.copyDirectory(new File(componentEntity.getFilePath()), new File(cacheDirPath + "/" + componentEntity.getId() + "/"));
             // 3、压缩文件
             return CompressUtils.compress(cacheDir, new File(FileUtils.getTempDirectoryPath() + applicationConfiguration.getCompressFileName()));
         } else {
@@ -108,7 +108,7 @@ public class ComponentService {
                 throw new CustomizeException(NotificationMessage.COMPONENT_EXISTS);
             }
             componentEntity.setFilePath(getFilePath(componentEntity, null));
-            componentEntity.setComponentDetailEntities(addComponentDetails(componentEntity, componentDetailService.getComponentDetails(componentEntity, new File(cacheDir + componentEntity.getFilePath()))));
+            componentEntity.setComponentDetailEntities(addComponentDetails(componentEntity, componentDetailService.getComponentDetails(componentEntity, new File(cacheDir.getAbsolutePath() + "/" + JsonUtils.readJsonFile(new File(cacheDir + "/" + applicationConfiguration.getJsonFileName()), ComponentEntity.class).getId()))));
             componentEntity.setSize(getSize(componentEntity));
             componentEntityList.add(componentRepository.save(componentEntity));
         }
@@ -152,7 +152,7 @@ public class ComponentService {
         if (basePath == null) {
             basePath = "";
         }
-        return basePath + "/" + componentEntity.getId() + "/";
+        return (applicationConfiguration.getComponentLibraryPath() + basePath + "/" + componentEntity.getId() + "/").replace("//", "/");
     }
 
     public String getDeployPath(ComponentEntity componentEntity) {
@@ -161,11 +161,11 @@ public class ComponentService {
         }
         // 替换斜线方向
         String deployPath = componentEntity.getDeployPath().replace("\\", "/");
-        return deployPath.startsWith("/") ? deployPath : "/" + deployPath + "/";
+        return deployPath.startsWith("/") ? deployPath : "/" + deployPath + "/" + componentEntity.getName() + "-" + componentEntity.getVersion();
     }
 
     public long getSize(ComponentEntity componentEntity) {
-        return FileUtils.sizeOfDirectory(new File(applicationConfiguration.getComponentLibraryPath() + componentEntity.getFilePath()));
+        return FileUtils.sizeOfDirectory(new File(componentEntity.getFilePath()));
     }
 
     public boolean hasNameAndVersion(String name, String version) {

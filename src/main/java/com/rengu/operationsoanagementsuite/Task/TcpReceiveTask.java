@@ -64,22 +64,26 @@ public class TcpReceiveTask {
         String messageType = new String(bytes, 0, 4).trim();
         pointer = pointer + 4;
         if (messageType.equals(SCAN_RESULT_TAG)) {
-            String requestId = new String(bytes, pointer, 36).trim();
+            String id = new String(bytes, pointer, 36).trim();
             pointer = pointer + 36;
             String deviceId = new String(bytes, pointer, 36).trim();
             pointer = pointer + 36;
             String componentId = new String(bytes, pointer, 36).trim();
             pointer = pointer + 36;
-            List<ComponentDetailEntity> componentDetailEntityList = new ArrayList<>();
+            List<ComponentDetailEntity> originalScanResultList = new ArrayList<>();
             while (pointer + 256 + 34 <= bytes.length) {
                 String filePath = new String(bytes, pointer, 256).trim();
                 pointer = pointer + 256;
                 String md5 = new String(bytes, pointer, 34).trim();
                 pointer = pointer + 34;
-                componentDetailEntityList.add(new ComponentDetailEntity(filePath, md5));
+                originalScanResultList.add(new ComponentDetailEntity(filePath.replace("//", "/"), md5));
             }
-            ScanResultEntity scanResultEntity = new ScanResultEntity(requestId, deviceId, componentId, componentDetailEntityList);
-            stringRedisTemplate.opsForValue().set(requestId, JsonUtils.getJsonString(scanResultEntity));
+            ScanResultEntity scanResultEntity = new ScanResultEntity();
+            scanResultEntity.setId(id);
+            scanResultEntity.setDeviceId(deviceId);
+            scanResultEntity.setComponentId(componentId);
+            scanResultEntity.setOriginalScanResultList(originalScanResultList);
+            stringRedisTemplate.opsForValue().set(id, JsonUtils.getJsonString(scanResultEntity));
         }
     }
 }

@@ -29,6 +29,7 @@ public class RequestLogService {
         requestLogEntity.setMessage(resultEntity.getMessage());
         requestLogEntity.setUsername(resultEntity.getUsername());
         requestLogEntity.setRequestUrl(httpServletRequest.getRequestURI());
+        requestLogEntity.setUserAgent(httpServletRequest.getHeader("User-Agent"));
         requestLogRepository.save(requestLogEntity);
     }
 }

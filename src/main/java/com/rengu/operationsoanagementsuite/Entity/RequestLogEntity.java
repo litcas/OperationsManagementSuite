@@ -19,6 +19,7 @@ public class RequestLogEntity {
     private String username;
     private int code;
     private String message;
+    private String userAgent;
 
     public String getId() {
         return id;
@@ -82,5 +83,13 @@ public class RequestLogEntity {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public String getUserAgent() {
+        return userAgent;
+    }
+
+    public void setUserAgent(String userAgent) {
+        this.userAgent = userAgent;
     }
 }

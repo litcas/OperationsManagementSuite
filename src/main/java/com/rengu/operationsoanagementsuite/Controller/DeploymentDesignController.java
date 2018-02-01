@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+
 @RestController
 @RequestMapping(value = "/deploymentdesigns")
 public class DeploymentDesignController {
@@ -79,9 +81,41 @@ public class DeploymentDesignController {
         return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, deploymentDesignService.getDeploymentDesignDetailsByDeploymentDesignId(deploymentDesignId));
     }
 
-    // 查询部署设计详情
+    // 查询部署设计详情-设备
     @GetMapping(value = "/{deploymentDesignId}/deploymentdesigndetails/devices/{deviceId}")
-    public ResultEntity getDeploymentDesignDetailsByDeploymentDesignId(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deploymentDesignId") String deploymentDesignId, @PathVariable(value = "deviceId") String deviceId) {
-        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, deploymentDesignService.getDeploymentDesignDetails(deploymentDesignId, deviceId));
+    public ResultEntity getDeploymentDesignDetailsByDeploymentDesignEntityIdAndDeviceEntityId(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deploymentDesignId") String deploymentDesignId, @PathVariable(value = "deviceId") String deviceId) {
+        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, deploymentDesignService.getDeploymentDesignDetailsByDeploymentDesignEntityIdAndDeviceEntityId(deploymentDesignId, deviceId));
+    }
+
+    // 查询部署设计详情-组件
+    @GetMapping(value = "/{deploymentDesignId}/deploymentdesigndetails/components/{componentId}")
+    public ResultEntity getDeploymentDesignDetailsByDeploymentDesignEntityIdAndComponentEntityId(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deploymentDesignId") String deploymentDesignId, @PathVariable(value = "componentId") String componentId) {
+        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, deploymentDesignService.getDeploymentDesignDetailsByDeploymentDesignEntityIdAndComponentEntityId(deploymentDesignId, componentId));
+    }
+
+    // 扫描设备
+    @GetMapping(value = "/{deploymentDesignId}/devices/{deviceId}/scan")
+    public ResultEntity scanDevices(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deploymentDesignId") String deploymentDesignId, @PathVariable(value = "deviceId") String deviceId, @RequestParam(value = "extensions", required = false) String... extensions) throws IOException, InterruptedException {
+        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, deploymentDesignService.scanDevices(deploymentDesignId, deviceId, extensions));
+    }
+
+    // 扫描设备
+    @GetMapping(value = "/{deploymentDesignId}/devices/{deviceId}/components/{componentId}/scan")
+    public ResultEntity scanComponents(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deploymentDesignId") String deploymentDesignId, @PathVariable(value = "deviceId") String deviceId, @PathVariable(value = "componentId") String componentId, @RequestParam(value = "extensions", required = false) String... extensions) throws IOException, InterruptedException {
+        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, deploymentDesignService.scanComponents(deploymentDesignId, deviceId, componentId, extensions));
+    }
+
+    // 部署组件
+    @PutMapping(value = "/{deploymentDesignId}/devices/{deviceId}/components/{componentId}/deploy")
+    public ResultEntity deployComponents(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deploymentDesignId") String deploymentDesignId, @PathVariable(value = "deviceId") String deviceId, @PathVariable(value = "componentId") String componentId) throws IOException, InterruptedException {
+        deploymentDesignService.deployComponents(deploymentDesignId, deviceId, componentId);
+        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, "部署成功");
+    }
+
+    // 部署组件
+    @PutMapping(value = "/{deploymentDesignId}/devices/{deviceId}/deploy")
+    public ResultEntity deployComponents(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deploymentDesignId") String deploymentDesignId, @PathVariable(value = "deviceId") String deviceId) throws IOException, InterruptedException {
+        deploymentDesignService.deployComponents(deploymentDesignId, deviceId);
+        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, "部署成功");
     }
 }

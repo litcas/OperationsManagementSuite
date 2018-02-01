@@ -3,12 +3,10 @@ package com.rengu.operationsoanagementsuite.Service;
 import com.rengu.operationsoanagementsuite.Entity.ComponentDetailEntity;
 import com.rengu.operationsoanagementsuite.Entity.ComponentEntity;
 import com.rengu.operationsoanagementsuite.Exception.CustomizeException;
-import com.rengu.operationsoanagementsuite.Utils.ApplicationConfiguration;
 import com.rengu.operationsoanagementsuite.Utils.NotificationMessage;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,9 +20,6 @@ import java.util.UUID;
 
 @Service
 public class ComponentDetailService {
-
-    @Autowired
-    private ApplicationConfiguration applicationConfiguration;
 
     public List<ComponentDetailEntity> getComponentDetails(ComponentEntity componentEntity, MultipartFile[] multipartFiles) throws IOException {
         if (multipartFiles.length == 0) {
@@ -43,7 +38,7 @@ public class ComponentDetailService {
         List<ComponentDetailEntity> componentDetailEntityList = new ArrayList<>();
         for (File file : fileCollection) {
             // 从缓存文件中复制到组件库目录
-            File componentFile = new File(applicationConfiguration.getComponentLibraryPath() + componentEntity.getFilePath() + file.getName());
+            File componentFile = new File(componentEntity.getFilePath() + file.getName());
             FileUtils.copyFile(file, componentFile);
             // 创建组件文件记录
             ComponentDetailEntity componentDetailEntity = new ComponentDetailEntity();
@@ -51,7 +46,7 @@ public class ComponentDetailService {
             componentDetailEntity.setMD5(DigestUtils.md5Hex(new FileInputStream(file)));
             componentDetailEntity.setType(FilenameUtils.getExtension(file.getName()));
             componentDetailEntity.setSize(FileUtils.sizeOf(file));
-            componentDetailEntity.setPath(componentFile.getAbsolutePath());
+            componentDetailEntity.setPath(componentFile.getAbsolutePath().replace(componentEntity.getFilePath(), "/"));
             componentDetailEntityList.add(componentDetailEntity);
         }
         return componentDetailEntityList;
