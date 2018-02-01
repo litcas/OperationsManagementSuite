@@ -88,7 +88,7 @@ public class DeviceService {
             throw new CustomizeException(NotificationMessage.DEVICE_EXISTS);
         }
         DeviceEntity deviceEntity = deviceRepository.findOne(deviceId);
-        if (!hasDeviceByIp(deviceArgs.getIp(), deviceEntity.getProjectEntity().getId())) {
+        if (hasDeviceByIp(deviceArgs.getIp(), deviceEntity.getProjectEntity().getId())) {
             throw new CustomizeException(NotificationMessage.DEVICE_EXISTS);
         }
         BeanUtils.copyProperties(deviceArgs, deviceEntity, "id", "createTime", "projectEntity");
