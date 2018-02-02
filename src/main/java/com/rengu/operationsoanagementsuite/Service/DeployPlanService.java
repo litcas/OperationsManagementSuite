@@ -229,6 +229,7 @@ public class DeployPlanService {
                     IOUtils.copy(new FileInputStream(componentEntity.getFilePath() + componentFileEntity.getPath()), dataOutputStream);
                     // 4、单个文件发送结束标志
                     dataOutputStream.write("fileRecvEnd".getBytes());
+                    int count = 0;
                     while (true) {
                         try {
                             int flag = dataInputStream.read();
@@ -237,7 +238,12 @@ public class DeployPlanService {
                                 break;
                             }
                         } catch (IOException io) {
+                            count = count + 1;
                             dataOutputStream.write("fileRecvEnd".getBytes());
+                            logger.info("等待回复超时，重新发送文件结束标志,第" + count + "次重试。");
+                            if (count == 10) {
+                                break;
+                            }
                         }
                     }
 //                    double sendSpeed = componentFileEntity.getSize() / Integer.parseInt(DurationFormatUtils.formatPeriod(start.getTime(), new Date().getTime(), "s"));
@@ -350,11 +356,13 @@ public class DeployPlanService {
                     exists = true;
                     if (md5.equals(temp.getMD5())) {
                         // 一致文件列表
+                        logger.info(componentFileEntity.getPath() + "---路径、MD5均一致");
                         deviceScanResultEntity.setHasCorrectComponentFiles(true);
                         correctComponentFiles.add(temp);
                         break;
                     } else {
                         // 不一致文件列表
+                        logger.info(componentFileEntity.getPath() + "---路径一致，MD5不一致");
                         deviceScanResultEntity.setHasModifyedComponentFiles(true);
                         modifyedComponentFiles.add(temp);
                         break;
@@ -362,6 +370,7 @@ public class DeployPlanService {
                 }
             }
             if (!exists) {
+                logger.info(componentFileEntity.getPath() + "---未知文件");
                 deviceScanResultEntity.setHasUnknownFiles(true);
                 unknownFiles.add(componentFileEntity);
             }
