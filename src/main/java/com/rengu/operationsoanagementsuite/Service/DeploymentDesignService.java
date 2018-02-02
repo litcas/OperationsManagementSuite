@@ -30,22 +30,18 @@ public class DeploymentDesignService {
 
     // 引入日志记录类
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-    private final StringRedisTemplate stringRedisTemplate;
-    private final UDPService udpService;
-    private final DeploymentDesignRepository deploymentDesignRepository;
-    private final DeploymentDesignDetailService deploymentDesignDetailService;
-    private final ProjectService projectService;
-    private final DeviceService deviceService;
-
     @Autowired
-    public DeploymentDesignService(StringRedisTemplate stringRedisTemplate, UDPService udpService, DeploymentDesignRepository deploymentDesignRepository, DeploymentDesignDetailService deploymentDesignDetailService, ProjectService projectService, DeviceService deviceService) {
-        this.stringRedisTemplate = stringRedisTemplate;
-        this.udpService = udpService;
-        this.deploymentDesignRepository = deploymentDesignRepository;
-        this.deploymentDesignDetailService = deploymentDesignDetailService;
-        this.projectService = projectService;
-        this.deviceService = deviceService;
-    }
+    private StringRedisTemplate stringRedisTemplate;
+    @Autowired
+    private UDPService udpService;
+    @Autowired
+    private DeploymentDesignRepository deploymentDesignRepository;
+    @Autowired
+    private DeploymentDesignDetailService deploymentDesignDetailService;
+    @Autowired
+    private ProjectService projectService;
+    @Autowired
+    private DeviceService deviceService;
 
     // 保存部署设计
     @Transactional
@@ -211,11 +207,11 @@ public class DeploymentDesignService {
         }
     }
 
-    public void deployComponents(String deploymentDesignId, String deviceId, String componentId) throws IOException, InterruptedException {
+    public void deployComponents(String deploymentDesignId, String deviceId, String componentId) throws IOException {
         deploy(deviceService.getDevices(deviceId), deploymentDesignDetailService.getDeploymentDesignDetailsByDeploymentDesignEntityIdAndDeviceEntityIdAndComponentEntityId(deploymentDesignId, deviceId, componentId));
     }
 
-    public void deployComponents(String deploymentDesignId, String deviceId) throws IOException, InterruptedException {
+    public void deployComponents(String deploymentDesignId, String deviceId) throws IOException {
         deploy(deviceService.getDevices(deviceId), deploymentDesignDetailService.getDeploymentDesignDetailsByDeploymentDesignEntityIdAndDeviceEntityId(deploymentDesignId, deviceId));
     }
 
