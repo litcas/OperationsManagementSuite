@@ -49,7 +49,7 @@ public class DeviceService {
             throw new CustomizeException(NotificationMessage.DEVICE_IP_NOT_FOUND);
         }
         // 检查Ip是否已经存在
-        if (hasDeviceByIp(projectId, deviceEntity.getIp())) {
+        if (hasDeviceByIp(deviceEntity.getIp(),projectId)) {
             throw new CustomizeException(NotificationMessage.DEVICE_IP_EXISTS);
         }
         deviceEntity.setProjectEntity(projectService.getProject(projectId));
