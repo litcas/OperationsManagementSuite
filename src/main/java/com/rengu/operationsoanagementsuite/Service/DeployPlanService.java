@@ -232,7 +232,7 @@ public class DeployPlanService {
                     while (true) {
                         try {
                             int flag = dataInputStream.read();
-                            logger.info(componentFileEntity.getPath() + "发送状态：" + flag);
+                            logger.info(deployPlanDetailEntity.getDeployPath() + componentFileEntity.getPath() + "发送状态：" + flag);
                             if (flag == 102) {
                                 break;
                             }
@@ -273,7 +273,11 @@ public class DeployPlanService {
         List<DeployPlanDetailEntity> deployPlanDetailEntityList = deployPlanDetailService.getDeployPlanDetails(deployplanId, deviceId);
         List<DeviceScanResultEntity> deviceScanResultEntityList = new ArrayList<>();
         for (DeployPlanDetailEntity deployPlanDetailEntity : deployPlanDetailEntityList) {
-            deviceScanResultEntityList.add(scanDevices(UUID.randomUUID().toString(), deployPlanDetailEntity, extensions));
+            if (extensions.length == 0) {
+                deviceScanResultEntityList.add(scanDevices(UUID.randomUUID().toString(), deployPlanDetailEntity, null));
+            } else {
+                deviceScanResultEntityList.add(scanDevices(UUID.randomUUID().toString(), deployPlanDetailEntity, extensions));
+            }
         }
         return deviceScanResultEntityList;
     }
@@ -294,7 +298,7 @@ public class DeployPlanService {
         return scanDevices(UUID.randomUUID().toString(), deployPlanDetailEntity, extensions);
     }
 
-    private DeviceScanResultEntity scanDevices(String id, DeployPlanDetailEntity deployPlanDetailEntity, String[] extensions) throws IOException, InterruptedException {
+    private DeviceScanResultEntity scanDevices(String id, DeployPlanDetailEntity deployPlanDetailEntity, String... extensions) throws IOException, InterruptedException {
         DeviceEntity deviceEntity = deployPlanDetailEntity.getDeviceEntity();
         udpService.sendScanDeviceMessage(deviceEntity.getIp(), deviceEntity.getUDPPort(), id, deployPlanDetailEntity, extensions);
         // 查询Redis中的存放的内容
