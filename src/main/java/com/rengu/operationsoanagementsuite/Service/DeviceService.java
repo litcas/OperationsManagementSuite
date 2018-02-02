@@ -88,8 +88,10 @@ public class DeviceService {
             throw new CustomizeException(NotificationMessage.DEVICE_EXISTS);
         }
         DeviceEntity deviceEntity = deviceRepository.findOne(deviceId);
-        if (hasDeviceByIp(deviceArgs.getIp(), deviceEntity.getProjectEntity().getId())) {
-            throw new CustomizeException(NotificationMessage.DEVICE_EXISTS);
+        if (!deviceArgs.getIp().equals(deviceEntity.getIp())) {
+            if (hasDeviceByIp(deviceArgs.getIp(), deviceEntity.getProjectEntity().getId())) {
+                throw new CustomizeException(NotificationMessage.DEVICE_EXISTS);
+            }
         }
         BeanUtils.copyProperties(deviceArgs, deviceEntity, "id", "createTime", "projectEntity");
         deviceEntity.setLastModified(new Date());
@@ -162,6 +164,17 @@ public class DeviceService {
             deviceEntities.add(deviceEntity);
         }
         return deviceEntities;
+    }
+
+    public DeviceEntity onlineChecker(DeviceEntity deviceEntity) {
+        List<DeviceRealInfoEntity> unknowDevices = new ArrayList<>(HearBeatTask.onlineDevices);
+        for (DeviceRealInfoEntity deviceRealInfoEntity : unknowDevices) {
+            if (deviceEntity.getIp().equals(deviceRealInfoEntity.getInetAddress().getHostAddress())) {
+                deviceEntity.setOnline(true);
+                return deviceEntity;
+            }
+        }
+        return deviceEntity;
     }
 
     public boolean hasDevice(String deviceId) {

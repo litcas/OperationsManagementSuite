@@ -13,16 +13,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import javax.persistence.criteria.Predicate;
 import javax.transaction.Transactional;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Date;
@@ -101,7 +97,12 @@ public class DeployPlanService {
     // 查看部署设计
     @Transactional
     public DeployPlanEntity getDeployPlans(String deployplanId) {
-        return deployPlanRepository.findOne(deployplanId);
+        DeployPlanEntity deployPlanEntity = deployPlanRepository.findOne(deployplanId);
+        for (DeployPlanDetailEntity deployPlanDetailEntity : deployPlanEntity.getDeployPlanDetailEntities()) {
+            DeviceEntity deviceEntity = deviceService.onlineChecker(deployPlanDetailEntity.getDeviceEntity());
+            deployPlanDetailEntity.setDeviceEntity(deviceEntity);
+        }
+        return deployPlanEntity;
     }
 
     @Transactional
@@ -187,7 +188,6 @@ public class DeployPlanService {
         return deployPlanDetailService.getDeployPlanDetails(deployplanId, deviceId);
     }
 
-
     // 开始部署
     @Transactional
     public void startDeploy(String deployplanId, String deviceId) throws IOException, InterruptedException {
@@ -204,12 +204,15 @@ public class DeployPlanService {
     }
 
     // 异步发送文件
-    @Async
-    void startDeploy(DeviceEntity deviceEntity, List<DeployPlanDetailEntity> deployPlanDetailEntities, DeployLogEntity deployLogEntity) throws IOException, InterruptedException {
+    void startDeploy(DeviceEntity deviceEntity, List<DeployPlanDetailEntity> deployPlanDetailEntities, DeployLogEntity deployLogEntity) throws IOException {
+        Date startTime = new Date();
         Socket socket = new Socket(deviceEntity.getIp(), deviceEntity.getTCPPort());
+        socket.setTcpNoDelay(true);
+        socket.setSoTimeout(1000);
         if (socket.isConnected()) {
             deployLogService.updateDeployLogsStarted(deployLogEntity, true);
             DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
+            DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
             // 连接成功
             int fileCount = 0;
             long remainingSize = deployLogEntity.getSize();
@@ -226,9 +229,19 @@ public class DeployPlanService {
                     IOUtils.copy(new FileInputStream(componentEntity.getFilePath() + componentFileEntity.getPath()), dataOutputStream);
                     // 4、单个文件发送结束标志
                     dataOutputStream.write("fileRecvEnd".getBytes());
-                    Thread.sleep(1000);
-                    Date end = new Date();
-                    double sendSpeed = componentFileEntity.getSize() / Integer.parseInt(DurationFormatUtils.formatPeriod(start.getTime(), end.getTime(), "s"));
+                    while (true) {
+                        try {
+                            int flag = dataInputStream.read();
+                            logger.info(componentFileEntity.getPath() + "发送状态：" + flag);
+                            if (flag == 102) {
+                                break;
+                            }
+                        } catch (IOException io) {
+                            dataOutputStream.write("fileRecvEnd".getBytes());
+                        }
+                    }
+//                    double sendSpeed = componentFileEntity.getSize() / Integer.parseInt(DurationFormatUtils.formatPeriod(start.getTime(), new Date().getTime(), "s"));
+                    double sendSpeed = 150;
                     remainingSize = remainingSize - componentFileEntity.getSize();
                     double remainingTime = remainingSize / sendSpeed;
                     fileCount = fileCount + 1;
@@ -242,6 +255,7 @@ public class DeployPlanService {
             socket.close();
             deployLogService.updateDeployLogsFinished(deployLogEntity, true);
         }
+        logger.info("发送时间：" + DurationFormatUtils.formatPeriod(startTime.getTime(), new Date().getTime(), "s") + "秒");
     }
 
     public List<DeviceScanResultEntity> scanDevices(String deployplanId, String deviceId, String[] extensions) throws IOException, InterruptedException {
