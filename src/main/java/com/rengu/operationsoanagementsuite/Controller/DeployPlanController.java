@@ -4,6 +4,7 @@ import com.rengu.operationsoanagementsuite.Entity.DeployPlanDetailEntity;
 import com.rengu.operationsoanagementsuite.Entity.DeployPlanEntity;
 import com.rengu.operationsoanagementsuite.Entity.ResultEntity;
 import com.rengu.operationsoanagementsuite.Entity.UserEntity;
+import com.rengu.operationsoanagementsuite.Service.BaselineService;
 import com.rengu.operationsoanagementsuite.Service.DeployPlanService;
 import com.rengu.operationsoanagementsuite.Utils.NotificationMessage;
 import com.rengu.operationsoanagementsuite.Utils.ResultUtils;
@@ -20,6 +21,8 @@ import java.io.IOException;
 public class DeployPlanController {
     @Autowired
     private DeployPlanService deployPlanService;
+    @Autowired
+    private BaselineService baselineService;
 
     // 删除部署设计
     @DeleteMapping(value = "/{deployplanId}")
@@ -82,7 +85,6 @@ public class DeployPlanController {
     public ResultEntity getDeployPlanDetails(@AuthenticationPrincipal UserEntity loginUser, @PathVariable("deployplanId") String deployplanId, @PathVariable("deviceId") String deviceId) {
         return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, deployPlanService.getDeployPlanDetails(deployplanId, deviceId));
     }
-
 
     // 开始部署
     @GetMapping(value = "/deploy/{deployplanId}/devices/{deviceId}")

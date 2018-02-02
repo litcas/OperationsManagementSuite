@@ -1,8 +1,10 @@
 package com.rengu.operationsoanagementsuite.Service;
 
-import com.rengu.operationsoanagementsuite.Entity.DeviceEntity;
-import com.rengu.operationsoanagementsuite.Entity.DeviceRealInfoEntity;
+import com.rengu.operationsoanagementsuite.Entity.*;
 import com.rengu.operationsoanagementsuite.Exception.CustomizeException;
+import com.rengu.operationsoanagementsuite.Repository.DeployLogRepository;
+import com.rengu.operationsoanagementsuite.Repository.DeployPlanDetailRepository;
+import com.rengu.operationsoanagementsuite.Repository.DeployPlanRepository;
 import com.rengu.operationsoanagementsuite.Repository.DeviceRepository;
 import com.rengu.operationsoanagementsuite.Task.HearBeatTask;
 import com.rengu.operationsoanagementsuite.Utils.NotificationMessage;
@@ -17,6 +19,7 @@ import javax.persistence.criteria.Predicate;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 @Service
@@ -28,6 +31,12 @@ public class DeviceService {
     private DeviceRepository deviceRepository;
     @Autowired
     private ProjectService projectService;
+    @Autowired
+    private DeployLogRepository deployLogRepository;
+    @Autowired
+    private DeployPlanDetailRepository deployPlanDetailRepository;
+    @Autowired
+    private DeployPlanRepository deployPlanRepository;
 
     // 新增设备
     @Transactional
@@ -40,7 +49,7 @@ public class DeviceService {
             throw new CustomizeException(NotificationMessage.DEVICE_IP_NOT_FOUND);
         }
         // 检查Ip是否已经存在
-        if (hasDeviceByIp(projectId, deviceEntity.getIp())) {
+        if (hasDeviceByIp(deviceEntity.getIp(),projectId)) {
             throw new CustomizeException(NotificationMessage.DEVICE_IP_EXISTS);
         }
         deviceEntity.setProjectEntity(projectService.getProject(projectId));
@@ -55,6 +64,19 @@ public class DeviceService {
         if (!hasDevice(deviceId)) {
             throw new CustomizeException(NotificationMessage.DEVICE_EXISTS);
         }
+        if (deployLogRepository.findByDeviceEntityId(deviceId).size() != 0) {
+            for (DeployLogEntity deployLogEntity : deployLogRepository.findByDeviceEntityId(deviceId)) {
+                deployLogRepository.delete(deployLogEntity);
+            }
+        }
+        if (deployPlanDetailRepository.findByDeviceEntityId(deviceId).size() != 0) {
+            for (DeployPlanDetailEntity deployPlanDetailEntity : deployPlanDetailRepository.findByDeviceEntityId(deviceId)) {
+                DeployPlanEntity deployPlanEntity = deployPlanDetailEntity.getDeployPlanEntity();
+                deployPlanEntity.getDeployPlanDetailEntities().remove(deployPlanDetailEntity);
+                deployPlanRepository.save(deployPlanEntity);
+                deployPlanDetailRepository.delete(deployPlanDetailEntity);
+            }
+        }
         deviceRepository.delete(deviceId);
     }
 
@@ -66,8 +88,10 @@ public class DeviceService {
             throw new CustomizeException(NotificationMessage.DEVICE_EXISTS);
         }
         DeviceEntity deviceEntity = deviceRepository.findOne(deviceId);
-        if (!hasDeviceByIp(deviceArgs.getIp(), deviceEntity.getProjectEntity().getId())) {
-            throw new CustomizeException(NotificationMessage.DEVICE_EXISTS);
+        if (!deviceArgs.getIp().equals(deviceEntity.getIp())) {
+            if (hasDeviceByIp(deviceArgs.getIp(), deviceEntity.getProjectEntity().getId())) {
+                throw new CustomizeException(NotificationMessage.DEVICE_EXISTS);
+            }
         }
         BeanUtils.copyProperties(deviceArgs, deviceEntity, "id", "createTime", "projectEntity");
         deviceEntity.setLastModified(new Date());
@@ -119,15 +143,38 @@ public class DeviceService {
     }
 
     public List<DeviceEntity> onlineChecker(List<DeviceEntity> deviceEntities) {
+        List<DeviceRealInfoEntity> unknowDevices = new ArrayList<>(HearBeatTask.onlineDevices);
         for (DeviceEntity deviceEntity : deviceEntities) {
-            for (DeviceRealInfoEntity deviceRealInfoEntity : HearBeatTask.onlineDevices) {
+            Iterator<DeviceRealInfoEntity> deviceRealInfoEntityIterable = unknowDevices.iterator();
+            while (deviceRealInfoEntityIterable.hasNext()) {
+                DeviceRealInfoEntity deviceRealInfoEntity = deviceRealInfoEntityIterable.next();
                 if (deviceEntity.getIp().equals(deviceRealInfoEntity.getInetAddress().getHostAddress())) {
                     deviceEntity.setOnline(true);
+                    deviceRealInfoEntityIterable.remove();
                     break;
                 }
             }
         }
+        for (DeviceRealInfoEntity deviceRealInfoEntity : unknowDevices) {
+            DeviceEntity deviceEntity = new DeviceEntity();
+            deviceEntity.setName(deviceRealInfoEntity.getInetAddress().getHostName());
+            deviceEntity.setIp(deviceRealInfoEntity.getInetAddress().getHostAddress());
+            deviceEntity.setVirtual(true);
+            deviceEntity.setOnline(true);
+            deviceEntities.add(deviceEntity);
+        }
         return deviceEntities;
+    }
+
+    public DeviceEntity onlineChecker(DeviceEntity deviceEntity) {
+        List<DeviceRealInfoEntity> unknowDevices = new ArrayList<>(HearBeatTask.onlineDevices);
+        for (DeviceRealInfoEntity deviceRealInfoEntity : unknowDevices) {
+            if (deviceEntity.getIp().equals(deviceRealInfoEntity.getInetAddress().getHostAddress())) {
+                deviceEntity.setOnline(true);
+                return deviceEntity;
+            }
+        }
+        return deviceEntity;
     }
 
     public boolean hasDevice(String deviceId) {

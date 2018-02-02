@@ -11,4 +11,6 @@ public interface DeployPlanDetailRepository extends JpaRepository<DeployPlanDeta
     List<DeployPlanDetailEntity> findByDeployPlanEntityIdAndDeviceEntityId(String deployplanId, String deviceId);
 
     DeployPlanDetailEntity findByDeployPlanEntityIdAndDeviceEntityIdAndComponentEntityId(String deployplanId, String deviceId, String componentId);
+
+    List<DeployPlanDetailEntity> findByDeviceEntityId(String deviceId);
 }

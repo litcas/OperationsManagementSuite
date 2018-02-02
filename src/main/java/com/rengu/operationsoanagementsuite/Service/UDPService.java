@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.net.*;
+import java.util.Arrays;
 
 @Service
 public class UDPService {
@@ -16,6 +17,7 @@ public class UDPService {
     public void sendScanDeviceMessage(String ip, int port, String id, DeployPlanDetailEntity deployPlanDetailEntity, String[] extensions) throws IOException {
         String message = getScanDeviceMessage(id, deployPlanDetailEntity, extensions);
         sandMessage(ip, port, message);
+        System.out.println(message + "发送至：" + ip + ":" + port);
     }
 
     public void sendServerIpMessage(InetAddress inetAddress, int port, InterfaceAddress interfaceAddress) throws IOException {
@@ -49,20 +51,17 @@ public class UDPService {
         String requestId = Tools.getString(id, 37);
         String deviceId = Tools.getString(deployPlanDetailEntity.getDeviceEntity().getId(), 37);
         String componentId = Tools.getString(deployPlanDetailEntity.getComponentEntity().getId(), 37);
-        String temp = "";
-        if (extensions.length != 0) {
+        String extension = null;
+        if (extensions != null) {
             codeType = "S103";
-            for (int i = 0; i < extensions.length; i++) {
-                if (i == extensions.length - 1) {
-                    temp = temp + extensions[i];
-                } else {
-                    temp = temp + extensions[i] + ",";
-                }
-            }
+            extension = Tools.getString(Arrays.toString(extensions).replace("[", "").replace("]", "").replaceAll("\\s*", ""), 128);
         }
         codeType = Tools.getString(codeType, 4);
-        String extension = Tools.getString(temp, 128);
         String deployPath = Tools.getString(deployPlanDetailEntity.getDeployPath(), 256);
-        return codeType + requestId + deviceId + componentId + extension + deployPath;
+        if (extension == null) {
+            return codeType + requestId + deviceId + componentId + deployPath;
+        } else {
+            return codeType + requestId + deviceId + componentId + extension + deployPath;
+        }
     }
 }

@@ -81,11 +81,12 @@ public class ComponentService {
 
     // 更新组件信息
     @Transactional
-    public ComponentEntity updateComponents(String componentId, MultipartFile[] multipartFiles) throws IOException {
+    public ComponentEntity updateComponents(String componentId, ComponentEntity componentArgs, MultipartFile[] multipartFiles) throws IOException {
         if (!hasComponent(componentId)) {
             throw new CustomizeException(NotificationMessage.COMPONENT_NOT_FOUND);
         }
         ComponentEntity componentEntity = getComponent(componentId);
+        BeanUtils.copyProperties(componentArgs, componentEntity, "id", "createTime", "name", "version", "filePath", "size", "deleted", "componentFileEntities");
         List<ComponentFileEntity> componentFileEntityList = componentFileService.saveComponentFiles(componentEntity, multipartFiles);
         componentEntity.setComponentFileEntities(addComponentFile(componentEntity, componentFileEntityList));
         // 创建实体文件存放文件夹

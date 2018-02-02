@@ -38,9 +38,9 @@ public class ComponentController {
     }
 
     // 更新组件
-    @PatchMapping(value = "/{componentId}")
-    public ResultEntity updateComponents(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "componentId") String componentId, @RequestParam(value = "componentfile") MultipartFile[] multipartFiles) throws IOException {
-        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, componentService.updateComponents(componentId, multipartFiles));
+    @PostMapping(value = "/{componentId}/update")
+    public ResultEntity updateComponents(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "componentId") String componentId, ComponentEntity componentArgs, @RequestParam(value = "componentfile") MultipartFile[] multipartFiles) throws IOException {
+        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, componentService.updateComponents(componentId, componentArgs, multipartFiles));
     }
 
     // 查询组件
