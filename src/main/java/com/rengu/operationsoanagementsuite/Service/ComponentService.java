@@ -27,12 +27,16 @@ import java.util.UUID;
 @Service
 public class ComponentService {
 
+    private final ApplicationConfiguration applicationConfiguration;
+    private final ComponentRepository componentRepository;
+    private final ComponentDetailService componentDetailService;
+
     @Autowired
-    private ApplicationConfiguration applicationConfiguration;
-    @Autowired
-    private ComponentRepository componentRepository;
-    @Autowired
-    private ComponentDetailService componentDetailService;
+    public ComponentService(ApplicationConfiguration applicationConfiguration, ComponentRepository componentRepository, ComponentDetailService componentDetailService) {
+        this.applicationConfiguration = applicationConfiguration;
+        this.componentRepository = componentRepository;
+        this.componentDetailService = componentDetailService;
+    }
 
     @Transactional
     public ComponentEntity saveComponents(ComponentEntity componentArgs, MultipartFile[] componentFiles) throws IOException {

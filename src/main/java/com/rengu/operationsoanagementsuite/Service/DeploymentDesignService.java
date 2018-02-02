@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -29,18 +30,22 @@ public class DeploymentDesignService {
 
     // 引入日志记录类
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final StringRedisTemplate stringRedisTemplate;
+    private final UDPService udpService;
+    private final DeploymentDesignRepository deploymentDesignRepository;
+    private final DeploymentDesignDetailService deploymentDesignDetailService;
+    private final ProjectService projectService;
+    private final DeviceService deviceService;
+
     @Autowired
-    private StringRedisTemplate stringRedisTemplate;
-    @Autowired
-    private UDPService udpService;
-    @Autowired
-    private DeploymentDesignRepository deploymentDesignRepository;
-    @Autowired
-    private DeploymentDesignDetailService deploymentDesignDetailService;
-    @Autowired
-    private ProjectService projectService;
-    @Autowired
-    private DeviceService deviceService;
+    public DeploymentDesignService(StringRedisTemplate stringRedisTemplate, UDPService udpService, DeploymentDesignRepository deploymentDesignRepository, DeploymentDesignDetailService deploymentDesignDetailService, ProjectService projectService, DeviceService deviceService) {
+        this.stringRedisTemplate = stringRedisTemplate;
+        this.udpService = udpService;
+        this.deploymentDesignRepository = deploymentDesignRepository;
+        this.deploymentDesignDetailService = deploymentDesignDetailService;
+        this.projectService = projectService;
+        this.deviceService = deviceService;
+    }
 
     // 保存部署设计
     @Transactional
@@ -214,9 +219,11 @@ public class DeploymentDesignService {
         deploy(deviceService.getDevices(deviceId), deploymentDesignDetailService.getDeploymentDesignDetailsByDeploymentDesignEntityIdAndDeviceEntityId(deploymentDesignId, deviceId));
     }
 
-    public void deploy(DeviceEntity deviceEntity, List<DeploymentDesignDetailEntity> deploymentDesignDetailEntityList) throws IOException, InterruptedException {
+    public void deploy(DeviceEntity deviceEntity, List<DeploymentDesignDetailEntity> deploymentDesignDetailEntityList) throws IOException {
         Socket socket = new Socket(deviceEntity.getIp(), deviceEntity.getTCPPort());
+        socket.setSoTimeout(2000);
         DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
+        DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
         for (DeploymentDesignDetailEntity deploymentDesignDetailEntity : deploymentDesignDetailEntityList) {
             ComponentEntity componentEntity = deploymentDesignDetailEntity.getComponentEntity();
             for (ComponentDetailEntity componentDetailEntity : componentEntity.getComponentDetailEntities()) {
@@ -229,8 +236,18 @@ public class DeploymentDesignService {
                 IOUtils.copy(new FileInputStream(componentEntity.getFilePath() + componentDetailEntity.getPath()), dataOutputStream);
                 // 单个文件发送结束标志
                 dataOutputStream.write("fileRecvEnd".getBytes());
-                // 增加间隔时间防止TCP粘包
-                Thread.sleep(1000);
+                // 重复发送文件结束标志并等待回复
+                while (true) {
+                    try {
+                        if (dataInputStream.read() == 102) {
+                            logger.info("文件名：" + componentDetailEntity.getPath() + "大小：" + componentDetailEntity.getSize() + "发送成功。");
+                            break;
+                        }
+                    } catch (IOException excepiton) {
+                        dataOutputStream.write("fileRecvEnd".getBytes());
+                        logger.info("文件发送结束标志等待超时，重新发送文件结束标志。");
+                    }
+                }
             }
         }
         // 发送部署结束标志

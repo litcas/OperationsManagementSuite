@@ -14,14 +14,18 @@ import java.util.List;
 @Service
 public class DeploymentDesignDetailService {
 
+    private final DeploymentDesignDetailRepository deploymentDesignDetailRepository;
+    private final DeploymentDesignService deploymentDesignService;
+    private final DeviceService deviceService;
+    private final ComponentService componentService;
+
     @Autowired
-    private DeploymentDesignDetailRepository deploymentDesignDetailRepository;
-    @Autowired
-    private DeploymentDesignService deploymentDesignService;
-    @Autowired
-    private DeviceService deviceService;
-    @Autowired
-    private ComponentService componentService;
+    public DeploymentDesignDetailService(DeploymentDesignDetailRepository deploymentDesignDetailRepository, DeploymentDesignService deploymentDesignService, DeviceService deviceService, ComponentService componentService) {
+        this.deploymentDesignDetailRepository = deploymentDesignDetailRepository;
+        this.deploymentDesignService = deploymentDesignService;
+        this.deviceService = deviceService;
+        this.componentService = componentService;
+    }
 
     @Transactional
     public DeploymentDesignDetailEntity saveDeploymentDesignDetails(String deploymentDesignId, String deviceId, String componentId) {

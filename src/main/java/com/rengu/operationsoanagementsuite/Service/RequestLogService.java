@@ -14,8 +14,12 @@ import javax.transaction.Transactional;
 @Service
 public class RequestLogService {
 
+    private final RequestLogRepository requestLogRepository;
+
     @Autowired
-    private RequestLogRepository requestLogRepository;
+    public RequestLogService(RequestLogRepository requestLogRepository) {
+        this.requestLogRepository = requestLogRepository;
+    }
 
     // 新增请求日志
     @Transactional

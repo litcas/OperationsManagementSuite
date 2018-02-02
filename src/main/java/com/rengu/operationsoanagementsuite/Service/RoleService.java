@@ -16,8 +16,12 @@ public class RoleService {
     public static final String USER_ROLE_NAME = "ROLE_USER";
     public static final String ADMIN_ROLE_NAME = "ROLE_ADMIN";
 
+    private final RoleRepository roleRepository;
+
     @Autowired
-    private RoleRepository roleRepository;
+    public RoleService(RoleRepository roleRepository) {
+        this.roleRepository = roleRepository;
+    }
 
     // 保存角色
     @Transactional

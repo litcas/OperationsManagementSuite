@@ -55,11 +55,13 @@ public class DeviceService {
         if (StringUtils.isEmpty(deviceArgs.getIp())) {
             throw new CustomizeException(NotificationMessage.DEVICE_IP_NOT_FOUND);
         }
-        if (hasIp(deviceArgs.getProjectEntity().getId(), deviceArgs.getIp())) {
-            throw new CustomizeException(NotificationMessage.DEVICE_EXISTS);
-        }
         DeviceEntity deviceEntity = getDevices(deviceId);
-        BeanUtils.copyProperties(deviceArgs, deviceEntity, "id", "createTime");
+        if (!deviceArgs.getIp().equals(deviceEntity.getIp())) {
+            if (hasIp(deviceArgs.getProjectEntity().getId(), deviceArgs.getIp())) {
+                throw new CustomizeException(NotificationMessage.DEVICE_EXISTS);
+            }
+        }
+        BeanUtils.copyProperties(deviceArgs, deviceEntity, "id", "createTime", "projectEntity");
         return deviceRepository.save(deviceEntity);
     }
 
