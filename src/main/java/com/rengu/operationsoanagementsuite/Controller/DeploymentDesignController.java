@@ -45,13 +45,20 @@ public class DeploymentDesignController {
     }
 
     // 保存部署设计详情
-    @PostMapping(value = "/{deploymentDesignId}/devices/{deviceId}/components/{componentId}")
+    @PostMapping(value = "/{deploymentDesignId}/deploymentdesigndetails")
+    public ResultEntity saveDeploymentDesignDetails(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deploymentDesignId") String deploymentDesignId, @RequestParam(value = "deviceIds") String[] deviceIds, @RequestParam(value = "componentIds") String[] componentIds) {
+        return ResultUtils.resultBuilder(loginUser, HttpStatus.CREATED, deploymentDesignService.saveDeploymentDesignDetails(deploymentDesignId, deviceIds, componentIds));
+    }
+
+
+    // 保存部署设计详情
+    @PostMapping(value = "/{deploymentDesignId}/deploymentdesigndetails/devices/{deviceId}/components/{componentId}")
     public ResultEntity saveDeploymentDesignDetails(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deploymentDesignId") String deploymentDesignId, @PathVariable(value = "deviceId") String deviceId, @PathVariable(value = "componentId") String componentId) {
         return ResultUtils.resultBuilder(loginUser, HttpStatus.CREATED, deploymentDesignService.saveDeploymentDesignDetails(deploymentDesignId, deviceId, componentId));
     }
 
     // 保存部署设计详情
-    @PostMapping(value = "/{deploymentDesignId}/devices/{deviceId}")
+    @PostMapping(value = "/{deploymentDesignId}/deploymentdesigndetails/devices/{deviceId}")
     public ResultEntity saveDeploymentDesignDetails(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deploymentDesignId") String deploymentDesignId, @PathVariable(value = "deviceId") String deviceId, @RequestParam(value = "componentIds") String[] componentIds) {
         return ResultUtils.resultBuilder(loginUser, HttpStatus.CREATED, deploymentDesignService.saveDeploymentDesignDetails(deploymentDesignId, deviceId, componentIds));
     }

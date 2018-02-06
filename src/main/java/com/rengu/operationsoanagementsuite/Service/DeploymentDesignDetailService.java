@@ -38,6 +38,15 @@ public class DeploymentDesignDetailService {
     }
 
     @Transactional
+    public List<DeploymentDesignDetailEntity> saveDeploymentDesignDetails(String deploymentDesignId, String[] deviceIds, String[] componentIds) {
+        List<DeploymentDesignDetailEntity> deploymentDesignDetailEntityList = new ArrayList<>();
+        for (int i = 0; i <= deviceIds.length; i++) {
+            deploymentDesignDetailEntityList.add(saveDeploymentDesignDetail(deploymentDesignId, deviceIds[i], componentIds[i]));
+        }
+        return deploymentDesignDetailEntityList;
+    }
+
+    @Transactional
     public DeploymentDesignDetailEntity saveDeploymentDesignDetail(String deploymentDesignId, String deviceId, String componentId) {
         DeploymentDesignDetailEntity deploymentDesignDetailEntity = new DeploymentDesignDetailEntity();
         deploymentDesignDetailEntity.setDeploymentDesignEntity(deploymentDesignService.getDeploymentDesigns(deploymentDesignId));

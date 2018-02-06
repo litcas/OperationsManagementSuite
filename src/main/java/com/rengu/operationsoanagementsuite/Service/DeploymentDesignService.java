@@ -100,6 +100,11 @@ public class DeploymentDesignService {
     }
 
     @Transactional
+    public List<DeploymentDesignDetailEntity> saveDeploymentDesignDetails(String deploymentDesignId, String[] deviceIds, String[] componentIds) {
+        return deploymentDesignDetailService.saveDeploymentDesignDetails(deploymentDesignId, deviceIds, componentIds);
+    }
+
+    @Transactional
     public List<DeploymentDesignDetailEntity> saveDeploymentDesignDetails(String deploymentDesignId, String deviceId, String[] componentIds) {
         return deploymentDesignDetailService.saveDeploymentDesignDetails(deploymentDesignId, deviceId, componentIds);
     }
