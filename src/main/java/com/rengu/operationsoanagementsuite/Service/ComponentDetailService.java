@@ -38,7 +38,7 @@ public class ComponentDetailService {
         List<ComponentDetailEntity> componentDetailEntityList = new ArrayList<>();
         for (File file : fileCollection) {
             // 从缓存文件中复制到组件库目录
-            File componentFile = new File(componentEntity.getFilePath() + file.getName());
+            File componentFile = new File(componentEntity.getFilePath() + file.getAbsolutePath().replace(srcDir.getAbsolutePath(), "").replace("//", "/"));
             FileUtils.copyFile(file, componentFile);
             // 创建组件文件记录
             ComponentDetailEntity componentDetailEntity = new ComponentDetailEntity();

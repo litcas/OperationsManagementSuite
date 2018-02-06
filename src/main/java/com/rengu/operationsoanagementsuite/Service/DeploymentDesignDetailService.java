@@ -79,7 +79,11 @@ public class DeploymentDesignDetailService {
         if (!deploymentDesignService.hasDeploymentDesigns(deploymentDesignId)) {
             throw new CustomizeException(NotificationMessage.DEPLOYMENT_DESIGN_NOT_FOUND);
         }
-        return deploymentDesignDetailRepository.findByDeploymentDesignEntityId(deploymentDesignId);
+        List<DeploymentDesignDetailEntity> deploymentDesignDetailEntityList = deploymentDesignDetailRepository.findByDeploymentDesignEntityId(deploymentDesignId);
+        for (DeploymentDesignDetailEntity deploymentDesignDetailEntity : deploymentDesignDetailEntityList) {
+            deploymentDesignDetailEntity.setDeviceEntity(deviceService.onlineChecker(deploymentDesignDetailEntity.getDeviceEntity()));
+        }
+        return deploymentDesignDetailEntityList;
     }
 
     // 按设备id查询

@@ -18,7 +18,7 @@ import java.util.List;
 @Service
 public class DeviceService {
 
-    public static List<HeartbeatEntity> onlineHeartbeats = new ArrayList<>();
+    public static volatile List<HeartbeatEntity> onlineHeartbeats = new ArrayList<>();
     @Autowired
     private DeviceRepository deviceRepository;
     @Autowired
@@ -132,9 +132,9 @@ public class DeviceService {
         List<HeartbeatEntity> onlineDevices = new ArrayList<>(onlineHeartbeats);
         Iterator<HeartbeatEntity> heartbeatEntityIterator = onlineDevices.iterator();
         if (onlineDevices.size() != 0) {
-            for (DeviceEntity deviceEntity : deviceEntityList) {
-                while (heartbeatEntityIterator.hasNext()) {
-                    HeartbeatEntity heartbeatEntity = heartbeatEntityIterator.next();
+            while (heartbeatEntityIterator.hasNext()) {
+                HeartbeatEntity heartbeatEntity = heartbeatEntityIterator.next();
+                for (DeviceEntity deviceEntity : deviceEntityList) {
                     if (deviceEntity.getIp().equals(heartbeatEntity.getInetAddress().getHostAddress())) {
                         deviceEntity.setOnline(true);
                         heartbeatEntityIterator.remove();
@@ -142,7 +142,6 @@ public class DeviceService {
                     }
                 }
             }
-
             // 建立虚拟设备
             for (HeartbeatEntity heartbeatEntity : onlineDevices) {
                 DeviceEntity deviceEntity = new DeviceEntity();

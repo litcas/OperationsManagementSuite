@@ -3,6 +3,8 @@ package com.rengu.operationsoanagementsuite.Service;
 import com.rengu.operationsoanagementsuite.Entity.RequestLogEntity;
 import com.rengu.operationsoanagementsuite.Entity.ResultEntity;
 import com.rengu.operationsoanagementsuite.Repository.RequestLogRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -14,6 +16,8 @@ import javax.transaction.Transactional;
 @Service
 public class RequestLogService {
 
+    // 引入日志记录类
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final RequestLogRepository requestLogRepository;
 
     @Autowired
@@ -35,5 +39,6 @@ public class RequestLogService {
         requestLogEntity.setRequestUrl(httpServletRequest.getRequestURI());
         requestLogEntity.setUserAgent(httpServletRequest.getHeader("User-Agent"));
         requestLogRepository.save(requestLogEntity);
+        logger.info("用户：" + resultEntity.getUsername() + "--->调用接口：" + httpServletRequest.getRequestURI() + "--->状态：" + resultEntity.getCode());
     }
 }
