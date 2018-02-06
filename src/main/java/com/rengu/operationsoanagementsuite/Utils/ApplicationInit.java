@@ -1,5 +1,6 @@
 package com.rengu.operationsoanagementsuite.Utils;
 
+import com.rengu.operationsoanagementsuite.Configuration.ApplicationConfiguration;
 import com.rengu.operationsoanagementsuite.Entity.RoleEntity;
 import com.rengu.operationsoanagementsuite.Entity.UserEntity;
 import com.rengu.operationsoanagementsuite.Service.RoleService;

@@ -1,4 +1,4 @@
-package com.rengu.operationsoanagementsuite.Utils;
+package com.rengu.operationsoanagementsuite.Configuration;
 
 import org.springframework.context.annotation.Configuration;
 

@@ -1,5 +1,6 @@
 package com.rengu.operationsoanagementsuite.Service;
 
+import com.rengu.operationsoanagementsuite.Utils.Utils;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -28,29 +29,21 @@ public class UDPService {
     }
 
     public void sendScanDeviceOrderMessage(String id, String ip, int port, String deviceId, String componentId, String path) throws IOException {
-        String codeType = getString("S102", 4);
-        id = getString(id, 37);
-        deviceId = getString(deviceId, 37);
-        componentId = getString(componentId, 37);
-        path = getString(path, 256);
+        String codeType = Utils.getString("S102", 4);
+        id = Utils.getString(id, 37);
+        deviceId = Utils.getString(deviceId, 37);
+        componentId = Utils.getString(componentId, 37);
+        path = Utils.getString(path, 256);
         sandMessage(ip, port, codeType + id + deviceId + componentId + path);
     }
 
     public void sendScanDeviceOrderMessage(String id, String ip, int port, String deviceId, String componentId, String path, String[] extensions) throws IOException {
-        String codeType = getString("S103", 4);
-        id = getString(id, 37);
-        deviceId = getString(deviceId, 37);
-        componentId = getString(componentId, 37);
-        path = getString(path, 256);
-        String extension = getString(Arrays.toString(extensions).replace("[", "").replace("]", "").replaceAll("\\s*", ""), 128);
+        String codeType = Utils.getString("S103", 4);
+        id = Utils.getString(id, 37);
+        deviceId = Utils.getString(deviceId, 37);
+        componentId = Utils.getString(componentId, 37);
+        path = Utils.getString(path, 256);
+        String extension = Utils.getString(Arrays.toString(extensions).replace("[", "").replace("]", "").replaceAll("\\s*", ""), 128);
         sandMessage(ip, port, codeType + id + deviceId + componentId + extension + path);
-    }
-
-    // 生成指定长度的字符串
-    private String getString(String string, int length) {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(string);
-        stringBuilder.setLength(length);
-        return stringBuilder.toString();
     }
 }

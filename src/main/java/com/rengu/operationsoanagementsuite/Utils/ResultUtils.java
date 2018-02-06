@@ -1,5 +1,6 @@
 package com.rengu.operationsoanagementsuite.Utils;
 
+import com.rengu.operationsoanagementsuite.Entity.ResultEntity;
 import com.rengu.operationsoanagementsuite.Entity.UserEntity;
 import org.springframework.http.HttpStatus;
 

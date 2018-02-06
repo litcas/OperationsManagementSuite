@@ -1,4 +1,4 @@
-package com.rengu.operationsoanagementsuite.Utils;
+package com.rengu.operationsoanagementsuite.Entity;
 
 import java.net.InetAddress;
 import java.util.Objects;

@@ -1,10 +1,10 @@
 package com.rengu.operationsoanagementsuite.Service;
 
+import com.rengu.operationsoanagementsuite.Configuration.ApplicationConfiguration;
 import com.rengu.operationsoanagementsuite.Entity.ComponentDetailEntity;
 import com.rengu.operationsoanagementsuite.Entity.ComponentEntity;
 import com.rengu.operationsoanagementsuite.Exception.CustomizeException;
 import com.rengu.operationsoanagementsuite.Repository.ComponentRepository;
-import com.rengu.operationsoanagementsuite.Utils.ApplicationConfiguration;
 import com.rengu.operationsoanagementsuite.Utils.CompressUtils;
 import com.rengu.operationsoanagementsuite.Utils.JsonUtils;
 import com.rengu.operationsoanagementsuite.Utils.NotificationMessage;

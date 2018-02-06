@@ -1,6 +1,4 @@
-package com.rengu.operationsoanagementsuite.Utils;
-
-import com.rengu.operationsoanagementsuite.Entity.ComponentDetailEntity;
+package com.rengu.operationsoanagementsuite.Entity;
 
 import java.io.Serializable;
 import java.util.List;

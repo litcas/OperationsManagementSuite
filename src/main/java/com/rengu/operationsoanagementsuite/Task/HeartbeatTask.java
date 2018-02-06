@@ -1,9 +1,9 @@
 package com.rengu.operationsoanagementsuite.Task;
 
+import com.rengu.operationsoanagementsuite.Configuration.ApplicationConfiguration;
+import com.rengu.operationsoanagementsuite.Entity.HeartbeatEntity;
 import com.rengu.operationsoanagementsuite.Service.DeviceService;
 import com.rengu.operationsoanagementsuite.Service.UDPService;
-import com.rengu.operationsoanagementsuite.Utils.ApplicationConfiguration;
-import com.rengu.operationsoanagementsuite.Utils.HeartbeatEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -3,12 +3,9 @@ package com.rengu.operationsoanagementsuite.Service;
 import com.rengu.operationsoanagementsuite.Entity.*;
 import com.rengu.operationsoanagementsuite.Exception.CustomizeException;
 import com.rengu.operationsoanagementsuite.Repository.DeploymentDesignRepository;
+import com.rengu.operationsoanagementsuite.Task.AsyncTask;
 import com.rengu.operationsoanagementsuite.Utils.JsonUtils;
 import com.rengu.operationsoanagementsuite.Utils.NotificationMessage;
-import com.rengu.operationsoanagementsuite.Utils.ScanResultEntity;
-import org.apache.commons.io.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -16,11 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -28,12 +21,12 @@ import java.util.UUID;
 @Service
 public class DeploymentDesignService {
 
-    // 引入日志记录类
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
     @Autowired
     private UDPService udpService;
+    @Autowired
+    private AsyncTask asyncTask;
     @Autowired
     private DeploymentDesignRepository deploymentDesignRepository;
     @Autowired
@@ -216,50 +209,13 @@ public class DeploymentDesignService {
     }
 
     public void deployComponents(String deploymentDesignId, String deviceId, String componentId) throws IOException {
-        deploy(deviceService.getDevices(deviceId), deploymentDesignDetailService.getDeploymentDesignDetailsByDeploymentDesignEntityIdAndDeviceEntityIdAndComponentEntityId(deploymentDesignId, deviceId, componentId));
+        asyncTask.deploy(deviceService.getDevices(deviceId), deploymentDesignDetailService.getDeploymentDesignDetailsByDeploymentDesignEntityIdAndDeviceEntityIdAndComponentEntityId(deploymentDesignId, deviceId, componentId));
     }
 
     public void deployDevices(String deploymentDesignId, String deviceId) throws IOException {
-        deploy(deviceService.getDevices(deviceId), deploymentDesignDetailService.getDeploymentDesignDetailsByDeploymentDesignEntityIdAndDeviceEntityId(deploymentDesignId, deviceId));
+        asyncTask.deploy(deviceService.getDevices(deviceId), deploymentDesignDetailService.getDeploymentDesignDetailsByDeploymentDesignEntityIdAndDeviceEntityId(deploymentDesignId, deviceId));
     }
 
-    public void deploy(DeviceEntity deviceEntity, List<DeploymentDesignDetailEntity> deploymentDesignDetailEntityList) throws IOException {
-        Socket socket = new Socket(deviceEntity.getIp(), deviceEntity.getTCPPort());
-        socket.setSoTimeout(2000);
-        DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
-        DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
-        for (DeploymentDesignDetailEntity deploymentDesignDetailEntity : deploymentDesignDetailEntityList) {
-            ComponentEntity componentEntity = deploymentDesignDetailEntity.getComponentEntity();
-            for (ComponentDetailEntity componentDetailEntity : componentEntity.getComponentDetailEntities()) {
-                // 组件部署逻辑
-                dataOutputStream.write("fileRecvStart".getBytes());
-                // 发送文件路径 + 文件名
-                String destPath = getString(deploymentDesignDetailEntity.getDeployPath() + componentDetailEntity.getPath(), 255 - (deploymentDesignDetailEntity.getDeployPath() + componentDetailEntity.getPath()).getBytes().length);
-                dataOutputStream.write(destPath.getBytes());
-                // 发送文件实体
-                IOUtils.copy(new FileInputStream(componentEntity.getFilePath() + componentDetailEntity.getPath()), dataOutputStream);
-                // 单个文件发送结束标志
-                dataOutputStream.write("fileRecvEnd".getBytes());
-                // 重复发送文件结束标志并等待回复
-                while (true) {
-                    try {
-                        if (dataInputStream.read() == 102) {
-                            logger.info("文件名：" + componentDetailEntity.getPath() + "大小：" + componentDetailEntity.getSize() + "发送成功。");
-                            break;
-                        }
-                    } catch (IOException excepiton) {
-                        dataOutputStream.write("fileRecvEnd".getBytes());
-                        logger.info("文件发送结束标志等待超时，重新发送文件结束标志。");
-                    }
-                }
-            }
-        }
-        // 发送部署结束标志
-        dataOutputStream.write("DeployEnd".getBytes());
-        dataOutputStream.flush();
-        dataOutputStream.close();
-        socket.close();
-    }
 
     public DeploymentDesignEntity copyDeploymentDesign(String deploymentDesignId) {
         DeploymentDesignEntity deploymentDesignArgs = getDeploymentDesigns(deploymentDesignId);
@@ -283,13 +239,5 @@ public class DeploymentDesignService {
 
     public boolean hasDeploymentDesigns(String deploymentDesignId) {
         return deploymentDesignRepository.exists(deploymentDesignId);
-    }
-
-    // 生成指定长度的字符串
-    private String getString(String string, int length) {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(string);
-        stringBuilder.setLength(length);
-        return stringBuilder.toString();
     }
 }

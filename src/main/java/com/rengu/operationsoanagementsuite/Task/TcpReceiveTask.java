@@ -1,9 +1,9 @@
 package com.rengu.operationsoanagementsuite.Task;
 
+import com.rengu.operationsoanagementsuite.Configuration.ApplicationConfiguration;
 import com.rengu.operationsoanagementsuite.Entity.ComponentDetailEntity;
-import com.rengu.operationsoanagementsuite.Utils.ApplicationConfiguration;
+import com.rengu.operationsoanagementsuite.Entity.ScanResultEntity;
 import com.rengu.operationsoanagementsuite.Utils.JsonUtils;
-import com.rengu.operationsoanagementsuite.Utils.ScanResultEntity;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

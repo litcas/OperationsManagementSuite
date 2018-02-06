@@ -1,7 +1,7 @@
 package com.rengu.operationsoanagementsuite.Aspect;
 
+import com.rengu.operationsoanagementsuite.Entity.ResultEntity;
 import com.rengu.operationsoanagementsuite.Service.RequestLogService;
-import com.rengu.operationsoanagementsuite.Utils.ResultEntity;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
