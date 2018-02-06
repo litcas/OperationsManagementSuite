@@ -47,6 +47,11 @@ public class NotificationMessage {
     public static final String DEVICE_DEPLOY_PATH_NOT_FOUND = "device.deployPath不存在";
     public static final String DEVICE_DELETED = "device已删除";
 
+    // 组件基线相关错误
+    public static final String COMPONENT_BASELINE_COMPONENTIDS_NOT_FOUND = "componentbaseline.componentIds不存在";
+    public static final String COMPONENT_BASELINE_EXISTS = "componentbaseline已存在";
+    public static final String COMPONENT_BASELINE_DELETED = "componentbaseline已删除";
+
     // 通用错误
     public static final String CACHE_CREAT_FAILED = "缓存文件创建失败。";
     public static final String COMPRESS_FAILED = "文件压缩失败。";

@@ -6,8 +6,8 @@ import com.rengu.operationsoanagementsuite.Repository.DeploymentDesignDetailRepo
 import com.rengu.operationsoanagementsuite.Utils.NotificationMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -112,6 +112,15 @@ public class DeploymentDesignDetailService {
         return deploymentDesignDetailRepository.findByDeploymentDesignEntityIdAndDeviceEntityIdAndComponentEntityId(deploymentDesignId, deviceId, componentId);
     }
 
+    @Transactional
+    public List<DeploymentDesignDetailEntity> copyDeploymentDesignDetail(String deploymentDesignId) {
+        List<DeploymentDesignDetailEntity> deploymentDesignDetailEntities = getDeploymentDesignDetailsByDeploymentDesignId(deploymentDesignId);
+        List<DeploymentDesignDetailEntity> deploymentDesignDetailEntityList = new ArrayList<>();
+        for (DeploymentDesignDetailEntity deploymentDesignDetailArgs : deploymentDesignDetailEntities) {
+            deploymentDesignDetailEntityList.add(saveDeploymentDesignDetail(deploymentDesignId, deploymentDesignDetailArgs.getDeviceEntity().getId(), deploymentDesignDetailArgs.getComponentEntity().getId()));
+        }
+        return deploymentDesignDetailEntityList;
+    }
 
     public boolean hasDeploymentDesignDetail(String deploymentdesigndetailId) {
         return deploymentDesignDetailRepository.exists(deploymentdesigndetailId);

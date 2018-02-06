@@ -57,7 +57,7 @@ public class DeviceService {
         }
         DeviceEntity deviceEntity = getDevices(deviceId);
         if (!deviceArgs.getIp().equals(deviceEntity.getIp())) {
-            if (hasIp(deviceArgs.getProjectEntity().getId(), deviceArgs.getIp())) {
+            if (hasIp(deviceEntity.getProjectEntity().getId(), deviceArgs.getIp())) {
                 throw new CustomizeException(NotificationMessage.DEVICE_EXISTS);
             }
         }
@@ -101,6 +101,7 @@ public class DeviceService {
             ip = strings[0] + "." + strings[1] + "." + strings[2] + "." + temp;
         }
         deviceEntity.setIp(ip);
+        deviceEntity.setProjectEntity(deviceArgs.getProjectEntity());
         return deviceRepository.save(deviceEntity);
     }
 

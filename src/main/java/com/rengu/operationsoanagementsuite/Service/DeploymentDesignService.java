@@ -60,14 +60,17 @@ public class DeploymentDesignService {
     @Transactional
     public DeploymentDesignEntity updateDeploymentDesigns(String deploymentDesignId, DeploymentDesignEntity deploymentDesignArgs) {
         DeploymentDesignEntity deploymentDesignEntity = getDeploymentDesigns(deploymentDesignId);
-        BeanUtils.copyProperties(deploymentDesignArgs, deploymentDesignEntity, "id", "createTime", "name", "projectEntity", "deploymentDesignDetailEntities");
+        if (hasProjectIdAndName(deploymentDesignEntity.getProjectEntity().getId(), deploymentDesignArgs.getName())) {
+            throw new CustomizeException(NotificationMessage.DEPLOYMENT_DESIGN_EXISTS);
+        }
+        BeanUtils.copyProperties(deploymentDesignArgs, deploymentDesignEntity, "id", "createTime", "projectEntity", "deploymentDesignDetailEntities");
         return deploymentDesignRepository.save(deploymentDesignEntity);
     }
 
     // 删除部署设计
     @Transactional
     public void deleteDeploymentDesigns(String deploymentDesignId) {
-        if (hasDeploymentDesigns(deploymentDesignId)) {
+        if (!hasDeploymentDesigns(deploymentDesignId)) {
             throw new CustomizeException(NotificationMessage.DEPLOYMENT_DESIGN_NOT_FOUND);
         }
         deploymentDesignRepository.delete(deploymentDesignId);
@@ -211,7 +214,7 @@ public class DeploymentDesignService {
         deploy(deviceService.getDevices(deviceId), deploymentDesignDetailService.getDeploymentDesignDetailsByDeploymentDesignEntityIdAndDeviceEntityIdAndComponentEntityId(deploymentDesignId, deviceId, componentId));
     }
 
-    public void deployComponents(String deploymentDesignId, String deviceId) throws IOException {
+    public void deployDevices(String deploymentDesignId, String deviceId) throws IOException {
         deploy(deviceService.getDevices(deviceId), deploymentDesignDetailService.getDeploymentDesignDetailsByDeploymentDesignEntityIdAndDeviceEntityId(deploymentDesignId, deviceId));
     }
 
@@ -251,6 +254,22 @@ public class DeploymentDesignService {
         dataOutputStream.flush();
         dataOutputStream.close();
         socket.close();
+    }
+
+    public DeploymentDesignEntity copyDeploymentDesign(String deploymentDesignId) {
+        DeploymentDesignEntity deploymentDesignArgs = getDeploymentDesigns(deploymentDesignId);
+        DeploymentDesignEntity deploymentDesignEntity = new DeploymentDesignEntity();
+        BeanUtils.copyProperties(deploymentDesignArgs, deploymentDesignEntity, "id", "createTime", "name");
+        // 设置部署图名称-自动累加数字
+        int i = 1;
+        String name = deploymentDesignArgs.getName() + "-副本( " + i + ")";
+        while (hasProjectIdAndName(deploymentDesignArgs.getProjectEntity().getId(), name)) {
+            i = i + 1;
+            name = deploymentDesignArgs.getName() + "-副本( " + i + ")";
+        }
+        deploymentDesignEntity.setName(name);
+        deploymentDesignDetailService.copyDeploymentDesignDetail(deploymentDesignArgs.getId());
+        return deploymentDesignRepository.save(deploymentDesignEntity);
     }
 
     public boolean hasProjectIdAndName(String projectId, String name) {

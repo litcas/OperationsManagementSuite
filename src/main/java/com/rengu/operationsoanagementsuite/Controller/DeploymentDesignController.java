@@ -114,8 +114,14 @@ public class DeploymentDesignController {
 
     // 部署组件
     @PutMapping(value = "/{deploymentDesignId}/devices/{deviceId}/deploy")
-    public ResultEntity deployComponents(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deploymentDesignId") String deploymentDesignId, @PathVariable(value = "deviceId") String deviceId) throws IOException {
-        deploymentDesignService.deployComponents(deploymentDesignId, deviceId);
+    public ResultEntity deployDevices(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deploymentDesignId") String deploymentDesignId, @PathVariable(value = "deviceId") String deviceId) throws IOException {
+        deploymentDesignService.deployDevices(deploymentDesignId, deviceId);
         return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, "部署成功");
+    }
+
+    // 复制部署图
+    @PostMapping(value = "/{deploymentDesignId}/copy")
+    public ResultEntity copyDeploymentDesign(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deploymentDesignId") String deploymentDesignId) {
+        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, deploymentDesignService.copyDeploymentDesign(deploymentDesignId));
     }
 }
