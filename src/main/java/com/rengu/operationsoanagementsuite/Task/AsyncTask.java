@@ -1,13 +1,14 @@
 package com.rengu.operationsoanagementsuite.Task;
 
-import com.rengu.operationsoanagementsuite.Entity.ComponentDetailEntity;
-import com.rengu.operationsoanagementsuite.Entity.ComponentEntity;
-import com.rengu.operationsoanagementsuite.Entity.DeploymentDesignDetailEntity;
-import com.rengu.operationsoanagementsuite.Entity.DeviceEntity;
+import com.rengu.operationsoanagementsuite.Entity.*;
+import com.rengu.operationsoanagementsuite.Service.DeployLogService;
+import com.rengu.operationsoanagementsuite.Service.DeploymentDesignService;
+import com.rengu.operationsoanagementsuite.Service.DeviceService;
 import com.rengu.operationsoanagementsuite.Utils.Utils;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -23,10 +24,19 @@ public class AsyncTask {
 
     // 引入日志记录类
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    @Autowired
+    private DeployLogService deployLogService;
+    @Autowired
+    private DeviceService deviceService;
+    @Autowired
+    private DeploymentDesignService deploymentDesignService;
 
     // 部署组件异步方法
     @Async
-    public void deploy(DeviceEntity deviceEntity, List<DeploymentDesignDetailEntity> deploymentDesignDetailEntityList) throws IOException {
+    public void deploy(String deploymentDesignId, String deviceId, List<DeploymentDesignDetailEntity> deploymentDesignDetailEntityList) throws IOException {
+        DeploymentDesignEntity deploymentDesignEntity = deploymentDesignService.getDeploymentDesigns(deploymentDesignId);
+        DeviceEntity deviceEntity = deviceService.getDevices(deviceId);
+        deployLogService.saveDeployLogs(deploymentDesignEntity, deviceEntity, deploymentDesignDetailEntityList);
         Socket socket = new Socket(deviceEntity.getIp(), deviceEntity.getTCPPort());
         socket.setSoTimeout(2000);
         DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
@@ -44,6 +54,7 @@ public class AsyncTask {
                 // 单个文件发送结束标志
                 dataOutputStream.write("fileRecvEnd".getBytes());
                 // 重复发送文件结束标志并等待回复
+                int count = 0;
                 while (true) {
                     try {
                         if (dataInputStream.read() == 102) {
@@ -51,8 +62,13 @@ public class AsyncTask {
                             break;
                         }
                     } catch (IOException exception) {
+                        count = count + 1;
                         dataOutputStream.write("fileRecvEnd".getBytes());
-                        logger.info("文件发送结束标志等待超时，重新发送文件结束标志。");
+                        logger.info("文件发送结束标志回复等待超时，第" + count + "次重新发送文件结束标志。");
+                        if (count == 10) {
+                            logger.info("文件发送结束标志等待回复超时，" + deploymentDesignDetailEntity.getDeployPath() + componentDetailEntity.getPath() + "发送失败");
+                            break;
+                        }
                     }
                 }
             }

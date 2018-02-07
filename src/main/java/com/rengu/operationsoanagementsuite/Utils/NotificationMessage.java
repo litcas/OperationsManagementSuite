@@ -52,6 +52,9 @@ public class NotificationMessage {
     public static final String COMPONENT_BASELINE_EXISTS = "componentbaseline已存在";
     public static final String COMPONENT_BASELINE_DELETED = "componentbaseline已删除";
 
+    // 通用提示
+    public static final String DEPLOY_STARTED = "部署已开始";
+
     // 通用错误
     public static final String CACHE_CREAT_FAILED = "缓存文件创建失败。";
     public static final String COMPRESS_FAILED = "文件压缩失败。";

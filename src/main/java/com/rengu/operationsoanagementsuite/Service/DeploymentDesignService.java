@@ -33,8 +33,6 @@ public class DeploymentDesignService {
     private DeploymentDesignDetailService deploymentDesignDetailService;
     @Autowired
     private ProjectService projectService;
-    @Autowired
-    private DeviceService deviceService;
 
     // 保存部署设计
     @Transactional
@@ -209,11 +207,11 @@ public class DeploymentDesignService {
     }
 
     public void deployComponents(String deploymentDesignId, String deviceId, String componentId) throws IOException {
-        asyncTask.deploy(deviceService.getDevices(deviceId), deploymentDesignDetailService.getDeploymentDesignDetailsByDeploymentDesignEntityIdAndDeviceEntityIdAndComponentEntityId(deploymentDesignId, deviceId, componentId));
+        asyncTask.deploy(deploymentDesignId, deviceId, deploymentDesignDetailService.getDeploymentDesignDetailsByDeploymentDesignEntityIdAndDeviceEntityIdAndComponentEntityId(deploymentDesignId, deviceId, componentId));
     }
 
     public void deployDevices(String deploymentDesignId, String deviceId) throws IOException {
-        asyncTask.deploy(deviceService.getDevices(deviceId), deploymentDesignDetailService.getDeploymentDesignDetailsByDeploymentDesignEntityIdAndDeviceEntityId(deploymentDesignId, deviceId));
+        asyncTask.deploy(deploymentDesignId, deviceId, deploymentDesignDetailService.getDeploymentDesignDetailsByDeploymentDesignEntityIdAndDeviceEntityId(deploymentDesignId, deviceId));
     }
 
 
