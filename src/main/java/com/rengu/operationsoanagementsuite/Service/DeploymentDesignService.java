@@ -33,6 +33,8 @@ public class DeploymentDesignService {
     private DeploymentDesignDetailService deploymentDesignDetailService;
     @Autowired
     private ProjectService projectService;
+    @Autowired
+    private DeviceService deviceService;
 
     // 保存部署设计
     @Transactional
@@ -128,6 +130,17 @@ public class DeploymentDesignService {
     @Transactional
     public List<DeploymentDesignDetailEntity> getDeploymentDesignDetailsByDeploymentDesignId(String deploymentDesignId) {
         return deploymentDesignDetailService.getDeploymentDesignDetailsByDeploymentDesignId(deploymentDesignId);
+    }
+
+    @Transactional
+    public List<DeviceEntity> getDevicesByDeploymentDesignId(String deploymentDesignId) {
+        List<DeviceEntity> deviceEntityList = new ArrayList<>();
+        for (DeploymentDesignDetailEntity deploymentDesignDetailEntity : deploymentDesignDetailService.getDeploymentDesignDetailsByDeploymentDesignId(deploymentDesignId)) {
+            if (!deviceEntityList.contains(deploymentDesignDetailEntity.getDeviceEntity())) {
+                deviceEntityList.add(deviceService.onlineChecker(deploymentDesignDetailEntity.getDeviceEntity()));
+            }
+        }
+        return deviceEntityList;
     }
 
     @Transactional

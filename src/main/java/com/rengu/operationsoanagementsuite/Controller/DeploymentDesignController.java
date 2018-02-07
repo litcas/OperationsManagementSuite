@@ -88,6 +88,12 @@ public class DeploymentDesignController {
         return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, deploymentDesignService.getDeploymentDesignDetailsByDeploymentDesignId(deploymentDesignId));
     }
 
+    // 查询部署设计设备
+    @GetMapping(value = "/{deploymentDesignId}/devices")
+    public ResultEntity getDevicesByDeploymentDesignId(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deploymentDesignId") String deploymentDesignId) {
+        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, deploymentDesignService.getDevicesByDeploymentDesignId(deploymentDesignId));
+    }
+
     // 查询部署设计详情-设备
     @GetMapping(value = "/{deploymentDesignId}/deploymentdesigndetails/devices/{deviceId}")
     public ResultEntity getDeploymentDesignDetailsByDeploymentDesignEntityIdAndDeviceEntityId(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deploymentDesignId") String deploymentDesignId, @PathVariable(value = "deviceId") String deviceId) {
