@@ -1,15 +1,20 @@
 package com.rengu.operationsoanagementsuite.Task;
 
 import com.rengu.operationsoanagementsuite.Entity.*;
+import com.rengu.operationsoanagementsuite.Exception.CustomizeException;
 import com.rengu.operationsoanagementsuite.Service.DeployLogService;
 import com.rengu.operationsoanagementsuite.Service.DeploymentDesignService;
 import com.rengu.operationsoanagementsuite.Service.DeviceService;
+import com.rengu.operationsoanagementsuite.Service.UDPService;
+import com.rengu.operationsoanagementsuite.Utils.JsonUtils;
 import com.rengu.operationsoanagementsuite.Utils.Utils;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 
 import java.io.DataInputStream;
@@ -17,7 +22,9 @@ import java.io.DataOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Future;
 
 @Service
 public class AsyncTask {
@@ -26,6 +33,10 @@ public class AsyncTask {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     @Autowired
     private DeployLogService deployLogService;
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
+    @Autowired
+    private UDPService udpService;
     @Autowired
     private DeviceService deviceService;
     @Autowired
@@ -78,5 +89,62 @@ public class AsyncTask {
         dataOutputStream.flush();
         dataOutputStream.close();
         socket.close();
+    }
+
+    // 扫描设备
+    @Async
+    public Future<ScanResultEntity> scan(String id, DeploymentDesignDetailEntity deploymentDesignDetailEntity, String... extensions) throws IOException, InterruptedException {
+        if (extensions == null) {
+            udpService.sendScanDeviceOrderMessage(id, deploymentDesignDetailEntity.getDeviceEntity().getIp(), deploymentDesignDetailEntity.getDeviceEntity().getUDPPort(), deploymentDesignDetailEntity.getDeviceEntity().getId(), deploymentDesignDetailEntity.getComponentEntity().getId(), deploymentDesignDetailEntity.getDeployPath());
+        } else {
+            udpService.sendScanDeviceOrderMessage(id, deploymentDesignDetailEntity.getDeviceEntity().getIp(), deploymentDesignDetailEntity.getDeviceEntity().getUDPPort(), deploymentDesignDetailEntity.getDeviceEntity().getId(), deploymentDesignDetailEntity.getComponentEntity().getId(), deploymentDesignDetailEntity.getDeployPath(), extensions);
+        }
+        int count = 0;
+        while (true) {
+            if (stringRedisTemplate.hasKey(id)) {
+                ScanResultEntity scanResultEntity = JsonUtils.readJsonString(stringRedisTemplate.opsForValue().get(id), ScanResultEntity.class);
+                ComponentEntity componentEntity = deploymentDesignDetailEntity.getComponentEntity();
+                List<ComponentDetailEntity> correctComponentFiles = new ArrayList<>();
+                List<ComponentDetailEntity> modifyedComponentFiles = new ArrayList<>();
+                List<ComponentDetailEntity> unknownFiles = new ArrayList<>();
+                for (ComponentDetailEntity scanResult : scanResultEntity.getOriginalScanResultList()) {
+                    boolean fileExists = false;
+                    for (ComponentDetailEntity componentFile : componentEntity.getComponentDetailEntities()) {
+                        // 路径是否一致
+                        if (scanResult.getPath().replace(deploymentDesignDetailEntity.getDeployPath(), "").equals(componentFile.getPath())) {
+                            fileExists = true;
+                            // MD5是否相同
+                            if (scanResult.getMD5().equals(componentFile.getMD5())) {
+                                correctComponentFiles.add(componentFile);
+                                scanResultEntity.setHasCorrectComponentFiles(true);
+                            } else {
+                                modifyedComponentFiles.add(componentFile);
+                                scanResultEntity.setHasModifyedComponentFiles(true);
+                            }
+                            break;
+                        }
+                    }
+                    // 未知文件
+                    if (!fileExists) {
+                        scanResultEntity.setHasUnknownFiles(true);
+                        ComponentDetailEntity componentFile = new ComponentDetailEntity();
+                        componentFile.setMD5(scanResult.getMD5());
+                        componentFile.setPath(scanResult.getPath());
+                        unknownFiles.add(componentFile);
+                    }
+                }
+                scanResultEntity.setCorrectComponentFiles(correctComponentFiles);
+                scanResultEntity.setModifyedComponentFiles(modifyedComponentFiles);
+                scanResultEntity.setUnknownFiles(unknownFiles);
+                scanResultEntity.setHasMissingFile(scanResultEntity.getOriginalScanResultList().size() - unknownFiles.size() != componentEntity.getComponentDetailEntities().size());
+                return new AsyncResult<>(scanResultEntity);
+            } else {
+                Thread.sleep(10000);
+                count = count + 1;
+                if (count == 10) {
+                    throw new CustomizeException("扫描'" + deploymentDesignDetailEntity.getDeviceEntity().getIp() + "'上的'" + deploymentDesignDetailEntity.getComponentEntity().getName() + "-" + deploymentDesignDetailEntity.getComponentEntity().getVersion() + "'组件失败");
+                }
+            }
+        }
     }
 }

@@ -12,6 +12,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 @RestController
 @RequestMapping(value = "/deploymentdesigns")
@@ -108,13 +109,13 @@ public class DeploymentDesignController {
 
     // 扫描设备
     @GetMapping(value = "/{deploymentDesignId}/devices/{deviceId}/scan")
-    public ResultEntity scanDevices(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deploymentDesignId") String deploymentDesignId, @PathVariable(value = "deviceId") String deviceId, @RequestParam(value = "extensions", required = false) String... extensions) throws IOException, InterruptedException {
+    public ResultEntity scanDevices(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deploymentDesignId") String deploymentDesignId, @PathVariable(value = "deviceId") String deviceId, @RequestParam(value = "extensions", required = false) String... extensions) throws IOException, InterruptedException, ExecutionException {
         return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, deploymentDesignService.scanDevices(deploymentDesignId, deviceId, extensions));
     }
 
     // 扫描设备
     @GetMapping(value = "/{deploymentDesignId}/devices/{deviceId}/components/{componentId}/scan")
-    public ResultEntity scanComponents(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deploymentDesignId") String deploymentDesignId, @PathVariable(value = "deviceId") String deviceId, @PathVariable(value = "componentId") String componentId, @RequestParam(value = "extensions", required = false) String... extensions) throws IOException, InterruptedException {
+    public ResultEntity scanComponents(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deploymentDesignId") String deploymentDesignId, @PathVariable(value = "deviceId") String deviceId, @PathVariable(value = "componentId") String componentId, @RequestParam(value = "extensions", required = false) String... extensions) throws IOException, InterruptedException, ExecutionException {
         return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, deploymentDesignService.scanComponents(deploymentDesignId, deviceId, componentId, extensions));
     }
 

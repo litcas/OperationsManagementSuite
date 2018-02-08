@@ -1,14 +1,15 @@
 package com.rengu.operationsoanagementsuite.Service;
 
-import com.rengu.operationsoanagementsuite.Entity.*;
+import com.rengu.operationsoanagementsuite.Entity.DeploymentDesignDetailEntity;
+import com.rengu.operationsoanagementsuite.Entity.DeploymentDesignEntity;
+import com.rengu.operationsoanagementsuite.Entity.DeviceEntity;
+import com.rengu.operationsoanagementsuite.Entity.ScanResultEntity;
 import com.rengu.operationsoanagementsuite.Exception.CustomizeException;
 import com.rengu.operationsoanagementsuite.Repository.DeploymentDesignRepository;
 import com.rengu.operationsoanagementsuite.Task.AsyncTask;
-import com.rengu.operationsoanagementsuite.Utils.JsonUtils;
 import com.rengu.operationsoanagementsuite.Utils.NotificationMessage;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -17,14 +18,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 @Service
 public class DeploymentDesignService {
 
-    @Autowired
-    private StringRedisTemplate stringRedisTemplate;
-    @Autowired
-    private UDPService udpService;
     @Autowired
     private AsyncTask asyncTask;
     @Autowired
@@ -144,80 +142,25 @@ public class DeploymentDesignService {
     }
 
     @Transactional
-    public List<ScanResultEntity> scanDevices(String deploymentDesignId, String deviceId, String... extensions) throws IOException, InterruptedException {
+    public List<ScanResultEntity> scanDevices(String deploymentDesignId, String deviceId, String... extensions) throws IOException, InterruptedException, ExecutionException {
         List<DeploymentDesignDetailEntity> deploymentDesignDetailEntityList = deploymentDesignDetailService.getDeploymentDesignDetailsByDeploymentDesignEntityIdAndDeviceEntityId(deploymentDesignId, deviceId);
         List<ScanResultEntity> scanResultEntityList = new ArrayList<>();
         for (DeploymentDesignDetailEntity deploymentDesignDetailEntity : deploymentDesignDetailEntityList) {
-            scanResultEntityList.add(scan(UUID.randomUUID().toString(), deploymentDesignDetailEntity, extensions));
+            scanResultEntityList.add(asyncTask.scan(UUID.randomUUID().toString(), deploymentDesignDetailEntity, extensions).get());
         }
         return scanResultEntityList;
     }
 
     @Transactional
-    public List<ScanResultEntity> scanComponents(String deploymentDesignId, String deviceId, String componentId, String... extensions) throws IOException, InterruptedException {
+    public List<ScanResultEntity> scanComponents(String deploymentDesignId, String deviceId, String componentId, String... extensions) throws IOException, InterruptedException, ExecutionException {
         List<DeploymentDesignDetailEntity> deploymentDesignDetailEntityList = deploymentDesignDetailService.getDeploymentDesignDetailsByDeploymentDesignEntityIdAndDeviceEntityIdAndComponentEntityId(deploymentDesignId, deviceId, componentId);
         List<ScanResultEntity> scanResultEntityList = new ArrayList<>();
         for (DeploymentDesignDetailEntity deploymentDesignDetailEntity : deploymentDesignDetailEntityList) {
-            scanResultEntityList.add(scan(UUID.randomUUID().toString(), deploymentDesignDetailEntity, extensions));
+            scanResultEntityList.add(asyncTask.scan(UUID.randomUUID().toString(), deploymentDesignDetailEntity, extensions).get());
         }
         return scanResultEntityList;
     }
 
-    // 扫描设备
-    public ScanResultEntity scan(String id, DeploymentDesignDetailEntity deploymentDesignDetailEntity, String... extensions) throws IOException, InterruptedException {
-        if (extensions == null) {
-            udpService.sendScanDeviceOrderMessage(id, deploymentDesignDetailEntity.getDeviceEntity().getIp(), deploymentDesignDetailEntity.getDeviceEntity().getUDPPort(), deploymentDesignDetailEntity.getDeviceEntity().getId(), deploymentDesignDetailEntity.getComponentEntity().getId(), deploymentDesignDetailEntity.getDeployPath());
-        } else {
-            udpService.sendScanDeviceOrderMessage(id, deploymentDesignDetailEntity.getDeviceEntity().getIp(), deploymentDesignDetailEntity.getDeviceEntity().getUDPPort(), deploymentDesignDetailEntity.getDeviceEntity().getId(), deploymentDesignDetailEntity.getComponentEntity().getId(), deploymentDesignDetailEntity.getDeployPath(), extensions);
-        }
-        int count = 0;
-        while (true) {
-            if (stringRedisTemplate.hasKey(id)) {
-                ScanResultEntity scanResultEntity = JsonUtils.readJsonString(stringRedisTemplate.opsForValue().get(id), ScanResultEntity.class);
-                ComponentEntity componentEntity = deploymentDesignDetailEntity.getComponentEntity();
-                List<ComponentDetailEntity> correctComponentFiles = new ArrayList<>();
-                List<ComponentDetailEntity> modifyedComponentFiles = new ArrayList<>();
-                List<ComponentDetailEntity> unknownFiles = new ArrayList<>();
-                for (ComponentDetailEntity scanResult : scanResultEntity.getOriginalScanResultList()) {
-                    boolean fileExists = false;
-                    for (ComponentDetailEntity componentFile : componentEntity.getComponentDetailEntities()) {
-                        // 路径是否一致
-                        if (scanResult.getPath().replace(deploymentDesignDetailEntity.getDeployPath(), "").equals(componentFile.getPath())) {
-                            fileExists = true;
-                            // MD5是否相同
-                            if (scanResult.getMD5().equals(componentFile.getMD5())) {
-                                correctComponentFiles.add(componentFile);
-                                scanResultEntity.setHasCorrectComponentFiles(true);
-                            } else {
-                                modifyedComponentFiles.add(componentFile);
-                                scanResultEntity.setHasModifyedComponentFiles(true);
-                            }
-                            break;
-                        }
-                    }
-                    // 未知文件
-                    if (!fileExists) {
-                        scanResultEntity.setHasUnknownFiles(true);
-                        ComponentDetailEntity componentFile = new ComponentDetailEntity();
-                        componentFile.setMD5(scanResult.getMD5());
-                        componentFile.setPath(scanResult.getPath());
-                        unknownFiles.add(componentFile);
-                    }
-                }
-                scanResultEntity.setCorrectComponentFiles(correctComponentFiles);
-                scanResultEntity.setModifyedComponentFiles(modifyedComponentFiles);
-                scanResultEntity.setUnknownFiles(unknownFiles);
-                scanResultEntity.setHasMissingFile(scanResultEntity.getOriginalScanResultList().size() - unknownFiles.size() != componentEntity.getComponentDetailEntities().size());
-                return scanResultEntity;
-            } else {
-                Thread.sleep(10000);
-                count = count + 1;
-                if (count == 10) {
-                    throw new CustomizeException("扫描'" + deploymentDesignDetailEntity.getDeviceEntity().getIp() + "'上的'" + deploymentDesignDetailEntity.getComponentEntity().getName() + "-" + deploymentDesignDetailEntity.getComponentEntity().getVersion() + "'组件失败");
-                }
-            }
-        }
-    }
 
     public void deployComponents(String deploymentDesignId, String deviceId, String componentId) throws IOException {
         asyncTask.deploy(deploymentDesignId, deviceId, deploymentDesignDetailService.getDeploymentDesignDetailsByDeploymentDesignEntityIdAndDeviceEntityIdAndComponentEntityId(deploymentDesignId, deviceId, componentId));
