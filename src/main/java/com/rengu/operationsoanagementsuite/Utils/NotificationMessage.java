@@ -47,10 +47,15 @@ public class NotificationMessage {
     public static final String DEVICE_DEPLOY_PATH_NOT_FOUND = "device.deployPath不存在";
     public static final String DEVICE_DELETED = "device已删除";
 
-    // 组件基线相关错误
-    public static final String COMPONENT_BASELINE_COMPONENTIDS_NOT_FOUND = "componentbaseline.componentIds不存在";
-    public static final String COMPONENT_BASELINE_EXISTS = "componentbaseline已存在";
-    public static final String COMPONENT_BASELINE_DELETED = "componentbaseline已删除";
+    // 组件包相关错误
+    public static final String COMPONENT_PACKAGE_COMPONENTIDS_NOT_FOUND = "componentpackage.componentIds不存在";
+    public static final String COMPONENT_PACKAGE_EXISTS = "componentpackage已存在";
+    public static final String COMPONENT_PACKAGE_NOT_FOUND = "componentpackage不存在";
+    public static final String COMPONENT_PACKAGE_DELETED = "componentpackage已删除";
+
+    // 部署设计快照相关错误
+    public static final String DEPLOYMENT_DESIGN_SNAPSHOT_NOT_FOUND = "deploymentdesignsnapshot不存在";
+    public static final String DEPLOYMENT_DESIGN_SNAPSHOT_DELETED = "deploymentdesignsnapshot已删除";
 
     // 通用提示
     public static final String DEPLOY_STARTED = "部署已开始";

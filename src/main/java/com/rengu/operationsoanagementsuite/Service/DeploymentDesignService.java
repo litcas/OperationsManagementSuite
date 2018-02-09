@@ -1,9 +1,6 @@
 package com.rengu.operationsoanagementsuite.Service;
 
-import com.rengu.operationsoanagementsuite.Entity.DeploymentDesignDetailEntity;
-import com.rengu.operationsoanagementsuite.Entity.DeploymentDesignEntity;
-import com.rengu.operationsoanagementsuite.Entity.DeviceEntity;
-import com.rengu.operationsoanagementsuite.Entity.ScanResultEntity;
+import com.rengu.operationsoanagementsuite.Entity.*;
 import com.rengu.operationsoanagementsuite.Exception.CustomizeException;
 import com.rengu.operationsoanagementsuite.Repository.DeploymentDesignRepository;
 import com.rengu.operationsoanagementsuite.Task.AsyncTask;
@@ -29,6 +26,8 @@ public class DeploymentDesignService {
     private DeploymentDesignRepository deploymentDesignRepository;
     @Autowired
     private DeploymentDesignDetailService deploymentDesignDetailService;
+    @Autowired
+    private DeploymentDesignSnapshotService deploymentDesignSnapshotService;
     @Autowired
     private ProjectService projectService;
     @Autowired
@@ -83,6 +82,11 @@ public class DeploymentDesignService {
     @Transactional
     public List<DeploymentDesignEntity> getDeploymentDesigns() {
         return deploymentDesignRepository.findAll();
+    }
+
+    @Transactional
+    public DeploymentDesignSnapshotEntity saveDeploymentDesignSnapshots(String deploymentDesignId, DeploymentDesignSnapshotEntity deploymentDesignSnapshotArgs) {
+        return deploymentDesignSnapshotService.saveDeploymentDesignSnapshots(deploymentDesignId, deploymentDesignSnapshotArgs);
     }
 
     @Transactional

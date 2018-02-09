@@ -1,6 +1,7 @@
 package com.rengu.operationsoanagementsuite.Controller;
 
 import com.rengu.operationsoanagementsuite.Entity.DeploymentDesignEntity;
+import com.rengu.operationsoanagementsuite.Entity.DeploymentDesignSnapshotEntity;
 import com.rengu.operationsoanagementsuite.Entity.ResultEntity;
 import com.rengu.operationsoanagementsuite.Entity.UserEntity;
 import com.rengu.operationsoanagementsuite.Service.DeploymentDesignService;
@@ -43,6 +44,18 @@ public class DeploymentDesignController {
     @GetMapping
     public ResultEntity getDeploymentDesigns(@AuthenticationPrincipal UserEntity loginUser) {
         return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, deploymentDesignService.getDeploymentDesigns());
+    }
+
+    // 复制部署图
+    @PostMapping(value = "/{deploymentDesignId}/copy")
+    public ResultEntity copyDeploymentDesign(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deploymentDesignId") String deploymentDesignId) {
+        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, deploymentDesignService.copyDeploymentDesign(deploymentDesignId));
+    }
+
+    // 生成部署设计快照
+    @PostMapping(value = "/{deploymentDesignId}/deploymentdesignsnapshots")
+    public ResultEntity saveDeploymentDesignSnapshots(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deploymentDesignId") String deploymentDesignId, DeploymentDesignSnapshotEntity deploymentDesignSnapshotArgs) {
+        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, deploymentDesignService.saveDeploymentDesignSnapshots(deploymentDesignId, deploymentDesignSnapshotArgs));
     }
 
     // 保存部署设计详情
@@ -131,11 +144,5 @@ public class DeploymentDesignController {
     public ResultEntity deployDevices(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deploymentDesignId") String deploymentDesignId, @PathVariable(value = "deviceId") String deviceId) throws IOException {
         deploymentDesignService.deployDevices(deploymentDesignId, deviceId);
         return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, NotificationMessage.DEPLOY_STARTED);
-    }
-
-    // 复制部署图
-    @PostMapping(value = "/{deploymentDesignId}/copy")
-    public ResultEntity copyDeploymentDesign(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deploymentDesignId") String deploymentDesignId) {
-        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, deploymentDesignService.copyDeploymentDesign(deploymentDesignId));
     }
 }

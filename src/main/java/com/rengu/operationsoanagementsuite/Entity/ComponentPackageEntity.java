@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.ManyToMany;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -12,7 +12,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 @Entity
-public class ComponentBaselineEntity implements Serializable {
+public class ComponentPackageEntity implements Serializable {
     @Id
     private String id = UUID.randomUUID().toString();
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
@@ -20,7 +20,7 @@ public class ComponentBaselineEntity implements Serializable {
     private String name;
     private String version;
     private String description;
-    @OneToMany
+    @ManyToMany
     private List<ComponentEntity> componentEntities;
 
     public String getId() {
@@ -75,7 +75,7 @@ public class ComponentBaselineEntity implements Serializable {
     public boolean equals(Object object) {
         if (this == object) return true;
         if (object == null || getClass() != object.getClass()) return false;
-        ComponentBaselineEntity that = (ComponentBaselineEntity) object;
+        ComponentPackageEntity that = (ComponentPackageEntity) object;
         return Objects.equals(id, that.id);
     }
 

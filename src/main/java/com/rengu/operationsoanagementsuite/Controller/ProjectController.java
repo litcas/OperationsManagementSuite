@@ -2,6 +2,7 @@ package com.rengu.operationsoanagementsuite.Controller;
 
 import com.rengu.operationsoanagementsuite.Entity.*;
 import com.rengu.operationsoanagementsuite.Service.DeploymentDesignService;
+import com.rengu.operationsoanagementsuite.Service.DeploymentDesignSnapshotService;
 import com.rengu.operationsoanagementsuite.Service.DeviceService;
 import com.rengu.operationsoanagementsuite.Service.ProjectService;
 import com.rengu.operationsoanagementsuite.Utils.NotificationMessage;
@@ -21,6 +22,8 @@ public class ProjectController {
     private DeploymentDesignService deploymentDesignService;
     @Autowired
     private DeviceService deviceService;
+    @Autowired
+    private DeploymentDesignSnapshotService deploymentDesignSnapshotService;
 
     // 保存工程
     @PostMapping
@@ -63,6 +66,12 @@ public class ProjectController {
     @GetMapping(value = "/{projectId}/deploymentdesigns")
     public ResultEntity getDeploymentDesigns(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "projectId") String projectId) {
         return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, deploymentDesignService.getDeploymentDesignsByProjectId(projectId));
+    }
+
+    // 查询部署设计快照
+    @GetMapping(value = "/{projectId}/deploymentdesignsnapshots")
+    public ResultEntity getDeploymentDesignSnapshots(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "projectId") String projectId) {
+        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, deploymentDesignSnapshotService.getDeploymentDesignSnapshotsByProjectId(projectId));
     }
 
     // 保存设备
