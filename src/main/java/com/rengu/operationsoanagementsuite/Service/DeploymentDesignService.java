@@ -167,11 +167,11 @@ public class DeploymentDesignService {
 
 
     public void deployComponents(String deploymentDesignId, String deviceId, String componentId) throws IOException {
-        asyncTask.deploy(deploymentDesignId, deviceId, deploymentDesignDetailService.getDeploymentDesignDetailsByDeploymentDesignEntityIdAndDeviceEntityIdAndComponentEntityId(deploymentDesignId, deviceId, componentId));
+        asyncTask.deployDesign(deploymentDesignId, deviceId, deploymentDesignDetailService.getDeploymentDesignDetailsByDeploymentDesignEntityIdAndDeviceEntityIdAndComponentEntityId(deploymentDesignId, deviceId, componentId));
     }
 
     public void deployDevices(String deploymentDesignId, String deviceId) throws IOException {
-        asyncTask.deploy(deploymentDesignId, deviceId, deploymentDesignDetailService.getDeploymentDesignDetailsByDeploymentDesignEntityIdAndDeviceEntityId(deploymentDesignId, deviceId));
+        asyncTask.deployDesign(deploymentDesignId, deviceId, deploymentDesignDetailService.getDeploymentDesignDetailsByDeploymentDesignEntityIdAndDeviceEntityId(deploymentDesignId, deviceId));
     }
 
 

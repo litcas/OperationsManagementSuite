@@ -1,6 +1,7 @@
 package com.rengu.operationsoanagementsuite.Entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.rengu.operationsoanagementsuite.Configuration.ApplicationConfiguration;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -13,6 +14,7 @@ import java.util.UUID;
 
 @Entity
 public class DeviceEntity implements Serializable {
+
     @Id
     private String id = UUID.randomUUID().toString();
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
@@ -20,8 +22,8 @@ public class DeviceEntity implements Serializable {
     private String name;
     private String ip;
     private String description;
-    private int UDPPort = 3087;
-    private int TCPPort = 3088;
+    private int UDPPort = ApplicationConfiguration.deviceUDPPort;
+    private int TCPPort = ApplicationConfiguration.deviceTCPPort;
     private String deployPath;
     @Transient
     private boolean online = false;

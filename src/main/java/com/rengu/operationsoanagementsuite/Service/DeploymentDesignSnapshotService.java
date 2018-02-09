@@ -1,22 +1,29 @@
 package com.rengu.operationsoanagementsuite.Service;
 
+import com.rengu.operationsoanagementsuite.Configuration.ApplicationConfiguration;
 import com.rengu.operationsoanagementsuite.Entity.DeploymentDesignEntity;
 import com.rengu.operationsoanagementsuite.Entity.DeploymentDesignSnapshotDetailEntity;
 import com.rengu.operationsoanagementsuite.Entity.DeploymentDesignSnapshotEntity;
 import com.rengu.operationsoanagementsuite.Exception.CustomizeException;
 import com.rengu.operationsoanagementsuite.Repository.DeploymentDesignSnapshotRepository;
+import com.rengu.operationsoanagementsuite.Task.AsyncTask;
 import com.rengu.operationsoanagementsuite.Utils.NotificationMessage;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class DeploymentDesignSnapshotService {
 
+    @Autowired
+    private AsyncTask asyncTask;
     @Autowired
     private DeploymentDesignSnapshotRepository deploymentDesignSnapshotRepository;
     @Autowired
@@ -60,9 +67,19 @@ public class DeploymentDesignSnapshotService {
     }
 
     @Transactional
-    public Object getDeploymentDesignSnapshotsByProjectId(String projectId) {
+    public List<DeploymentDesignSnapshotEntity> getDeploymentDesignSnapshotsByProjectId(String projectId) {
         return deploymentDesignSnapshotRepository.findByProjectEntityId(projectService.getProjects(projectId).getId());
     }
+
+    @Transactional
+    public void deployDeploymentDesignSnapshots(String deploymentdesignsnapshotId) throws IOException {
+        List<DeploymentDesignSnapshotDetailEntity> deploymentDesignSnapshotDetailEntities = getDeploymentDesignSnapshots(deploymentdesignsnapshotId).getDeploymentDesignSnapshots();
+        Map<String, List<DeploymentDesignSnapshotDetailEntity>> ipMap = deploymentDesignSnapshotDetailEntities.stream().collect(Collectors.groupingBy(DeploymentDesignSnapshotDetailEntity::getIp));
+        for (Map.Entry<String, List<DeploymentDesignSnapshotDetailEntity>> entry : ipMap.entrySet()) {
+            asyncTask.deploySnapshot(entry.getKey(), ApplicationConfiguration.deviceTCPPort, entry.getValue());
+        }
+    }
+
 
     public List<DeploymentDesignSnapshotDetailEntity> addDeploymentDesignSnapshotDetails(DeploymentDesignSnapshotEntity deploymentDesignSnapshotEntity, List<DeploymentDesignSnapshotDetailEntity> deploymentDesignSnapshotDetailEntityList) {
         List<DeploymentDesignSnapshotDetailEntity> deploymentDesignSnapshotDetailEntities = deploymentDesignSnapshotEntity.getDeploymentDesignSnapshots();

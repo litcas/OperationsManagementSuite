@@ -44,7 +44,7 @@ public class AsyncTask {
 
     // 部署组件异步方法
     @Async
-    public void deploy(String deploymentDesignId, String deviceId, List<DeploymentDesignDetailEntity> deploymentDesignDetailEntityList) throws IOException {
+    public void deployDesign(String deploymentDesignId, String deviceId, List<DeploymentDesignDetailEntity> deploymentDesignDetailEntityList) throws IOException {
         DeploymentDesignEntity deploymentDesignEntity = deploymentDesignService.getDeploymentDesigns(deploymentDesignId);
         DeviceEntity deviceEntity = deviceService.getDevices(deviceId);
         deployLogService.saveDeployLogs(deploymentDesignEntity, deviceEntity, deploymentDesignDetailEntityList);
@@ -54,41 +54,64 @@ public class AsyncTask {
         DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
         for (DeploymentDesignDetailEntity deploymentDesignDetailEntity : deploymentDesignDetailEntityList) {
             ComponentEntity componentEntity = deploymentDesignDetailEntity.getComponentEntity();
-            for (ComponentDetailEntity componentDetailEntity : componentEntity.getComponentDetailEntities()) {
-                // 组件部署逻辑
-                dataOutputStream.write("fileRecvStart".getBytes());
-                // 发送文件路径 + 文件名
-                String destPath = Utils.getString(deploymentDesignDetailEntity.getDeployPath() + componentDetailEntity.getPath(), 255 - (deploymentDesignDetailEntity.getDeployPath() + componentDetailEntity.getPath()).getBytes().length);
-                dataOutputStream.write(destPath.getBytes());
-                // 发送文件实体
-                IOUtils.copy(new FileInputStream(componentEntity.getFilePath() + componentDetailEntity.getPath()), dataOutputStream);
-                // 单个文件发送结束标志
-                dataOutputStream.write("fileRecvEnd".getBytes());
-                // 重复发送文件结束标志并等待回复
-                int count = 0;
-                while (true) {
-                    try {
-                        if (dataInputStream.read() == 102) {
-                            logger.info("文件名：" + componentDetailEntity.getPath() + "大小：" + componentDetailEntity.getSize() + "发送成功。");
-                            break;
-                        }
-                    } catch (IOException exception) {
-                        count = count + 1;
-                        dataOutputStream.write("fileRecvEnd".getBytes());
-                        logger.info("文件发送结束标志回复等待超时，第" + count + "次重新发送文件结束标志。");
-                        if (count == 10) {
-                            logger.info("文件发送结束标志等待回复超时，" + deploymentDesignDetailEntity.getDeployPath() + componentDetailEntity.getPath() + "发送失败");
-                            break;
-                        }
-                    }
-                }
-            }
+            deploy(dataOutputStream, dataInputStream, componentEntity, deploymentDesignDetailEntity.getDeployPath());
         }
         // 发送部署结束标志
         dataOutputStream.write("DeployEnd".getBytes());
         dataOutputStream.flush();
         dataOutputStream.close();
         socket.close();
+    }
+
+    // 部署组件异步方法
+    @Async
+    public void deploySnapshot(String ip, int port, List<DeploymentDesignSnapshotDetailEntity> deploymentDesignSnapshotDetailEntityList) throws IOException {
+        Socket socket = new Socket(ip, port);
+        socket.setSoTimeout(2000);
+        DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
+        DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
+        for (DeploymentDesignSnapshotDetailEntity deploymentDesignSnapshotDetailEntity : deploymentDesignSnapshotDetailEntityList) {
+            ComponentEntity componentEntity = deploymentDesignSnapshotDetailEntity.getComponentEntity();
+            deploy(dataOutputStream, dataInputStream, componentEntity, deploymentDesignSnapshotDetailEntity.getDeployPath());
+        }
+        // 发送部署结束标志
+        dataOutputStream.write("DeployEnd".getBytes());
+        dataOutputStream.flush();
+        dataOutputStream.close();
+        socket.close();
+    }
+
+    // 部署
+    private void deploy(DataOutputStream dataOutputStream, DataInputStream dataInputStream, ComponentEntity componentEntity, String deployPath) throws IOException {
+        for (ComponentDetailEntity componentDetailEntity : componentEntity.getComponentDetailEntities()) {
+            // 组件部署逻辑
+            dataOutputStream.write("fileRecvStart".getBytes());
+            // 发送文件路径 + 文件名
+            String destPath = Utils.getString(deployPath + componentDetailEntity.getPath(), 255 - (deployPath + componentDetailEntity.getPath()).getBytes().length);
+            dataOutputStream.write(destPath.getBytes());
+            // 发送文件实体
+            IOUtils.copy(new FileInputStream(componentEntity.getFilePath() + componentDetailEntity.getPath()), dataOutputStream);
+            // 单个文件发送结束标志
+            dataOutputStream.write("fileRecvEnd".getBytes());
+            // 重复发送文件结束标志并等待回复
+            int count = 0;
+            while (true) {
+                try {
+                    if (dataInputStream.read() == 102) {
+                        logger.info("文件名：" + componentDetailEntity.getPath() + "大小：" + componentDetailEntity.getSize() + "发送成功。");
+                        break;
+                    }
+                } catch (IOException exception) {
+                    count = count + 1;
+                    dataOutputStream.write("fileRecvEnd".getBytes());
+                    logger.info("文件发送结束标志回复等待超时，第" + count + "次重新发送文件结束标志。");
+                    if (count == 10) {
+                        logger.info("文件发送结束标志等待回复超时，" + deployPath + componentDetailEntity.getPath() + "发送失败");
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     // 扫描设备

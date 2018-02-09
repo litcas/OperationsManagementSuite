@@ -2,10 +2,7 @@ package com.rengu.operationsoanagementsuite.Entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -22,7 +19,7 @@ public class DeploymentDesignSnapshotEntity implements Serializable {
     private String description;
     @ManyToOne
     private ProjectEntity projectEntity;
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     private List<DeploymentDesignSnapshotDetailEntity> deploymentDesignSnapshots;
 
     public String getId() {
