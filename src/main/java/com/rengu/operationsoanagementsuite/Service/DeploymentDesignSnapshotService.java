@@ -50,7 +50,7 @@ public class DeploymentDesignSnapshotService {
 
     @Transactional
     public void deleteDeploymentDesignSnapshots(String deploymentdesignsnapshotId) {
-        if (hasDeploymentDesignSnapshots(deploymentdesignsnapshotId)) {
+        if (!hasDeploymentDesignSnapshots(deploymentdesignsnapshotId)) {
             throw new CustomizeException(NotificationMessage.DEPLOYMENT_DESIGN_SNAPSHOT_NOT_FOUND);
         }
         deploymentDesignSnapshotRepository.delete(deploymentdesignsnapshotId);
