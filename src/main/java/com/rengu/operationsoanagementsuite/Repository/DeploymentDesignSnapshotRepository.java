@@ -10,4 +10,6 @@ import java.util.List;
 @Repository
 public interface DeploymentDesignSnapshotRepository extends JpaRepository<DeploymentDesignSnapshotEntity, String>, JpaSpecificationExecutor<DeploymentDesignSnapshotEntity> {
     List<DeploymentDesignSnapshotEntity> findByProjectEntityId(String projectId);
+
+    List<DeploymentDesignSnapshotEntity> findByProjectEntityIdAndName(String projectId, String name);
 }

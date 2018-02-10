@@ -38,6 +38,9 @@ public class DeploymentDesignSnapshotService {
     @Transactional
     public DeploymentDesignSnapshotEntity saveDeploymentDesignSnapshots(String deploymentDesignId, DeploymentDesignSnapshotEntity deploymentDesignSnapshotArgs) {
         DeploymentDesignEntity deploymentDesignEntity = deploymentDesignService.getDeploymentDesigns(deploymentDesignId);
+        if (hasProjectIdAndName(deploymentDesignEntity.getProjectEntity().getId(), deploymentDesignSnapshotArgs.getName())) {
+            throw new CustomizeException(NotificationMessage.DEPLOYMENT_DESIGN_SNAPSHOT_EXISTS);
+        }
         DeploymentDesignSnapshotEntity deploymentDesignSnapshotEntity = new DeploymentDesignSnapshotEntity();
         BeanUtils.copyProperties(deploymentDesignSnapshotArgs, deploymentDesignSnapshotEntity, "id", "createTime", "projectEntity", "deploymentDesignSnapshots");
         deploymentDesignSnapshotEntity.setProjectEntity(deploymentDesignEntity.getProjectEntity());
@@ -96,5 +99,9 @@ public class DeploymentDesignSnapshotService {
 
     public boolean hasDeploymentDesignSnapshots(String deploymentDesignSnapshotId) {
         return deploymentDesignSnapshotRepository.exists(deploymentDesignSnapshotId);
+    }
+
+    public boolean hasProjectIdAndName(String projectId, String name) {
+        return deploymentDesignSnapshotRepository.findByProjectEntityIdAndName(projectId, name).size() != 0;
     }
 }

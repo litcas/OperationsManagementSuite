@@ -55,6 +55,7 @@ public class NotificationMessage {
 
     // 部署设计快照相关错误
     public static final String DEPLOYMENT_DESIGN_SNAPSHOT_NOT_FOUND = "deploymentdesignsnapshot不存在";
+    public static final String DEPLOYMENT_DESIGN_SNAPSHOT_EXISTS = "deploymentdesignsnapshot已存在";
     public static final String DEPLOYMENT_DESIGN_SNAPSHOT_DELETED = "deploymentdesignsnapshot已删除";
 
     // 通用提示
