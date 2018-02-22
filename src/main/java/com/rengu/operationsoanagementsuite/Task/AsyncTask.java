@@ -47,7 +47,6 @@ public class AsyncTask {
     public void deployDesign(String deploymentDesignId, String deviceId, List<DeploymentDesignDetailEntity> deploymentDesignDetailEntityList) throws IOException {
         DeploymentDesignEntity deploymentDesignEntity = deploymentDesignService.getDeploymentDesigns(deploymentDesignId);
         DeviceEntity deviceEntity = deviceService.getDevices(deviceId);
-        deployLogService.saveDeployLogs(deploymentDesignEntity, deviceEntity, deploymentDesignDetailEntityList);
         Socket socket = new Socket(deviceEntity.getIp(), deviceEntity.getTCPPort());
         socket.setSoTimeout(2000);
         DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
@@ -61,6 +60,7 @@ public class AsyncTask {
         dataOutputStream.flush();
         dataOutputStream.close();
         socket.close();
+        deployLogService.saveDeployLogs(deploymentDesignEntity, deviceEntity, deploymentDesignDetailEntityList);
     }
 
     // 部署组件异步方法
