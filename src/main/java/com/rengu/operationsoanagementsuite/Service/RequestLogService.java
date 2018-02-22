@@ -39,6 +39,6 @@ public class RequestLogService {
         requestLogEntity.setRequestUrl(httpServletRequest.getRequestURI());
         requestLogEntity.setUserAgent(httpServletRequest.getHeader("User-Agent"));
         requestLogRepository.save(requestLogEntity);
-        logger.info("用户：" + resultEntity.getUsername() + "|--->调用接口：" + httpServletRequest.getRequestURI() + "|--->状态：" + resultEntity.getCode());
+        logger.info("用户：" + resultEntity.getUsername() + "|--->调用接口：" + httpServletRequest.getMethod() + ":" + httpServletRequest.getRequestURI() + "|--->状态：" + resultEntity.getCode());
     }
 }
