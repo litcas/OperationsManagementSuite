@@ -33,8 +33,8 @@ public class ComponentPackageController {
 
     // 修改组件基线
     @PatchMapping(value = "/{componentPackageId}")
-    public ResultEntity updateComponentPackages(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "componentPackageId") String componentPackageId, @RequestParam(value = "componentIds") String... componentIds) {
-        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, componentPackageService.updateComponentPackages(componentPackageId, componentIds));
+    public ResultEntity updateComponentPackages(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "componentPackageId") String componentPackageId, ComponentPackageEntity componentPackageArgs, @RequestParam(value = "componentIds") String... componentIds) {
+        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, componentPackageService.updateComponentPackages(componentPackageId, componentPackageArgs, componentIds));
     }
 
     // 查询组件基线

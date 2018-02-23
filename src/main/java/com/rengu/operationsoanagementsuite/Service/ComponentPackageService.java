@@ -43,10 +43,19 @@ public class ComponentPackageService {
     }
 
     @Transactional
-    public ComponentPackageEntity updateComponentPackages(String componentPackageId, String[] componentIds) {
+    public ComponentPackageEntity updateComponentPackages(String componentPackageId, ComponentPackageEntity componentPackageArgs, String[] componentIds) {
+        if (hasNameAndVersion(componentPackageArgs.getName(), componentPackageArgs.getVersion())) {
+            throw new CustomizeException(NotificationMessage.COMPONENT_PACKAGE_EXISTS);
+        }
+        if (componentIds.length == 0) {
+            throw new CustomizeException(NotificationMessage.COMPONENT_NOT_FOUND);
+        }
         ComponentPackageEntity componentPackageEntity = getComponentPackages(componentPackageId);
+        BeanUtils.copyProperties(componentPackageArgs, componentPackageEntity, "id", "createTime", "componentEntities");
         for (String componentId : componentIds) {
-            componentPackageEntity.setComponentEntities(addComponents(componentPackageEntity, componentService.getComponents(componentId)));
+            List<ComponentEntity> componentEntityList = new ArrayList<>();
+            componentEntityList.add(componentService.getComponents(componentId));
+            componentPackageEntity.setComponentEntities(componentEntityList);
         }
         return componentPackageRepository.save(componentPackageEntity);
     }
