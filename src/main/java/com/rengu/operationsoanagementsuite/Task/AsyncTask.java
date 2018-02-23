@@ -32,8 +32,6 @@ public class AsyncTask {
     // 引入日志记录类
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     @Autowired
-    private DeployLogService deployLogService;
-    @Autowired
     private StringRedisTemplate stringRedisTemplate;
     @Autowired
     private UDPService udpService;
@@ -41,6 +39,8 @@ public class AsyncTask {
     private DeviceService deviceService;
     @Autowired
     private DeploymentDesignService deploymentDesignService;
+    @Autowired
+    private DeployLogService deployLogService;
 
     // 部署组件异步方法
     @Async
@@ -51,16 +51,23 @@ public class AsyncTask {
         socket.setSoTimeout(2000);
         DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
         DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
+        int completeNum = 0;
         for (DeploymentDesignDetailEntity deploymentDesignDetailEntity : deploymentDesignDetailEntityList) {
             ComponentEntity componentEntity = deploymentDesignDetailEntity.getComponentEntity();
-            deploy(dataOutputStream, dataInputStream, componentEntity, deploymentDesignDetailEntity.getDeployPath());
+            try {
+                deploy(deployLogService.saveDeployLog(deviceEntity, componentEntity), dataOutputStream, dataInputStream, componentEntity, deploymentDesignDetailEntity.getDeployPath());
+                completeNum = completeNum + 1;
+                stringRedisTemplate.opsForValue().getAndSet(deviceId, String.valueOf(completeNum / deploymentDesignDetailEntityList.size() * 100));
+            } catch (IOException e) {
+                e.printStackTrace();
+                stringRedisTemplate.delete(deviceId);
+            }
         }
         // 发送部署结束标志
         dataOutputStream.write("DeployEnd".getBytes());
         dataOutputStream.flush();
         dataOutputStream.close();
         socket.close();
-        deployLogService.saveDeployLogs(deploymentDesignEntity, deviceEntity, deploymentDesignDetailEntityList);
     }
 
     // 部署组件异步方法
@@ -72,7 +79,7 @@ public class AsyncTask {
         DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
         for (DeploymentDesignSnapshotDetailEntity deploymentDesignSnapshotDetailEntity : deploymentDesignSnapshotDetailEntityList) {
             ComponentEntity componentEntity = deploymentDesignSnapshotDetailEntity.getComponentEntity();
-            deploy(dataOutputStream, dataInputStream, componentEntity, deploymentDesignSnapshotDetailEntity.getDeployPath());
+            deploy(deployLogService.saveDeployLog(ip, deploymentDesignSnapshotDetailEntity.getDeployPath(), componentEntity), dataOutputStream, dataInputStream, componentEntity, deploymentDesignSnapshotDetailEntity.getDeployPath());
         }
         // 发送部署结束标志
         dataOutputStream.write("DeployEnd".getBytes());
@@ -82,7 +89,7 @@ public class AsyncTask {
     }
 
     // 部署
-    private void deploy(DataOutputStream dataOutputStream, DataInputStream dataInputStream, ComponentEntity componentEntity, String deployPath) throws IOException {
+    private void deploy(DeployLogEntity deployLogEntity, DataOutputStream dataOutputStream, DataInputStream dataInputStream, ComponentEntity componentEntity, String deployPath) throws IOException {
         for (ComponentDetailEntity componentDetailEntity : componentEntity.getComponentDetailEntities()) {
             // 组件部署逻辑
             dataOutputStream.write("fileRecvStart".getBytes());
@@ -106,12 +113,14 @@ public class AsyncTask {
                     dataOutputStream.write("fileRecvEnd".getBytes());
                     logger.info("文件发送结束标志回复等待超时，第" + count + "次重新发送文件结束标志。");
                     if (count == 10) {
+                        deployLogService.updateDeployLog(deployLogEntity, DeployLogService.FAIL_STATE);
                         logger.info("文件发送结束标志等待回复超时，" + deployPath + componentDetailEntity.getPath() + "发送失败");
                         break;
                     }
                 }
             }
         }
+        deployLogService.updateDeployLog(deployLogEntity, DeployLogService.COMPLETE_STATE);
     }
 
     // 扫描设备

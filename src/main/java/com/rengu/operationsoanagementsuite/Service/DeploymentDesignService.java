@@ -14,8 +14,10 @@ import org.springframework.util.StringUtils;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 @Service
 public class DeploymentDesignService {
@@ -139,7 +141,7 @@ public class DeploymentDesignService {
         List<DeviceEntity> deviceEntityList = new ArrayList<>();
         for (DeploymentDesignDetailEntity deploymentDesignDetailEntity : deploymentDesignDetailService.getDeploymentDesignDetailsByDeploymentDesignId(deploymentDesignId)) {
             if (!deviceEntityList.contains(deploymentDesignDetailEntity.getDeviceEntity())) {
-                deviceEntityList.add(deviceService.onlineChecker(deploymentDesignDetailEntity.getDeviceEntity()));
+                deviceEntityList.add(deviceService.onlineChecker(deviceService.progressChecker(deploymentDesignDetailEntity.getDeviceEntity())));
             }
         }
         return deviceEntityList;
@@ -166,12 +168,20 @@ public class DeploymentDesignService {
     }
 
 
-    public void deployComponents(String deploymentDesignId, String deviceId, String componentId) throws IOException {
+    public void deploy(String deploymentDesignId, String deviceId, String componentId) throws IOException {
         asyncTask.deployDesign(deploymentDesignId, deviceId, deploymentDesignDetailService.getDeploymentDesignDetailsByDeploymentDesignEntityIdAndDeviceEntityIdAndComponentEntityId(deploymentDesignId, deviceId, componentId));
     }
 
-    public void deployDevices(String deploymentDesignId, String deviceId) throws IOException {
+    public void deploy(String deploymentDesignId, String deviceId) throws IOException {
         asyncTask.deployDesign(deploymentDesignId, deviceId, deploymentDesignDetailService.getDeploymentDesignDetailsByDeploymentDesignEntityIdAndDeviceEntityId(deploymentDesignId, deviceId));
+    }
+
+    public void deploy(String deploymentDesignId) throws IOException {
+        List<DeploymentDesignDetailEntity> deploymentDesignDetailEntityList = getDeploymentDesignDetailsByDeploymentDesignId(deploymentDesignId);
+        Map<DeviceEntity, List<DeploymentDesignDetailEntity>> deviceMap = deploymentDesignDetailEntityList.stream().collect(Collectors.groupingBy(DeploymentDesignDetailEntity::getDeviceEntity));
+        for (Map.Entry<DeviceEntity, List<DeploymentDesignDetailEntity>> entry : deviceMap.entrySet()) {
+            asyncTask.deployDesign(deploymentDesignId, entry.getKey().getId(), entry.getValue());
+        }
     }
 
 

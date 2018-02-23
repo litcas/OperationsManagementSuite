@@ -58,6 +58,9 @@ public class NotificationMessage {
     public static final String DEPLOYMENT_DESIGN_SNAPSHOT_EXISTS = "deploymentdesignsnapshot已存在";
     public static final String DEPLOYMENT_DESIGN_SNAPSHOT_DELETED = "deploymentdesignsnapshot已删除";
 
+    // 部署日志相关错误信息
+    public static final String DEPLOY_LOG_NOT_FOUND = "deploylog不存在";
+
     // 通用提示
     public static final String DEPLOY_STARTED = "部署已开始";
 

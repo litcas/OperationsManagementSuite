@@ -7,6 +7,7 @@ import com.rengu.operationsoanagementsuite.Repository.DeviceRepository;
 import com.rengu.operationsoanagementsuite.Utils.NotificationMessage;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -23,6 +24,8 @@ public class DeviceService {
     private DeviceRepository deviceRepository;
     @Autowired
     private ProjectService projectService;
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
 
     @Transactional
     public DeviceEntity saveDevices(String projectId, DeviceEntity deviceArgs) {
@@ -70,7 +73,7 @@ public class DeviceService {
         if (!hasDevices(deviceId)) {
             throw new CustomizeException(NotificationMessage.DEVICE_NOT_FOUND);
         }
-        return onlineChecker(deviceRepository.findOne(deviceId));
+        return onlineChecker(progressChecker(deviceRepository.findOne(deviceId)));
     }
 
     @Transactional
@@ -78,12 +81,12 @@ public class DeviceService {
         if (!projectService.hasProject(projectId)) {
             throw new CustomizeException(NotificationMessage.PROJECT_NOT_FOUND);
         }
-        return onlineChecker(deviceRepository.findByProjectEntityId(projectId));
+        return onlineChecker(progressChecker(deviceRepository.findByProjectEntityId(projectId)));
     }
 
     @Transactional
     public List<DeviceEntity> getDevices() {
-        return onlineChecker(deviceRepository.findAll());
+        return onlineChecker(progressChecker(deviceRepository.findAll()));
     }
 
     @Transactional
@@ -113,6 +116,22 @@ public class DeviceService {
         // 替换斜线方向
         String deployPath = deviceEntity.getDeployPath().replace("\\", "/");
         return deployPath.endsWith("/") ? deployPath : deployPath + "/";
+    }
+
+    public DeviceEntity progressChecker(DeviceEntity deviceEntity) {
+        if (stringRedisTemplate.hasKey(deviceEntity.getId())) {
+            deviceEntity.setProgress(Integer.parseInt(stringRedisTemplate.opsForValue().get(deviceEntity.getId())));
+        }
+        return deviceEntity;
+    }
+
+    public List<DeviceEntity> progressChecker(List<DeviceEntity> deviceEntityList) {
+        for (DeviceEntity deviceEntity : deviceEntityList) {
+            if (stringRedisTemplate.hasKey(deviceEntity.getId())) {
+                deviceEntity.setProgress(Integer.parseInt(stringRedisTemplate.opsForValue().get(deviceEntity.getId())));
+            }
+        }
+        return deviceEntityList;
     }
 
     public DeviceEntity onlineChecker(DeviceEntity deviceEntity) {

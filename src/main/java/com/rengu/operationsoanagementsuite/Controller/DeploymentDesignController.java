@@ -134,15 +134,22 @@ public class DeploymentDesignController {
 
     // 部署组件
     @PutMapping(value = "/{deploymentDesignId}/devices/{deviceId}/components/{componentId}/deploy")
-    public ResultEntity deployComponents(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deploymentDesignId") String deploymentDesignId, @PathVariable(value = "deviceId") String deviceId, @PathVariable(value = "componentId") String componentId) throws IOException {
-        deploymentDesignService.deployComponents(deploymentDesignId, deviceId, componentId);
+    public ResultEntity deploy(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deploymentDesignId") String deploymentDesignId, @PathVariable(value = "deviceId") String deviceId, @PathVariable(value = "componentId") String componentId) throws IOException {
+        deploymentDesignService.deploy(deploymentDesignId, deviceId, componentId);
         return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, NotificationMessage.DEPLOY_STARTED);
     }
 
     // 部署组件
     @PutMapping(value = "/{deploymentDesignId}/devices/{deviceId}/deploy")
-    public ResultEntity deployDevices(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deploymentDesignId") String deploymentDesignId, @PathVariable(value = "deviceId") String deviceId) throws IOException {
-        deploymentDesignService.deployDevices(deploymentDesignId, deviceId);
+    public ResultEntity deploy(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deploymentDesignId") String deploymentDesignId, @PathVariable(value = "deviceId") String deviceId) throws IOException {
+        deploymentDesignService.deploy(deploymentDesignId, deviceId);
+        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, NotificationMessage.DEPLOY_STARTED);
+    }
+
+    // 部署部署图
+    @PutMapping(value = "/{deploymentDesignId}/deploy")
+    public ResultEntity deploy(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deploymentDesignId") String deploymentDesignId) throws IOException {
+        deploymentDesignService.deploy(deploymentDesignId);
         return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, NotificationMessage.DEPLOY_STARTED);
     }
 }
