@@ -169,18 +169,18 @@ public class DeploymentDesignService {
 
 
     public void deploy(String deploymentDesignId, String deviceId, String componentId) throws IOException {
-        asyncTask.deployDesign(deploymentDesignId, deviceId, deploymentDesignDetailService.getDeploymentDesignDetailsByDeploymentDesignEntityIdAndDeviceEntityIdAndComponentEntityId(deploymentDesignId, deviceId, componentId));
+        asyncTask.deployDesign(deviceId, deploymentDesignDetailService.getDeploymentDesignDetailsByDeploymentDesignEntityIdAndDeviceEntityIdAndComponentEntityId(deploymentDesignId, deviceId, componentId));
     }
 
     public void deploy(String deploymentDesignId, String deviceId) throws IOException {
-        asyncTask.deployDesign(deploymentDesignId, deviceId, deploymentDesignDetailService.getDeploymentDesignDetailsByDeploymentDesignEntityIdAndDeviceEntityId(deploymentDesignId, deviceId));
+        asyncTask.deployDesign(deviceId, deploymentDesignDetailService.getDeploymentDesignDetailsByDeploymentDesignEntityIdAndDeviceEntityId(deploymentDesignId, deviceId));
     }
 
     public void deploy(String deploymentDesignId) throws IOException {
         List<DeploymentDesignDetailEntity> deploymentDesignDetailEntityList = getDeploymentDesignDetailsByDeploymentDesignId(deploymentDesignId);
         Map<DeviceEntity, List<DeploymentDesignDetailEntity>> deviceMap = deploymentDesignDetailEntityList.stream().collect(Collectors.groupingBy(DeploymentDesignDetailEntity::getDeviceEntity));
         for (Map.Entry<DeviceEntity, List<DeploymentDesignDetailEntity>> entry : deviceMap.entrySet()) {
-            asyncTask.deployDesign(deploymentDesignId, entry.getKey().getId(), entry.getValue());
+            asyncTask.deployDesign(entry.getKey().getId(), entry.getValue());
         }
     }
 

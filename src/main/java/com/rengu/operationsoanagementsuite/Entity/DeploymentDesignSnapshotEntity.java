@@ -17,10 +17,25 @@ public class DeploymentDesignSnapshotEntity implements Serializable {
     private Date createTime = new Date();
     private String name;
     private String description;
+    @Transient
+    private int progress;
     @ManyToOne
     private ProjectEntity projectEntity;
     @OneToMany(cascade = CascadeType.ALL)
     private List<DeploymentDesignSnapshotDetailEntity> deploymentDesignSnapshots;
+
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null || getClass() != object.getClass()) return false;
+        DeploymentDesignSnapshotEntity that = (DeploymentDesignSnapshotEntity) object;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 
     public String getId() {
         return id;
@@ -54,6 +69,14 @@ public class DeploymentDesignSnapshotEntity implements Serializable {
         this.description = description;
     }
 
+    public int getProgress() {
+        return progress;
+    }
+
+    public void setProgress(int progress) {
+        this.progress = progress;
+    }
+
     public ProjectEntity getProjectEntity() {
         return projectEntity;
     }
@@ -68,18 +91,5 @@ public class DeploymentDesignSnapshotEntity implements Serializable {
 
     public void setDeploymentDesignSnapshots(List<DeploymentDesignSnapshotDetailEntity> deploymentDesignSnapshots) {
         this.deploymentDesignSnapshots = deploymentDesignSnapshots;
-    }
-
-    @Override
-    public boolean equals(Object object) {
-        if (this == object) return true;
-        if (object == null || getClass() != object.getClass()) return false;
-        DeploymentDesignSnapshotEntity that = (DeploymentDesignSnapshotEntity) object;
-        return Objects.equals(id, that.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
     }
 }

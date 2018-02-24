@@ -44,8 +44,7 @@ public class AsyncTask {
 
     // 部署组件异步方法
     @Async
-    public void deployDesign(String deploymentDesignId, String deviceId, List<DeploymentDesignDetailEntity> deploymentDesignDetailEntityList) throws IOException {
-        DeploymentDesignEntity deploymentDesignEntity = deploymentDesignService.getDeploymentDesigns(deploymentDesignId);
+    public void deployDesign(String deviceId, List<DeploymentDesignDetailEntity> deploymentDesignDetailEntityList) throws IOException {
         DeviceEntity deviceEntity = deviceService.getDevices(deviceId);
         Socket socket = new Socket(deviceEntity.getIp(), deviceEntity.getTCPPort());
         socket.setSoTimeout(2000);
@@ -68,24 +67,34 @@ public class AsyncTask {
         dataOutputStream.flush();
         dataOutputStream.close();
         socket.close();
+        stringRedisTemplate.delete(deviceId);
     }
 
     // 部署组件异步方法
     @Async
-    public void deploySnapshot(String ip, int port, List<DeploymentDesignSnapshotDetailEntity> deploymentDesignSnapshotDetailEntityList) throws IOException {
+    public void deploySnapshot(String deploymentdesignsnapshotId, String ip, int port, List<DeploymentDesignSnapshotDetailEntity> deploymentDesignSnapshotDetailEntityList) throws IOException {
         Socket socket = new Socket(ip, port);
         socket.setSoTimeout(2000);
         DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
         DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
+        int completeNum = 0;
         for (DeploymentDesignSnapshotDetailEntity deploymentDesignSnapshotDetailEntity : deploymentDesignSnapshotDetailEntityList) {
             ComponentEntity componentEntity = deploymentDesignSnapshotDetailEntity.getComponentEntity();
-            deploy(deployLogService.saveDeployLog(ip, deploymentDesignSnapshotDetailEntity.getDeployPath(), componentEntity), dataOutputStream, dataInputStream, componentEntity, deploymentDesignSnapshotDetailEntity.getDeployPath());
+            try {
+                deploy(deployLogService.saveDeployLog(ip, deploymentDesignSnapshotDetailEntity.getDeployPath(), componentEntity), dataOutputStream, dataInputStream, componentEntity, deploymentDesignSnapshotDetailEntity.getDeployPath());
+                completeNum = completeNum + 1;
+                stringRedisTemplate.opsForValue().getAndSet(deploymentdesignsnapshotId, String.valueOf(completeNum / deploymentDesignSnapshotDetailEntityList.size() * 100));
+            } catch (IOException e) {
+                e.printStackTrace();
+                stringRedisTemplate.delete(deploymentdesignsnapshotId);
+            }
         }
         // 发送部署结束标志
         dataOutputStream.write("DeployEnd".getBytes());
         dataOutputStream.flush();
         dataOutputStream.close();
         socket.close();
+        stringRedisTemplate.delete(deploymentdesignsnapshotId);
     }
 
     // 部署

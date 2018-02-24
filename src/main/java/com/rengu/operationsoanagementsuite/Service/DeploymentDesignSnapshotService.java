@@ -10,6 +10,7 @@ import com.rengu.operationsoanagementsuite.Task.AsyncTask;
 import com.rengu.operationsoanagementsuite.Utils.NotificationMessage;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +25,8 @@ public class DeploymentDesignSnapshotService {
 
     @Autowired
     private AsyncTask asyncTask;
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
     @Autowired
     private DeploymentDesignSnapshotRepository deploymentDesignSnapshotRepository;
     @Autowired
@@ -61,17 +64,17 @@ public class DeploymentDesignSnapshotService {
         if (!hasDeploymentDesignSnapshots(deploymentDesignSnapshotId)) {
             throw new ClassCastException(NotificationMessage.DEPLOYMENT_DESIGN_SNAPSHOT_NOT_FOUND);
         }
-        return deploymentDesignSnapshotRepository.findOne(deploymentDesignSnapshotId);
+        return progressChecker(deploymentDesignSnapshotRepository.findOne(deploymentDesignSnapshotId));
     }
 
     @Transactional
     public List<DeploymentDesignSnapshotEntity> getDeploymentDesignSnapshots() {
-        return deploymentDesignSnapshotRepository.findAll();
+        return progressChecker(deploymentDesignSnapshotRepository.findAll());
     }
 
     @Transactional
     public List<DeploymentDesignSnapshotEntity> getDeploymentDesignSnapshotsByProjectId(String projectId) {
-        return deploymentDesignSnapshotRepository.findByProjectEntityId(projectService.getProjects(projectId).getId());
+        return progressChecker(deploymentDesignSnapshotRepository.findByProjectEntityId(projectService.getProjects(projectId).getId()));
     }
 
     @Transactional
@@ -79,10 +82,9 @@ public class DeploymentDesignSnapshotService {
         List<DeploymentDesignSnapshotDetailEntity> deploymentDesignSnapshotDetailEntities = getDeploymentDesignSnapshots(deploymentdesignsnapshotId).getDeploymentDesignSnapshots();
         Map<String, List<DeploymentDesignSnapshotDetailEntity>> ipMap = deploymentDesignSnapshotDetailEntities.stream().collect(Collectors.groupingBy(DeploymentDesignSnapshotDetailEntity::getIp));
         for (Map.Entry<String, List<DeploymentDesignSnapshotDetailEntity>> entry : ipMap.entrySet()) {
-            asyncTask.deploySnapshot(entry.getKey(), ApplicationConfiguration.deviceTCPPort, entry.getValue());
+            asyncTask.deploySnapshot(deploymentdesignsnapshotId, entry.getKey(), ApplicationConfiguration.deviceTCPPort, entry.getValue());
         }
     }
-
 
     public List<DeploymentDesignSnapshotDetailEntity> addDeploymentDesignSnapshotDetails(DeploymentDesignSnapshotEntity deploymentDesignSnapshotEntity, List<DeploymentDesignSnapshotDetailEntity> deploymentDesignSnapshotDetailEntityList) {
         List<DeploymentDesignSnapshotDetailEntity> deploymentDesignSnapshotDetailEntities = deploymentDesignSnapshotEntity.getDeploymentDesignSnapshots();
@@ -95,6 +97,22 @@ public class DeploymentDesignSnapshotService {
             }
         }
         return deploymentDesignSnapshotDetailEntities;
+    }
+
+    public DeploymentDesignSnapshotEntity progressChecker(DeploymentDesignSnapshotEntity deploymentDesignSnapshotEntity) {
+        if (stringRedisTemplate.hasKey(deploymentDesignSnapshotEntity.getId())) {
+            deploymentDesignSnapshotEntity.setProgress(Integer.parseInt(stringRedisTemplate.opsForValue().get(deploymentDesignSnapshotEntity.getId())));
+        }
+        return deploymentDesignSnapshotEntity;
+    }
+
+    public List<DeploymentDesignSnapshotEntity> progressChecker(List<DeploymentDesignSnapshotEntity> deploymentDesignSnapshotEntityListe) {
+        for (DeploymentDesignSnapshotEntity deploymentDesignSnapshotEntity : deploymentDesignSnapshotEntityListe) {
+            if (stringRedisTemplate.hasKey(deploymentDesignSnapshotEntity.getId())) {
+                deploymentDesignSnapshotEntity.setProgress(Integer.parseInt(stringRedisTemplate.opsForValue().get(deploymentDesignSnapshotEntity.getId())));
+            }
+        }
+        return deploymentDesignSnapshotEntityListe;
     }
 
     public boolean hasDeploymentDesignSnapshots(String deploymentDesignSnapshotId) {
