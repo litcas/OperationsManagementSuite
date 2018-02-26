@@ -77,14 +77,14 @@ public class AsyncTask {
         DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
         DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
         int completeNum = 0;
-        stringRedisTemplate.opsForValue().getAndSet(deploymentdesignsnapshotId, String.valueOf(completeNum / deploymentDesignSnapshotDetailEntityList.size() * 100));
+        stringRedisTemplate.opsForValue().getAndSet(deploymentdesignsnapshotId, String.valueOf(completeNum / (double) deploymentDesignSnapshotDetailEntityList.size() * 100));
         for (DeploymentDesignSnapshotDetailEntity deploymentDesignSnapshotDetailEntity : deploymentDesignSnapshotDetailEntityList) {
             ComponentEntity componentEntity = deploymentDesignSnapshotDetailEntity.getComponentEntity();
             try {
                 deploy(deployLogService.saveDeployLog(ip, deploymentDesignSnapshotDetailEntity.getDeployPath(), componentEntity), dataOutputStream, dataInputStream, componentEntity, deploymentDesignSnapshotDetailEntity.getDeployPath());
                 completeNum = completeNum + 1;
-                stringRedisTemplate.opsForValue().getAndSet(deploymentdesignsnapshotId, String.valueOf(completeNum / deploymentDesignSnapshotDetailEntityList.size() * 100));
-                logger.info(componentEntity.getName() + "--->发送完成，当前发送进度：" + String.valueOf(completeNum / deploymentDesignSnapshotDetailEntityList.size() * 100) + "%");
+                stringRedisTemplate.opsForValue().getAndSet(deploymentdesignsnapshotId, String.valueOf(completeNum / (double) deploymentDesignSnapshotDetailEntityList.size() * 100));
+                logger.info(componentEntity.getName() + "--->发送完成，当前发送进度：" + String.valueOf(completeNum / (double) deploymentDesignSnapshotDetailEntityList.size() * 100) + "%");
             } catch (IOException e) {
                 e.printStackTrace();
                 stringRedisTemplate.delete(deploymentdesignsnapshotId);
