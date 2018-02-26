@@ -30,7 +30,7 @@ public class DeviceEntity implements Serializable {
     @Transient
     private boolean virtual = false;
     @Transient
-    private int progress;
+    private double progress;
     @ManyToOne
     private ProjectEntity projectEntity;
 
@@ -127,11 +127,11 @@ public class DeviceEntity implements Serializable {
         this.virtual = virtual;
     }
 
-    public int getProgress() {
+    public double getProgress() {
         return progress;
     }
 
-    public void setProgress(int progress) {
+    public void setProgress(double progress) {
         this.progress = progress;
     }
 

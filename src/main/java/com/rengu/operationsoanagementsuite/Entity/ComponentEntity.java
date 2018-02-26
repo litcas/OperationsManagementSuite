@@ -2,10 +2,7 @@ package com.rengu.operationsoanagementsuite.Entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -25,7 +22,7 @@ public class ComponentEntity implements Serializable {
     private String deployPath;
     private long size;
     private boolean deleted = false;
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<ComponentDetailEntity> componentDetailEntities;
 
     public String getId() {

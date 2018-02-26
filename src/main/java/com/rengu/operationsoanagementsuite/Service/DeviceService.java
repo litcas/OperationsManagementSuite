@@ -120,7 +120,7 @@ public class DeviceService {
 
     public DeviceEntity progressChecker(DeviceEntity deviceEntity) {
         if (stringRedisTemplate.hasKey(deviceEntity.getId())) {
-            deviceEntity.setProgress(Integer.parseInt(stringRedisTemplate.opsForValue().get(deviceEntity.getId())));
+            deviceEntity.setProgress(Double.parseDouble(stringRedisTemplate.opsForValue().get(deviceEntity.getId())));
         }
         return deviceEntity;
     }
@@ -128,7 +128,7 @@ public class DeviceService {
     public List<DeviceEntity> progressChecker(List<DeviceEntity> deviceEntityList) {
         for (DeviceEntity deviceEntity : deviceEntityList) {
             if (stringRedisTemplate.hasKey(deviceEntity.getId())) {
-                deviceEntity.setProgress(Integer.parseInt(stringRedisTemplate.opsForValue().get(deviceEntity.getId())));
+                deviceEntity.setProgress(Double.parseDouble(stringRedisTemplate.opsForValue().get(deviceEntity.getId())));
             }
         }
         return deviceEntityList;
