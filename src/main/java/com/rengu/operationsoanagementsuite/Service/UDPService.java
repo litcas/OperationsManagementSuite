@@ -42,8 +42,8 @@ public class UDPService {
         id = Utils.getString(id, 37);
         deviceId = Utils.getString(deviceId, 37);
         componentId = Utils.getString(componentId, 37);
-        path = Utils.getString(path, 256);
         String extension = Utils.getString(Arrays.toString(extensions).replace("[", "").replace("]", "").replaceAll("\\s*", ""), 128);
+        path = Utils.getString(path, 256);
         sandMessage(ip, port, codeType + id + deviceId + componentId + extension + path);
     }
 }

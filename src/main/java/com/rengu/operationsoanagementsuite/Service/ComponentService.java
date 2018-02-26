@@ -152,8 +152,10 @@ public class ComponentService {
         componentEntity.setName(name);
         componentEntity.setDeployPath(getDeployPath(componentEntity));
         componentEntity.setFilePath(getFilePath(componentEntity, null));
-        componentEntity.setComponentDetailEntities(addComponentDetails(componentEntity, componentDetailService.getComponentDetails(componentEntity, new File(componentArgs.getFilePath()))));
-        componentEntity.setSize(getSize(componentEntity));
+        if (new File(componentEntity.getFilePath()).exists()) {
+            componentEntity.setComponentDetailEntities(addComponentDetails(componentEntity, componentDetailService.getComponentDetails(componentEntity, new File(componentArgs.getFilePath()))));
+            componentEntity.setSize(getSize(componentEntity));
+        }
         return componentRepository.save(componentEntity);
     }
 
