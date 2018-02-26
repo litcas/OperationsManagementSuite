@@ -2,8 +2,6 @@ package com.rengu.operationsoanagementsuite.Service;
 
 import com.rengu.operationsoanagementsuite.Entity.ComponentDetailEntity;
 import com.rengu.operationsoanagementsuite.Entity.ComponentEntity;
-import com.rengu.operationsoanagementsuite.Exception.CustomizeException;
-import com.rengu.operationsoanagementsuite.Utils.NotificationMessage;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -22,9 +20,6 @@ import java.util.UUID;
 public class ComponentDetailService {
 
     public List<ComponentDetailEntity> getComponentDetails(ComponentEntity componentEntity, MultipartFile[] multipartFiles) throws IOException {
-        if (multipartFiles.length == 0) {
-            throw new CustomizeException(NotificationMessage.COMPONENT_FILE_NOT_FOUND);
-        }
         String cacheFilePath = FileUtils.getTempDirectoryPath() + UUID.randomUUID().toString() + "/";
         for (MultipartFile multipartFile : multipartFiles) {
             // 复制文件到缓存文件

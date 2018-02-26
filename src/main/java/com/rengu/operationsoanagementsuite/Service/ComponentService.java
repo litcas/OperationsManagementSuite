@@ -51,8 +51,10 @@ public class ComponentService {
         }
         componentArgs.setDeployPath(getDeployPath(componentArgs));
         componentArgs.setFilePath(getFilePath(componentArgs, null));
-        componentArgs.setComponentDetailEntities(addComponentDetails(componentArgs, componentDetailService.getComponentDetails(componentArgs, componentFiles)));
-        componentArgs.setSize(getSize(componentArgs));
+        if (componentFiles.length != 0) {
+            componentArgs.setComponentDetailEntities(addComponentDetails(componentArgs, componentDetailService.getComponentDetails(componentArgs, componentFiles)));
+            componentArgs.setSize(getSize(componentArgs));
+        }
         return componentRepository.save(componentArgs);
     }
 
@@ -61,6 +63,22 @@ public class ComponentService {
         ComponentEntity componentEntity = getComponents(componentId);
         componentEntity.setDeleted(true);
         componentRepository.save(componentEntity);
+    }
+
+    @Transactional
+    public ComponentEntity updateComponents(String componentId, ComponentEntity componentArgs, MultipartFile[] componentFiles) throws IOException {
+        ComponentEntity componentEntity = getComponents(componentId);
+        if (!componentEntity.getName().equals(componentArgs.getName()) || !componentEntity.getVersion().equals(componentArgs.getVersion())) {
+            if (hasNameAndVersion(componentArgs.getName(), componentArgs.getVersion())) {
+                throw new CustomizeException(NotificationMessage.COMPONENT_EXISTS);
+            }
+        }
+        BeanUtils.copyProperties(componentArgs, componentEntity, "id", "createTime", "filePath", "size", "componentDetailEntities");
+        if (componentFiles.length != 0) {
+            componentEntity.setComponentDetailEntities(addComponentDetails(componentEntity, componentDetailService.getComponentDetails(componentEntity, componentFiles)));
+            componentEntity.setSize(getSize(componentEntity));
+        }
+        return componentRepository.save(componentEntity);
     }
 
     @Transactional

@@ -40,7 +40,11 @@ public class ComponentController {
         return ResultUtils.resultBuilder(loginUser, HttpStatus.NO_CONTENT, NotificationMessage.COMPONENT_DELETE);
     }
 
-    // todo 修改组件
+    // 修改组件
+    @PostMapping(value = "/{componentId}/update")
+    public ResultEntity updateComponents(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "componentId") String componentId, ComponentEntity componentArgs, @RequestParam(value = "componentfiles") MultipartFile[] componentFiles) throws IOException {
+        return ResultUtils.resultBuilder(loginUser, HttpStatus.NO_CONTENT, componentService.updateComponents(componentId, componentArgs, componentFiles));
+    }
 
     // 查询所有组件
     @GetMapping
