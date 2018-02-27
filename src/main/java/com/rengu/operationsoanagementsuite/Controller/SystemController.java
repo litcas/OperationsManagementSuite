@@ -1,8 +1,5 @@
 package com.rengu.operationsoanagementsuite.Controller;
 
-import com.rengu.operationsoanagementsuite.Entity.ResultEntity;
-import com.rengu.operationsoanagementsuite.Entity.UserEntity;
-import com.rengu.operationsoanagementsuite.Service.SystemService;
 import com.rengu.operationsoanagementsuite.Utils.ResultUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,18 +17,13 @@ public class SystemController {
     @Autowired
     private SystemService systemService;
 
-    @GetMapping(value = "/info")
+    @GetMapping(value = "/systeminfo")
     public ResultEntity getSystemInfo(@AuthenticationPrincipal UserEntity loginUser) {
-        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, systemService.getSystemInfo());
+        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, systemService.getSystemInfo());
     }
 
     @GetMapping(value = "/networks")
     public ResultEntity getNetworks(@AuthenticationPrincipal UserEntity loginUser) throws SocketException {
-        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, systemService.getNetworks());
-    }
-
-    @GetMapping(value = "/serverconfiguration")
-    public ResultEntity getServerConfiguration(@AuthenticationPrincipal UserEntity loginUser) {
-        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, systemService.getServerConfiguration());
+        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, systemService.getNetworks());
     }
 }

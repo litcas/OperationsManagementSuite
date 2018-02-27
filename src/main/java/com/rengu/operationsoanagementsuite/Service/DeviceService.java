@@ -1,187 +1,188 @@
 package com.rengu.operationsoanagementsuite.Service;
 
-import com.rengu.operationsoanagementsuite.Entity.*;
+import com.rengu.operationsoanagementsuite.Entity.DeviceEntity;
+import com.rengu.operationsoanagementsuite.Entity.HeartbeatEntity;
 import com.rengu.operationsoanagementsuite.Exception.CustomizeException;
-import com.rengu.operationsoanagementsuite.Repository.DeployLogRepository;
-import com.rengu.operationsoanagementsuite.Repository.DeployPlanDetailRepository;
-import com.rengu.operationsoanagementsuite.Repository.DeployPlanRepository;
 import com.rengu.operationsoanagementsuite.Repository.DeviceRepository;
-import com.rengu.operationsoanagementsuite.Task.HearBeatTask;
 import com.rengu.operationsoanagementsuite.Utils.NotificationMessage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import javax.persistence.criteria.Predicate;
-import javax.transaction.Transactional;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
 @Service
 public class DeviceService {
 
-    // 引入日志记录类
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    public static volatile List<HeartbeatEntity> onlineHeartbeats = new ArrayList<>();
     @Autowired
     private DeviceRepository deviceRepository;
     @Autowired
     private ProjectService projectService;
     @Autowired
-    private DeployLogRepository deployLogRepository;
+    private DeploymentDesignService deploymentDesignService;
     @Autowired
-    private DeployPlanDetailRepository deployPlanDetailRepository;
-    @Autowired
-    private DeployPlanRepository deployPlanRepository;
+    private StringRedisTemplate stringRedisTemplate;
 
-    // 新增设备
     @Transactional
-    public DeviceEntity saveDevice(String projectId, DeviceEntity deviceEntity) {
+    public DeviceEntity saveDevices(String projectId, DeviceEntity deviceArgs) {
         if (!projectService.hasProject(projectId)) {
             throw new CustomizeException(NotificationMessage.PROJECT_NOT_FOUND);
         }
-        // 检查设备ip参数是否存在
-        if (StringUtils.isEmpty(deviceEntity.getIp())) {
+        if (StringUtils.isEmpty(deviceArgs.getIp())) {
             throw new CustomizeException(NotificationMessage.DEVICE_IP_NOT_FOUND);
         }
-        // 检查Ip是否已经存在
-        if (hasDeviceByIp(deviceEntity.getIp(),projectId)) {
-            throw new CustomizeException(NotificationMessage.DEVICE_IP_EXISTS);
+        if (hasIp(projectId, deviceArgs.getIp())) {
+            throw new CustomizeException(NotificationMessage.DEVICE_EXISTS);
         }
-        deviceEntity.setProjectEntity(projectService.getProject(projectId));
-        deviceEntity.setLastModified(new Date());
+        DeviceEntity deviceEntity = new DeviceEntity();
+        BeanUtils.copyProperties(deviceArgs, deviceEntity, "id", "createTime", "projectEntity");
+        deviceEntity.setDeployPath(getDeployPath(deviceArgs));
+        deviceEntity.setProjectEntity(projectService.getProjects(projectId));
         return deviceRepository.save(deviceEntity);
     }
 
-    // 删除设备
     @Transactional
-    public void deleteDevice(String deviceId) {
-        // 检查设备id是否存在
-        if (!hasDevice(deviceId)) {
-            throw new CustomizeException(NotificationMessage.DEVICE_EXISTS);
+    public void deleteDevices(String deviceId) {
+        if (!hasDevices(deviceId)) {
+            throw new CustomizeException(NotificationMessage.DEVICE_NOT_FOUND);
         }
-        if (deployLogRepository.findByDeviceEntityId(deviceId).size() != 0) {
-            for (DeployLogEntity deployLogEntity : deployLogRepository.findByDeviceEntityId(deviceId)) {
-                deployLogRepository.delete(deployLogEntity);
-            }
-        }
-        if (deployPlanDetailRepository.findByDeviceEntityId(deviceId).size() != 0) {
-            for (DeployPlanDetailEntity deployPlanDetailEntity : deployPlanDetailRepository.findByDeviceEntityId(deviceId)) {
-                DeployPlanEntity deployPlanEntity = deployPlanDetailEntity.getDeployPlanEntity();
-                deployPlanEntity.getDeployPlanDetailEntities().remove(deployPlanDetailEntity);
-                deployPlanRepository.save(deployPlanEntity);
-                deployPlanDetailRepository.delete(deployPlanDetailEntity);
-            }
-        }
+        // 从部署设计中移除设备
+        deploymentDesignService.deleteDeploymentDesignDetailsByDeviceId(deviceId);
         deviceRepository.delete(deviceId);
     }
 
-    // 更新设备
     @Transactional
-    public DeviceEntity updateDevice(String deviceId, DeviceEntity deviceArgs) {
-        // 检查设备id是否存在
-        if (!hasDevice(deviceId)) {
-            throw new CustomizeException(NotificationMessage.DEVICE_EXISTS);
+    public DeviceEntity updateDevices(String deviceId, DeviceEntity deviceArgs) {
+        if (StringUtils.isEmpty(deviceArgs.getIp())) {
+            throw new CustomizeException(NotificationMessage.DEVICE_IP_NOT_FOUND);
         }
-        DeviceEntity deviceEntity = deviceRepository.findOne(deviceId);
+        DeviceEntity deviceEntity = getDevices(deviceId);
         if (!deviceArgs.getIp().equals(deviceEntity.getIp())) {
-            if (hasDeviceByIp(deviceArgs.getIp(), deviceEntity.getProjectEntity().getId())) {
+            if (hasIp(deviceEntity.getProjectEntity().getId(), deviceArgs.getIp())) {
                 throw new CustomizeException(NotificationMessage.DEVICE_EXISTS);
             }
         }
         BeanUtils.copyProperties(deviceArgs, deviceEntity, "id", "createTime", "projectEntity");
-        deviceEntity.setLastModified(new Date());
         return deviceRepository.save(deviceEntity);
-    }
-
-    // 查询设备
-    public DeviceEntity getDevice(String deviceId) {
-        return deviceRepository.findOne(deviceId);
-    }
-
-    // 查询设备
-    public List<DeviceEntity> getDevices(String projectId, DeviceEntity deviceArgs) {
-        return onlineChecker(deviceRepository.findAll((root, query, cb) -> {
-            List<Predicate> predicateList = new ArrayList<>();
-            if (!StringUtils.isEmpty(projectId)) {
-                predicateList.add(cb.equal(root.get("projectEntity").get("id"), projectId));
-            }
-            if (deviceArgs.getName() != null) {
-                predicateList.add(cb.like(root.get("name"), deviceArgs.getName()));
-            }
-            return cb.and(predicateList.toArray(new Predicate[predicateList.size()]));
-        }));
     }
 
     @Transactional
-    public DeviceEntity copyDevice(String deviceId) {
-        if (!hasDevice(deviceId)) {
+    public DeviceEntity getDevices(String deviceId) {
+        if (!hasDevices(deviceId)) {
             throw new CustomizeException(NotificationMessage.DEVICE_NOT_FOUND);
         }
-        DeviceEntity deviceArgs = deviceRepository.findOne(deviceId);
-        DeviceEntity deviceEntity = new DeviceEntity();
-        BeanUtils.copyProperties(deviceArgs, deviceEntity, "id", "createTime", "lastModified", "name");
-        deviceEntity.setName(deviceArgs.getName() + "-副本");
-        if (!StringUtils.isEmpty(deviceEntity.getIp())) {
-            String ip = deviceEntity.getIp();
-            while (true) {
-                if (hasDeviceByIp(ip, deviceEntity.getProjectEntity().getId())) {
-                    String[] strings = ip.split("\\.");
-                    int temp = Integer.parseInt(strings[3]) + 1;
-                    ip = strings[0] + "." + strings[1] + "." + strings[2] + "." + temp;
-                } else {
-                    deviceEntity.setIp(ip);
-                    break;
-                }
-            }
+        return onlineChecker(progressChecker(deviceRepository.findOne(deviceId)));
+    }
+
+    @Transactional
+    public List<DeviceEntity> getDevicesByProjectId(String projectId) {
+        if (!projectService.hasProject(projectId)) {
+            throw new CustomizeException(NotificationMessage.PROJECT_NOT_FOUND);
         }
+        return onlineChecker(progressChecker(deviceRepository.findByProjectEntityId(projectId)));
+    }
+
+    @Transactional
+    public List<DeviceEntity> getDevices() {
+        return onlineChecker(progressChecker(deviceRepository.findAll()));
+    }
+
+    @Transactional
+    public DeviceEntity copyDevices(String deviceId) {
+        DeviceEntity deviceArgs = getDevices(deviceId);
+        DeviceEntity deviceEntity = new DeviceEntity();
+        BeanUtils.copyProperties(deviceArgs, deviceEntity, "id", "createTime", "name", "ip");
+        // 设置复制设备的名字
+        deviceEntity.setName(deviceArgs.getName() + "-副本");
+        // 设置复制组件的IP
+        String ip = deviceArgs.getIp();
+        while (hasIp(deviceArgs.getProjectEntity().getId(), ip)) {
+            String[] strings = ip.split("\\.");
+            int temp = Integer.parseInt(strings[3]) + 1;
+            ip = strings[0] + "." + strings[1] + "." + strings[2] + "." + temp;
+        }
+        deviceEntity.setIp(ip);
+        deviceEntity.setProjectEntity(deviceArgs.getProjectEntity());
         return deviceRepository.save(deviceEntity);
     }
 
-    public List<DeviceEntity> onlineChecker(List<DeviceEntity> deviceEntities) {
-        List<DeviceRealInfoEntity> unknowDevices = new ArrayList<>(HearBeatTask.onlineDevices);
-        for (DeviceEntity deviceEntity : deviceEntities) {
-            Iterator<DeviceRealInfoEntity> deviceRealInfoEntityIterable = unknowDevices.iterator();
-            while (deviceRealInfoEntityIterable.hasNext()) {
-                DeviceRealInfoEntity deviceRealInfoEntity = deviceRealInfoEntityIterable.next();
-                if (deviceEntity.getIp().equals(deviceRealInfoEntity.getInetAddress().getHostAddress())) {
-                    deviceEntity.setOnline(true);
-                    deviceRealInfoEntityIterable.remove();
-                    break;
-                }
+    // 调整路径分隔符
+    public String getDeployPath(DeviceEntity deviceEntity) {
+        if (StringUtils.isEmpty(deviceEntity.getDeployPath())) {
+            throw new CustomizeException(NotificationMessage.DEVICE_DEPLOY_PATH_NOT_FOUND);
+        }
+        // 替换斜线方向
+        String deployPath = deviceEntity.getDeployPath().replace("\\", "/");
+        return deployPath.endsWith("/") ? deployPath : deployPath + "/";
+    }
+
+    public DeviceEntity progressChecker(DeviceEntity deviceEntity) {
+        if (stringRedisTemplate.hasKey(deviceEntity.getId())) {
+            deviceEntity.setProgress(Double.parseDouble(stringRedisTemplate.opsForValue().get(deviceEntity.getId())));
+        }
+        return deviceEntity;
+    }
+
+    public List<DeviceEntity> progressChecker(List<DeviceEntity> deviceEntityList) {
+        for (DeviceEntity deviceEntity : deviceEntityList) {
+            if (stringRedisTemplate.hasKey(deviceEntity.getId())) {
+                deviceEntity.setProgress(Double.parseDouble(stringRedisTemplate.opsForValue().get(deviceEntity.getId())));
             }
         }
-        for (DeviceRealInfoEntity deviceRealInfoEntity : unknowDevices) {
-            DeviceEntity deviceEntity = new DeviceEntity();
-            deviceEntity.setName(deviceRealInfoEntity.getInetAddress().getHostName());
-            deviceEntity.setIp(deviceRealInfoEntity.getInetAddress().getHostAddress());
-            deviceEntity.setVirtual(true);
-            deviceEntity.setOnline(true);
-            deviceEntities.add(deviceEntity);
-        }
-        return deviceEntities;
+        return deviceEntityList;
     }
 
     public DeviceEntity onlineChecker(DeviceEntity deviceEntity) {
-        List<DeviceRealInfoEntity> unknowDevices = new ArrayList<>(HearBeatTask.onlineDevices);
-        for (DeviceRealInfoEntity deviceRealInfoEntity : unknowDevices) {
-            if (deviceEntity.getIp().equals(deviceRealInfoEntity.getInetAddress().getHostAddress())) {
-                deviceEntity.setOnline(true);
-                return deviceEntity;
+        List<HeartbeatEntity> onlineDevices = new ArrayList<>(onlineHeartbeats);
+        if (onlineDevices.size() != 0) {
+            for (HeartbeatEntity heartbeatEntity : onlineDevices) {
+                if (deviceEntity.getIp().equals(heartbeatEntity.getInetAddress().getHostAddress())) {
+                    deviceEntity.setOnline(true);
+                    break;
+                }
             }
         }
         return deviceEntity;
     }
 
-    public boolean hasDevice(String deviceId) {
+    public List<DeviceEntity> onlineChecker(List<DeviceEntity> deviceEntityList) {
+        List<HeartbeatEntity> onlineDevices = new ArrayList<>(onlineHeartbeats);
+        Iterator<HeartbeatEntity> heartbeatEntityIterator = onlineDevices.iterator();
+        if (onlineDevices.size() != 0) {
+            while (heartbeatEntityIterator.hasNext()) {
+                HeartbeatEntity heartbeatEntity = heartbeatEntityIterator.next();
+                for (DeviceEntity deviceEntity : deviceEntityList) {
+                    if (deviceEntity.getIp().equals(heartbeatEntity.getInetAddress().getHostAddress())) {
+                        deviceEntity.setOnline(true);
+                        heartbeatEntityIterator.remove();
+                        break;
+                    }
+                }
+            }
+            // 建立虚拟设备
+            for (HeartbeatEntity heartbeatEntity : onlineDevices) {
+                DeviceEntity deviceEntity = new DeviceEntity();
+                deviceEntity.setName(heartbeatEntity.getInetAddress().getHostName());
+                deviceEntity.setIp(heartbeatEntity.getInetAddress().getHostAddress());
+                deviceEntity.setVirtual(true);
+                deviceEntity.setOnline(true);
+                deviceEntityList.add(deviceEntity);
+            }
+        }
+        return deviceEntityList;
+    }
+
+    public boolean hasDevices(String deviceId) {
         return deviceRepository.exists(deviceId);
     }
 
-    private boolean hasDeviceByIp(String deviceIp, String projectId) {
-        return deviceRepository.findByIpAndProjectEntityId(deviceIp, projectId) != null;
+    public boolean hasIp(String projectId, String ip) {
+        return deviceRepository.findByProjectEntityIdAndIp(projectId, ip) != null;
     }
 }

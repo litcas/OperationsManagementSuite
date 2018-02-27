@@ -1,23 +1,24 @@
 package com.rengu.operationsoanagementsuite.Entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Id;
+import javax.persistence.ManyToMany;
+import java.io.Serializable;
 import java.util.*;
 
 @Entity
-public class UserEntity implements UserDetails {
+public class UserEntity implements UserDetails, Serializable {
     @Id
     private String id = UUID.randomUUID().toString();
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime = new Date();
-    @Column(nullable = false, unique = true)
     private String username;
-    @Column(nullable = false)
     private String password;
     private boolean accountNonExpired = true;
     private boolean accountNonLocked = true;
@@ -31,7 +32,6 @@ public class UserEntity implements UserDetails {
      *
      * @return the authorities, sorted by natural key (never <code>null</code>)
      */
-    @JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<GrantedAuthority> grantedAuthorityList = new ArrayList<>();
@@ -47,6 +47,14 @@ public class UserEntity implements UserDetails {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public Date getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
     }
 
     @Override
@@ -103,14 +111,6 @@ public class UserEntity implements UserDetails {
         this.enabled = enabled;
     }
 
-    public Date getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(Date createTime) {
-        this.createTime = createTime;
-    }
-
     public List<RoleEntity> getRoleEntities() {
         return roleEntities;
     }
@@ -125,5 +125,10 @@ public class UserEntity implements UserDetails {
         if (o == null || getClass() != o.getClass()) return false;
         UserEntity that = (UserEntity) o;
         return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

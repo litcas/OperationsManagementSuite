@@ -1,30 +1,28 @@
 package com.rengu.operationsoanagementsuite.Entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Objects;
 import java.util.UUID;
 
 @Entity
-public class DeployPlanDetailEntity {
+public class DeploymentDesignDetailEntity implements Serializable {
     @Id
     private String id = UUID.randomUUID().toString();
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime = new Date();
     private String deployPath;
-    @OneToOne
-    private DeviceEntity deviceEntity;
-    @OneToOne
-    private ComponentEntity componentEntity;
-    @JsonIgnore
     @ManyToOne
-    private DeployPlanEntity deployPlanEntity;
+    private DeviceEntity deviceEntity;
+    @ManyToOne
+    private ComponentEntity componentEntity;
+    @ManyToOne
+    private DeploymentDesignEntity deploymentDesignEntity;
 
     public String getId() {
         return id;
@@ -66,19 +64,19 @@ public class DeployPlanDetailEntity {
         this.componentEntity = componentEntity;
     }
 
-    public DeployPlanEntity getDeployPlanEntity() {
-        return deployPlanEntity;
+    public DeploymentDesignEntity getDeploymentDesignEntity() {
+        return deploymentDesignEntity;
     }
 
-    public void setDeployPlanEntity(DeployPlanEntity deployPlanEntity) {
-        this.deployPlanEntity = deployPlanEntity;
+    public void setDeploymentDesignEntity(DeploymentDesignEntity deploymentDesignEntity) {
+        this.deploymentDesignEntity = deploymentDesignEntity;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        DeployPlanDetailEntity that = (DeployPlanDetailEntity) o;
+        DeploymentDesignDetailEntity that = (DeploymentDesignDetailEntity) o;
         return Objects.equals(id, that.id);
     }
 

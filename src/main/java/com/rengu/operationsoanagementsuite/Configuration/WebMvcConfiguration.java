@@ -6,6 +6,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 
 @Configuration
 public class WebMvcConfiguration extends WebMvcConfigurerAdapter {
+
     // 配置允许跨域访问
     @Override
     public void addCorsMappings(CorsRegistry registry) {

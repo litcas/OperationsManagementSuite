@@ -3,30 +3,27 @@ package com.rengu.operationsoanagementsuite.Entity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
 @Entity
-public class ComponentEntity {
+public class ComponentEntity implements Serializable {
     @Id
     private String id = UUID.randomUUID().toString();
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime = new Date();
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    private Date lastModified;
-    @Column(nullable = false)
     private String name;
-    @Column(nullable = false)
     private String version;
     private String description;
     private String filePath;
     private String deployPath;
     private long size;
     private boolean deleted = false;
-    @OneToMany(cascade = CascadeType.ALL)
-    private List<ComponentFileEntity> componentFileEntities;
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<ComponentDetailEntity> componentDetailEntities;
 
     public String getId() {
         return id;
@@ -42,14 +39,6 @@ public class ComponentEntity {
 
     public void setCreateTime(Date createTime) {
         this.createTime = createTime;
-    }
-
-    public Date getLastModified() {
-        return lastModified;
-    }
-
-    public void setLastModified(Date lastModified) {
-        this.lastModified = lastModified;
     }
 
     public String getName() {
@@ -108,12 +97,12 @@ public class ComponentEntity {
         this.deleted = deleted;
     }
 
-    public List<ComponentFileEntity> getComponentFileEntities() {
-        return componentFileEntities;
+    public List<ComponentDetailEntity> getComponentDetailEntities() {
+        return componentDetailEntities;
     }
 
-    public void setComponentFileEntities(List<ComponentFileEntity> componentFileEntities) {
-        this.componentFileEntities = componentFileEntities;
+    public void setComponentDetailEntities(List<ComponentDetailEntity> componentDetailEntities) {
+        this.componentDetailEntities = componentDetailEntities;
     }
 
     @Override

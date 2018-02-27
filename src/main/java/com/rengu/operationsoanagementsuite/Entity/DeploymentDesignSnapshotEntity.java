@@ -1,29 +1,41 @@
 package com.rengu.operationsoanagementsuite.Entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Entity
-public class DeployPlanEntity {
+public class DeploymentDesignSnapshotEntity implements Serializable {
     @Id
     private String id = UUID.randomUUID().toString();
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime = new Date();
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    private Date lastModified;
-    @Column(nullable = false)
     private String name;
     private String description;
-    @OneToMany(cascade = CascadeType.ALL)
-    private List<DeployPlanDetailEntity> deployPlanDetailEntities;
-    @JsonIgnore
+    @Transient
+    private double progress;
     @ManyToOne
     private ProjectEntity projectEntity;
+    @OneToMany(cascade = CascadeType.ALL)
+    private List<DeploymentDesignSnapshotDetailEntity> deploymentDesignSnapshots;
+
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null || getClass() != object.getClass()) return false;
+        DeploymentDesignSnapshotEntity that = (DeploymentDesignSnapshotEntity) object;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 
     public String getId() {
         return id;
@@ -39,14 +51,6 @@ public class DeployPlanEntity {
 
     public void setCreateTime(Date createTime) {
         this.createTime = createTime;
-    }
-
-    public Date getLastModified() {
-        return lastModified;
-    }
-
-    public void setLastModified(Date lastModified) {
-        this.lastModified = lastModified;
     }
 
     public String getName() {
@@ -65,12 +69,12 @@ public class DeployPlanEntity {
         this.description = description;
     }
 
-    public List<DeployPlanDetailEntity> getDeployPlanDetailEntities() {
-        return deployPlanDetailEntities;
+    public double getProgress() {
+        return progress;
     }
 
-    public void setDeployPlanDetailEntities(List<DeployPlanDetailEntity> deployPlanDetailEntities) {
-        this.deployPlanDetailEntities = deployPlanDetailEntities;
+    public void setProgress(double progress) {
+        this.progress = progress;
     }
 
     public ProjectEntity getProjectEntity() {
@@ -79,5 +83,13 @@ public class DeployPlanEntity {
 
     public void setProjectEntity(ProjectEntity projectEntity) {
         this.projectEntity = projectEntity;
+    }
+
+    public List<DeploymentDesignSnapshotDetailEntity> getDeploymentDesignSnapshots() {
+        return deploymentDesignSnapshots;
+    }
+
+    public void setDeploymentDesignSnapshots(List<DeploymentDesignSnapshotDetailEntity> deploymentDesignSnapshots) {
+        this.deploymentDesignSnapshots = deploymentDesignSnapshots;
     }
 }

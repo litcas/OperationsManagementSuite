@@ -1,28 +1,35 @@
 package com.rengu.operationsoanagementsuite.Utils;
 
-import com.rengu.operationsoanagementsuite.Entity.ResultEntity;
-import com.rengu.operationsoanagementsuite.Entity.UserEntity;
 import org.springframework.http.HttpStatus;
+
+import java.security.Principal;
 
 public class ResultUtils {
 
-    // 定义返回类型
-    public static final String HTTPRESPONSE = "HTTP";
-    public static final String ERROR = "ERROR";
-
     // 创建ResultEntity
-    private static ResultEntity<Object> resultBuilder(HttpStatus httpStatus, String type, String username, Object object) {
-        ResultEntity<Object> resultEntity = new ResultEntity<>();
-        resultEntity.setCode(httpStatus.value());
-        resultEntity.setMessage(httpStatus.getReasonPhrase());
-        resultEntity.setType(type);
+    public static ResultEntity resultBuilder(String username, int code, String message, Object data) {
+        ResultEntity resultEntity = new ResultEntity();
         resultEntity.setUsername(username);
-        resultEntity.setData(object);
+        resultEntity.setCode(code);
+        resultEntity.setMessage(message);
+        resultEntity.setData(data);
         return resultEntity;
     }
 
-    public static ResultEntity<Object> resultBuilder(HttpStatus httpStatus, String type, UserEntity loginUser, Object object) {
-        String username = loginUser == null ? "" : loginUser.getUsername();
-        return resultBuilder(httpStatus, type, username, object);
+    // 创建ResultEntity
+    public static ResultEntity resultBuilder(UserEntity userEntity, HttpStatus httpStatus, Object data) {
+        String username = userEntity == null ? "" : userEntity.getUsername();
+        int code = httpStatus.value();
+        String message = httpStatus.getReasonPhrase();
+        return resultBuilder(username, code, message, data);
+    }
+
+    // 创建ResultEntity
+    public static ResultEntity resultBuilder(Principal principal, HttpStatus httpStatus, Throwable throwable) {
+        String username = principal == null ? null : principal.getName();
+        int code = httpStatus.value();
+        String message = httpStatus.getReasonPhrase();
+        String data = throwable == null ? null : throwable.getMessage();
+        return resultBuilder(username, code, message, data);
     }
 }

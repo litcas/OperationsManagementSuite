@@ -9,7 +9,7 @@ import java.util.List;
 
 @Repository
 public interface ComponentRepository extends JpaRepository<ComponentEntity, String>, JpaSpecificationExecutor<ComponentEntity> {
-    ComponentEntity findByNameAndVersionAndDeleted(String componentName, String version, boolean deleted);
+    ComponentEntity findByNameAndVersion(String name, String version);
 
-    List<ComponentEntity> findByName(String name);
+    List<ComponentEntity> findByDeleted(boolean isDeleted);
 }

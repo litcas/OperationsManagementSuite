@@ -1,35 +1,27 @@
 package com.rengu.operationsoanagementsuite.Entity;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class DeviceScanResultEntity {
-    private String requestId;
+public class ScanResultEntity implements Serializable {
+    private String id;
     private String deviceId;
     private String componentId;
-    private List<ComponentFileEntity> scanResult;
-    private List<ComponentFileEntity> correctComponentFiles;
-    private List<ComponentFileEntity> modifyedComponentFiles;
-    private List<ComponentFileEntity> unknownFiles;
+    private List<ComponentDetailEntity> originalScanResultList;
+    private List<ComponentDetailEntity> correctComponentFiles;
+    private List<ComponentDetailEntity> modifyedComponentFiles;
+    private List<ComponentDetailEntity> unknownFiles;
     private boolean hasCorrectComponentFiles;
     private boolean hasModifyedComponentFiles;
     private boolean hasUnknownFiles;
     private boolean hasMissingFile;
 
-    public DeviceScanResultEntity() {
+    public String getId() {
+        return id;
     }
 
-    public DeviceScanResultEntity(String requestId, String deviceId, String componentId) {
-        this.requestId = requestId;
-        this.deviceId = deviceId;
-        this.componentId = componentId;
-    }
-
-    public String getRequestId() {
-        return requestId;
-    }
-
-    public void setRequestId(String requestId) {
-        this.requestId = requestId;
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getDeviceId() {
@@ -48,35 +40,35 @@ public class DeviceScanResultEntity {
         this.componentId = componentId;
     }
 
-    public List<ComponentFileEntity> getScanResult() {
-        return scanResult;
+    public List<ComponentDetailEntity> getOriginalScanResultList() {
+        return originalScanResultList;
     }
 
-    public void setScanResult(List<ComponentFileEntity> scanResult) {
-        this.scanResult = scanResult;
+    public void setOriginalScanResultList(List<ComponentDetailEntity> originalScanResultList) {
+        this.originalScanResultList = originalScanResultList;
     }
 
-    public List<ComponentFileEntity> getCorrectComponentFiles() {
+    public List<ComponentDetailEntity> getCorrectComponentFiles() {
         return correctComponentFiles;
     }
 
-    public void setCorrectComponentFiles(List<ComponentFileEntity> correctComponentFiles) {
+    public void setCorrectComponentFiles(List<ComponentDetailEntity> correctComponentFiles) {
         this.correctComponentFiles = correctComponentFiles;
     }
 
-    public List<ComponentFileEntity> getModifyedComponentFiles() {
+    public List<ComponentDetailEntity> getModifyedComponentFiles() {
         return modifyedComponentFiles;
     }
 
-    public void setModifyedComponentFiles(List<ComponentFileEntity> modifyedComponentFiles) {
+    public void setModifyedComponentFiles(List<ComponentDetailEntity> modifyedComponentFiles) {
         this.modifyedComponentFiles = modifyedComponentFiles;
     }
 
-    public List<ComponentFileEntity> getUnknownFiles() {
+    public List<ComponentDetailEntity> getUnknownFiles() {
         return unknownFiles;
     }
 
-    public void setUnknownFiles(List<ComponentFileEntity> unknownFiles) {
+    public void setUnknownFiles(List<ComponentDetailEntity> unknownFiles) {
         this.unknownFiles = unknownFiles;
     }
 

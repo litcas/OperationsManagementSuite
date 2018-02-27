@@ -1,34 +1,51 @@
 package com.rengu.operationsoanagementsuite.Entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.rengu.operationsoanagementsuite.Configuration.ApplicationConfiguration;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.Transient;
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Objects;
 import java.util.UUID;
 
 @Entity
-public class DeviceEntity {
+public class DeviceEntity implements Serializable {
+
     @Id
     private String id = UUID.randomUUID().toString();
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime = new Date();
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    private Date lastModified;
-    @Column(nullable = false)
     private String name;
-    @Column(nullable = false)
     private String ip;
-    private int UDPPort = 3087;
-    private int TCPPort = 3088;
-    private String path;
     private String description;
-    @ManyToOne
-    private ProjectEntity projectEntity;
+    private int UDPPort = ApplicationConfiguration.deviceUDPPort;
+    private int TCPPort = ApplicationConfiguration.deviceTCPPort;
+    private String deployPath;
     @Transient
     private boolean online = false;
     @Transient
     private boolean virtual = false;
+    @Transient
+    private double progress;
+    @ManyToOne
+    private ProjectEntity projectEntity;
+
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null || getClass() != object.getClass()) return false;
+        DeviceEntity that = (DeviceEntity) object;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 
     public String getId() {
         return id;
@@ -44,14 +61,6 @@ public class DeviceEntity {
 
     public void setCreateTime(Date createTime) {
         this.createTime = createTime;
-    }
-
-    public Date getLastModified() {
-        return lastModified;
-    }
-
-    public void setLastModified(Date lastModified) {
-        this.lastModified = lastModified;
     }
 
     public String getName() {
@@ -70,6 +79,14 @@ public class DeviceEntity {
         this.ip = ip;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     public int getUDPPort() {
         return UDPPort;
     }
@@ -86,28 +103,12 @@ public class DeviceEntity {
         this.TCPPort = TCPPort;
     }
 
-    public String getPath() {
-        return path;
+    public String getDeployPath() {
+        return deployPath;
     }
 
-    public void setPath(String path) {
-        this.path = path;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public ProjectEntity getProjectEntity() {
-        return projectEntity;
-    }
-
-    public void setProjectEntity(ProjectEntity projectEntity) {
-        this.projectEntity = projectEntity;
+    public void setDeployPath(String deployPath) {
+        this.deployPath = deployPath;
     }
 
     public boolean isOnline() {
@@ -126,16 +127,19 @@ public class DeviceEntity {
         this.virtual = virtual;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        DeviceEntity that = (DeviceEntity) o;
-        return Objects.equals(id, that.id);
+    public double getProgress() {
+        return progress;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
+    public void setProgress(double progress) {
+        this.progress = progress;
+    }
+
+    public ProjectEntity getProjectEntity() {
+        return projectEntity;
+    }
+
+    public void setProjectEntity(ProjectEntity projectEntity) {
+        this.projectEntity = projectEntity;
     }
 }
