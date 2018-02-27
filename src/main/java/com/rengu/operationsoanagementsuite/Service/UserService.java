@@ -12,12 +12,11 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 public class UserService implements UserDetailsService {
@@ -87,17 +86,22 @@ public class UserService implements UserDetailsService {
     }
 
     @Transactional
-    public UserEntity updateUsers(String userId, UserEntity userArgs) {
-        // 检查用户是否存在
-        if (!hasUser(userId)) {
-            throw new CustomizeException(NotificationMessage.USER_NOT_FOUND);
-        }
-        // 检查密码是否存在
+    public Object changePassword(String userId, UserEntity userArgs) {
         if (StringUtils.isEmpty(userArgs.getPassword())) {
             throw new CustomizeException(NotificationMessage.USER_PASSWORD_NOT_FOUND);
         }
-        UserEntity userEntity = userRepository.findOne(userId);
-        BeanUtils.copyProperties(userArgs, userEntity, "id", "createTime", "username", "accountNonExpired", "accountNonLocked", "credentialsNonExpired", "enabled", "roleEntities");
+        UserEntity userEntity = getUsers(userId);
+        userEntity.setPassword(new BCryptPasswordEncoder().encode(userArgs.getPassword()));
+        return userRepository.save(userEntity);
+    }
+
+    @Transactional
+    public Object changePassword(UserEntity loginUser, UserEntity userArgs) {
+        if (StringUtils.isEmpty(userArgs.getPassword())) {
+            throw new CustomizeException(NotificationMessage.USER_PASSWORD_NOT_FOUND);
+        }
+        UserEntity userEntity = getUsers(loginUser.getId());
+        userEntity.setPassword(new BCryptPasswordEncoder().encode(userArgs.getPassword()));
         return userRepository.save(userEntity);
     }
 
@@ -113,18 +117,6 @@ public class UserService implements UserDetailsService {
             throw new CustomizeException(NotificationMessage.USER_NOT_FOUND);
         }
         return userRepository.findOne(userId);
-    }
-
-    @Transactional
-    public String forgotPassword(String userId) {
-        if (!hasUser(userId)) {
-            throw new CustomizeException(NotificationMessage.USER_NOT_FOUND);
-        }
-        UserEntity userEntity = userRepository.findOne(userId);
-        String password = UUID.randomUUID().toString();
-        userEntity.setPassword(new BCryptPasswordEncoder().encode(password));
-        userRepository.save(userEntity);
-        return userEntity.getUsername() + "的密码已被重置为：" + password;
     }
 
     private List<RoleEntity> addRoles(UserEntity userEntity, RoleEntity... roleEntities) {
@@ -144,7 +136,7 @@ public class UserService implements UserDetailsService {
         return userRepository.findByUsername(username) != null;
     }
 
-    private boolean hasUser(String userId) {
+    public boolean hasUser(String userId) {
         return userRepository.exists(userId);
     }
 }

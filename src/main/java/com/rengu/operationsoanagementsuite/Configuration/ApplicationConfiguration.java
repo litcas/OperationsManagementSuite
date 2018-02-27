@@ -5,6 +5,9 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ApplicationConfiguration {
 
+    // Device 通信端口
+    public static final int deviceUDPPort = 3087;
+    public static final int deviceTCPPort = 3088;
     private String defultUsername = "admin";
     private String defultPassword = "admin";
     private String componentLibraryName = "lib";
@@ -14,11 +17,6 @@ public class ApplicationConfiguration {
     private int hearbeatReceivePort = 6004;
     private int tcpReceivePort = 6005;
     private int deviceLogoutDelay = 5;
-
-    // Device 通信端口
-    public static final int deviceUDPPort = 3087;
-    public static final int deviceTCPPort = 3088;
-
     // 不可修改项-自动从运行环境获取
     private String componentLibraryPath = "";
 

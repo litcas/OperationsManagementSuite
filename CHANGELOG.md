@@ -7,8 +7,10 @@
 ### Fixed
 ### Removed
 
-## 0.0.5 - SNAPSHOT - 2018-1-17
+## 1.0.0 - RELEASE - 2018-2-27
 ### Added
+- 实现修改用户密码接口(普通用户)。
+- 实现修改用户密码接口(管理员)。
 ### Changed
 ### Fixed
 ### Removed
