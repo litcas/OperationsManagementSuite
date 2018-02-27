@@ -152,7 +152,7 @@ public class ComponentService {
         componentEntity.setName(name);
         componentEntity.setDeployPath(getDeployPath(componentEntity));
         componentEntity.setFilePath(getFilePath(componentEntity, null));
-        if (new File(componentEntity.getFilePath()).exists()) {
+        if (new File(componentArgs.getFilePath()).exists()) {
             componentEntity.setComponentDetailEntities(addComponentDetails(componentEntity, componentDetailService.getComponentDetails(componentEntity, new File(componentArgs.getFilePath()))));
             componentEntity.setSize(getSize(componentEntity));
         }

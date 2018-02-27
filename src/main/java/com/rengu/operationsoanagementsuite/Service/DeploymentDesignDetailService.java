@@ -65,6 +65,18 @@ public class DeploymentDesignDetailService {
     }
 
     @Transactional
+    public void deleteDeploymentDesignDetailsByDeploymentDesignId(String deploymentDesignId) {
+        List<DeploymentDesignDetailEntity> deploymentDesignDetailEntityList = getDeploymentDesignDetailsByDeploymentDesignId(deploymentDesignId);
+        deploymentDesignDetailRepository.delete(deploymentDesignDetailEntityList);
+    }
+
+    @Transactional
+    public void deleteDeploymentDesignDetailsByDeviceId(String deviceId) {
+        List<DeploymentDesignDetailEntity> deploymentDesignDetailEntityList = deploymentDesignDetailRepository.findByDeviceEntityId(deviceId);
+        deploymentDesignDetailRepository.delete(deploymentDesignDetailEntityList);
+    }
+
+    @Transactional
     public List<DeploymentDesignDetailEntity> getDeploymentDesignDetails() {
         return deploymentDesignDetailRepository.findAll();
     }
@@ -72,6 +84,11 @@ public class DeploymentDesignDetailService {
     @Transactional
     public DeploymentDesignDetailEntity getDeploymentDesignDetails(String deploymentDesignDetailId) {
         return deploymentDesignDetailRepository.findOne(deploymentDesignDetailId);
+    }
+
+    @Transactional
+    public List<DeploymentDesignDetailEntity> getDeploymentDesignDetailsByDeviceId(String deviceId) {
+        return deploymentDesignDetailRepository.findByDeploymentDesignEntityId(deviceId);
     }
 
     @Transactional

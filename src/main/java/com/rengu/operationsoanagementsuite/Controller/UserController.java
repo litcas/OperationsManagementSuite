@@ -7,6 +7,7 @@ import com.rengu.operationsoanagementsuite.Utils.NotificationMessage;
 import com.rengu.operationsoanagementsuite.Utils.ResultUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,6 +25,7 @@ public class UserController {
     }
 
     // 删除用户
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping(value = "/{userId}")
     public ResultEntity deleteUsers(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "userId") String userId) {
         userService.deleteUsers(userId);
@@ -37,6 +39,7 @@ public class UserController {
     }
 
     // 查询用户
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResultEntity getUsers(@AuthenticationPrincipal UserEntity loginUser) {
         return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, userService.getUsers());

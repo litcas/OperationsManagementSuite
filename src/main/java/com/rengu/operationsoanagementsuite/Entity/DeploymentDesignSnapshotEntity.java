@@ -18,7 +18,7 @@ public class DeploymentDesignSnapshotEntity implements Serializable {
     private String name;
     private String description;
     @Transient
-    private int progress;
+    private double progress;
     @ManyToOne
     private ProjectEntity projectEntity;
     @OneToMany(cascade = CascadeType.ALL)
@@ -69,11 +69,11 @@ public class DeploymentDesignSnapshotEntity implements Serializable {
         this.description = description;
     }
 
-    public int getProgress() {
+    public double getProgress() {
         return progress;
     }
 
-    public void setProgress(int progress) {
+    public void setProgress(double progress) {
         this.progress = progress;
     }
 

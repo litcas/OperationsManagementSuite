@@ -81,6 +81,7 @@ public class ComponentController {
         return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, componentService.importComponents(multipartFiles));
     }
 
+    // 复制组件
     @PostMapping(value = "/{componentId}/copy")
     public ResultEntity copyComponents(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "componentId") String componentId) throws IOException {
         return ResultUtils.resultBuilder(loginUser, HttpStatus.CREATED, componentService.copyComponents(componentId));

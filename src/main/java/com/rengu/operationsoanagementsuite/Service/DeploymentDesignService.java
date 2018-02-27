@@ -65,7 +65,13 @@ public class DeploymentDesignService {
         if (!hasDeploymentDesigns(deploymentDesignId)) {
             throw new CustomizeException(NotificationMessage.DEPLOYMENT_DESIGN_NOT_FOUND);
         }
+        deploymentDesignDetailService.deleteDeploymentDesignDetailsByDeploymentDesignId(deploymentDesignId);
         deploymentDesignRepository.delete(deploymentDesignId);
+    }
+
+    @Transactional
+    public void deleteDeploymentDesignDetailsByDeviceId(String deviceId) {
+        deploymentDesignDetailService.deleteDeploymentDesignDetailsByDeviceId(deviceId);
     }
 
     @Transactional

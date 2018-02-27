@@ -25,6 +25,8 @@ public class DeviceService {
     @Autowired
     private ProjectService projectService;
     @Autowired
+    private DeploymentDesignService deploymentDesignService;
+    @Autowired
     private StringRedisTemplate stringRedisTemplate;
 
     @Transactional
@@ -50,6 +52,8 @@ public class DeviceService {
         if (!hasDevices(deviceId)) {
             throw new CustomizeException(NotificationMessage.DEVICE_NOT_FOUND);
         }
+        // 从部署设计中移除设备
+        deploymentDesignService.deleteDeploymentDesignDetailsByDeviceId(deviceId);
         deviceRepository.delete(deviceId);
     }
 

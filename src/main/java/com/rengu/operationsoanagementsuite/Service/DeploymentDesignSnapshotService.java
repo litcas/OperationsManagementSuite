@@ -101,7 +101,7 @@ public class DeploymentDesignSnapshotService {
 
     public DeploymentDesignSnapshotEntity progressChecker(DeploymentDesignSnapshotEntity deploymentDesignSnapshotEntity) {
         if (stringRedisTemplate.hasKey(deploymentDesignSnapshotEntity.getId())) {
-            deploymentDesignSnapshotEntity.setProgress(Integer.parseInt(stringRedisTemplate.opsForValue().get(deploymentDesignSnapshotEntity.getId())));
+            deploymentDesignSnapshotEntity.setProgress(Double.parseDouble(stringRedisTemplate.opsForValue().get(deploymentDesignSnapshotEntity.getId())));
         }
         return deploymentDesignSnapshotEntity;
     }
@@ -109,7 +109,7 @@ public class DeploymentDesignSnapshotService {
     public List<DeploymentDesignSnapshotEntity> progressChecker(List<DeploymentDesignSnapshotEntity> deploymentDesignSnapshotEntityListe) {
         for (DeploymentDesignSnapshotEntity deploymentDesignSnapshotEntity : deploymentDesignSnapshotEntityListe) {
             if (stringRedisTemplate.hasKey(deploymentDesignSnapshotEntity.getId())) {
-                deploymentDesignSnapshotEntity.setProgress(Integer.parseInt(stringRedisTemplate.opsForValue().get(deploymentDesignSnapshotEntity.getId())));
+                deploymentDesignSnapshotEntity.setProgress(Double.parseDouble(stringRedisTemplate.opsForValue().get(deploymentDesignSnapshotEntity.getId())));
             }
         }
         return deploymentDesignSnapshotEntityListe;

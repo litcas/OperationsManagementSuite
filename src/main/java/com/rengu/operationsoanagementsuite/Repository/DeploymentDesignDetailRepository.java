@@ -11,6 +11,8 @@ import java.util.List;
 public interface DeploymentDesignDetailRepository extends JpaRepository<DeploymentDesignDetailEntity, String>, JpaSpecificationExecutor<DeploymentDesignDetailEntity> {
     List<DeploymentDesignDetailEntity> findByDeploymentDesignEntityId(String deploymentDesignId);
 
+    List<DeploymentDesignDetailEntity> findByDeviceEntityId(String deviceId);
+
     List<DeploymentDesignDetailEntity> findByDeploymentDesignEntityIdAndDeviceEntityId(String deploymentDesignId, String deviceId);
 
     List<DeploymentDesignDetailEntity> findByDeploymentDesignEntityIdAndComponentEntityId(String deploymentDesignId, String componentId);
