@@ -6,6 +6,7 @@ import com.rengu.operationsoanagementsuite.Entity.DeploymentDesignSnapshotDetail
 import com.rengu.operationsoanagementsuite.Entity.DeploymentDesignSnapshotEntity;
 import com.rengu.operationsoanagementsuite.Exception.CustomizeException;
 import com.rengu.operationsoanagementsuite.Repository.DeploymentDesignSnapshotRepository;
+import com.rengu.operationsoanagementsuite.Task.AsyncTask;
 import com.rengu.operationsoanagementsuite.Utils.NotificationMessage;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;

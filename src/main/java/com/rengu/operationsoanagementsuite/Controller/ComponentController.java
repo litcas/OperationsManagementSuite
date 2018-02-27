@@ -1,5 +1,9 @@
 package com.rengu.operationsoanagementsuite.Controller;
 
+import com.rengu.operationsoanagementsuite.Entity.ComponentEntity;
+import com.rengu.operationsoanagementsuite.Entity.ResultEntity;
+import com.rengu.operationsoanagementsuite.Entity.UserEntity;
+import com.rengu.operationsoanagementsuite.Service.ComponentService;
 import com.rengu.operationsoanagementsuite.Utils.NotificationMessage;
 import com.rengu.operationsoanagementsuite.Utils.ResultUtils;
 import net.lingala.zip4j.exception.ZipException;

@@ -1,5 +1,9 @@
 package com.rengu.operationsoanagementsuite.Controller;
 
+import com.rengu.operationsoanagementsuite.Entity.DeviceEntity;
+import com.rengu.operationsoanagementsuite.Entity.ResultEntity;
+import com.rengu.operationsoanagementsuite.Entity.UserEntity;
+import com.rengu.operationsoanagementsuite.Service.DeviceService;
 import com.rengu.operationsoanagementsuite.Utils.NotificationMessage;
 import com.rengu.operationsoanagementsuite.Utils.ResultUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,10 +46,5 @@ public class DeviceController {
     @PostMapping(value = "/{deviceId}/copy")
     public ResultEntity copyDevices(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deviceId") String deviceId) {
         return ResultUtils.resultBuilder(loginUser, HttpStatus.CREATED, deviceService.copyDevices(deviceId));
-    }
-
-    @PostMapping(value = "/copy/{deviceId}")
-    public ResultEntity copyDevice(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deviceId") String deviceId) {
-        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, deviceService.copyDevice(deviceId));
     }
 }
