@@ -7,7 +7,6 @@ import com.rengu.operationsoanagementsuite.Service.DeviceService;
 import com.rengu.operationsoanagementsuite.Service.UDPService;
 import com.rengu.operationsoanagementsuite.Utils.JsonUtils;
 import com.rengu.operationsoanagementsuite.Utils.Utils;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +16,10 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 
-import java.io.*;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -40,32 +42,31 @@ public class AsyncTask {
 
     // 部署组件异步方法
     @Async
-    public void deployDesign(String deviceId, List<DeploymentDesignDetailEntity> deploymentDesignDetailEntityList) throws IOException {
+    public Future<List<DeployFileEntity>> deployDesign(String deviceId, List<DeploymentDesignDetailEntity> deploymentDesignDetailEntityList) throws IOException {
         DeviceEntity deviceEntity = deviceService.getDevices(deviceId);
         Socket socket = new Socket(deviceEntity.getIp(), deviceEntity.getTCPPort());
         socket.setTcpNoDelay(true);
         socket.setSoTimeout(1000);
         DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
         DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
-        int completeNum = 0;
-        stringRedisTemplate.opsForValue().getAndSet(deviceId, String.valueOf(completeNum / (double) deploymentDesignDetailEntityList.size() * 100));
+        long size = 0;
+        long sendSize = 0;
+        List<DeployFileEntity> errorFileList = new ArrayList<>();
+        for (DeploymentDesignDetailEntity deploymentDesignDetailEntity : deploymentDesignDetailEntityList) {
+            size = size + deploymentDesignDetailEntity.getComponentEntity().getSize();
+        }
         for (DeploymentDesignDetailEntity deploymentDesignDetailEntity : deploymentDesignDetailEntityList) {
             ComponentEntity componentEntity = deploymentDesignDetailEntity.getComponentEntity();
-            try {
-                deploy(deployLogService.saveDeployLog(deviceEntity, componentEntity), dataOutputStream, dataInputStream, componentEntity, deploymentDesignDetailEntity.getDeployPath());
-                completeNum = completeNum + 1;
-                stringRedisTemplate.opsForValue().getAndSet(deviceId, String.valueOf(completeNum / (double) deploymentDesignDetailEntityList.size() * 100));
-                logger.info(componentEntity.getName() + "--->发送完成，当前发送进度：" + String.valueOf(completeNum / (double) deploymentDesignDetailEntityList.size() * 100) + "%");
-            } catch (IOException e) {
-                e.printStackTrace();
-                stringRedisTemplate.delete(deviceId);
-            }
+            TupleEntity tupleEntity = deploy(deviceId, size, sendSize, deployLogService.saveDeployLog(deviceEntity, componentEntity), dataOutputStream, dataInputStream, componentEntity, deploymentDesignDetailEntity.getDeployPath());
+            sendSize = tupleEntity.getSendSize();
+            errorFileList.addAll(tupleEntity.getErrorFileList());
         }
         // 发送部署结束标志
         dataOutputStream.write("DeployEnd".getBytes());
         dataOutputStream.flush();
         dataOutputStream.close();
         socket.close();
+        return new AsyncResult<>(errorFileList);
     }
 
     // 部署组件异步方法
@@ -76,19 +77,17 @@ public class AsyncTask {
         socket.setSoTimeout(1000);
         DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
         DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
-        int completeNum = 0;
-        stringRedisTemplate.opsForValue().getAndSet(deploymentdesignsnapshotId, String.valueOf(completeNum / (double) deploymentDesignSnapshotDetailEntityList.size() * 100));
+        long size = 0;
+        long sendSize = 0;
+        List<DeployFileEntity> errorFileList = new ArrayList<>();
+        for (DeploymentDesignSnapshotDetailEntity deploymentDesignSnapshotDetailEntity : deploymentDesignSnapshotDetailEntityList) {
+            size = size + deploymentDesignSnapshotDetailEntity.getComponentEntity().getSize();
+        }
         for (DeploymentDesignSnapshotDetailEntity deploymentDesignSnapshotDetailEntity : deploymentDesignSnapshotDetailEntityList) {
             ComponentEntity componentEntity = deploymentDesignSnapshotDetailEntity.getComponentEntity();
-            try {
-                deploy(deployLogService.saveDeployLog(ip, deploymentDesignSnapshotDetailEntity.getDeployPath(), componentEntity), dataOutputStream, dataInputStream, componentEntity, deploymentDesignSnapshotDetailEntity.getDeployPath());
-                completeNum = completeNum + 1;
-                stringRedisTemplate.opsForValue().getAndSet(deploymentdesignsnapshotId, String.valueOf(completeNum / (double) deploymentDesignSnapshotDetailEntityList.size() * 100));
-                logger.info(componentEntity.getName() + "--->发送完成，当前发送进度：" + String.valueOf(completeNum / (double) deploymentDesignSnapshotDetailEntityList.size() * 100) + "%");
-            } catch (IOException e) {
-                e.printStackTrace();
-                stringRedisTemplate.delete(deploymentdesignsnapshotId);
-            }
+            TupleEntity tupleEntity = deploy(deploymentdesignsnapshotId, size, sendSize, deployLogService.saveDeployLog(ip, deploymentDesignSnapshotDetailEntity.getDeployPath(), componentEntity), dataOutputStream, dataInputStream, componentEntity, deploymentDesignSnapshotDetailEntity.getDeployPath());
+            sendSize = tupleEntity.getSendSize();
+            errorFileList.addAll(tupleEntity.getErrorFileList());
         }
         // 发送部署结束标志
         dataOutputStream.write("DeployEnd".getBytes());
@@ -98,7 +97,7 @@ public class AsyncTask {
     }
 
     // 部署
-    private void deploy(DeployLogEntity deployLogEntity, DataOutputStream dataOutputStream, DataInputStream dataInputStream, ComponentEntity componentEntity, String deployPath) throws IOException {
+    private TupleEntity deploy(String id, long size, long sendSize, DeployLogEntity deployLogEntity, DataOutputStream dataOutputStream, DataInputStream dataInputStream, ComponentEntity componentEntity, String deployPath) throws IOException {
         int fileNum = 0;
         List<DeployFileEntity> errorFileList = new ArrayList<>();
         for (ComponentDetailEntity componentDetailEntity : componentEntity.getComponentDetailEntities()) {
@@ -117,14 +116,16 @@ public class AsyncTask {
             while (true) {
                 try {
                     if (dataInputStream.read() == 102) {
-                        logger.info("文件名：" + (deployPath + componentDetailEntity.getPath()).replace("//", "/") + ",大小：" + componentDetailEntity.getSize() + ",发送成功。(" + fileNum + "/" + componentEntity.getComponentDetailEntities().size() + ")");
+                        sendSize = sendSize + componentDetailEntity.getSize();
+                        stringRedisTemplate.opsForValue().getAndSet(id, String.valueOf(sendSize / (double) size * 100));
+                        logger.info("文件名：" + (deployPath + componentDetailEntity.getPath()).replace("//", "/") + ",大小：" + componentDetailEntity.getSize() + ",发送成功,当前发送进度：" + String.valueOf(sendSize / (double) size * 100) + "%(" + fileNum + "/" + componentEntity.getComponentDetailEntities().size() + ")");
                         break;
                     }
                 } catch (IOException exception) {
                     count = count + 1;
                     dataOutputStream.write("fileRecvEnd".getBytes());
                     if (count == 10) {
-                        errorFileList.add(new DeployFileEntity((deployPath + componentDetailEntity.getPath()).replace("//", "/"), new File(componentEntity.getFilePath() + componentDetailEntity.getPath())));
+                        errorFileList.add(new DeployFileEntity(componentEntity, componentDetailEntity, deployPath + componentDetailEntity.getPath()));
                         logger.info("文件名：" + (deployPath + componentDetailEntity.getPath()).replace("//", "/") + ",大小：" + componentDetailEntity.getSize() + ",发送失败(" + fileNum + "/" + componentEntity.getComponentDetailEntities().size() + ")");
                         break;
                     }
@@ -147,7 +148,7 @@ public class AsyncTask {
                 String destPath = Utils.getString(deployFileEntity.getDestPath(), 255 - (deployFileEntity.getDestPath()).getBytes().length);
                 dataOutputStream.write(destPath.getBytes());
                 // 发送文件实体
-                IOUtils.copy(new FileInputStream(deployFileEntity.getComponentFile()), dataOutputStream);
+                IOUtils.copy(new FileInputStream(deployFileEntity.getComponentEntity().getFilePath() + deployFileEntity.getComponentDetailEntity().getPath()), dataOutputStream);
                 // 单个文件发送结束标志
                 dataOutputStream.write("fileRecvEnd".getBytes());
                 // 重复发送文件结束标志并等待回复
@@ -156,7 +157,9 @@ public class AsyncTask {
                     try {
                         if (dataInputStream.read() == 102) {
                             deployFileEntityIterable.remove();
-                            logger.info("文件名：" + deployFileEntity.getDestPath() + ",大小：" + FileUtils.sizeOf(deployFileEntity.getComponentFile()) + ",重新发送成功。(剩余发送失败文件数量：" + errorFileList.size() + ")");
+                            sendSize = sendSize + deployFileEntity.getComponentDetailEntity().getSize();
+                            stringRedisTemplate.opsForValue().getAndSet(id, String.valueOf(sendSize / (double) size * 100));
+                            logger.info("文件名：" + deployFileEntity.getDestPath() + ",大小：" + deployFileEntity.getComponentDetailEntity().getSize() + ",重新发送成功,当前发送进度:" + String.valueOf(sendSize / (double) size * 100) + "%(剩余发送失败文件数量：" + errorFileList.size() + ")");
                             break;
                         }
                     } catch (IOException exception) {
@@ -175,6 +178,7 @@ public class AsyncTask {
         } else {
             deployLogService.updateDeployLog(deployLogEntity, DeployLogService.COMPLETE_STATE);
         }
+        return new TupleEntity(sendSize, errorFileList);
     }
 
     // 扫描设备

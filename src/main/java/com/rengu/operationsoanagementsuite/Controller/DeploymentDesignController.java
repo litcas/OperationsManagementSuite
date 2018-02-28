@@ -134,22 +134,19 @@ public class DeploymentDesignController {
 
     // 部署组件
     @PutMapping(value = "/{deploymentDesignId}/devices/{deviceId}/components/{componentId}/deploy")
-    public ResultEntity deploy(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deploymentDesignId") String deploymentDesignId, @PathVariable(value = "deviceId") String deviceId, @PathVariable(value = "componentId") String componentId) throws IOException {
-        deploymentDesignService.deploy(deploymentDesignId, deviceId, componentId);
-        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, NotificationMessage.DEPLOY_STARTED);
+    public ResultEntity deploy(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deploymentDesignId") String deploymentDesignId, @PathVariable(value = "deviceId") String deviceId, @PathVariable(value = "componentId") String componentId) throws IOException, ExecutionException, InterruptedException {
+        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, deploymentDesignService.deploy(deploymentDesignId, deviceId, componentId));
     }
 
     // 部署组件
     @PutMapping(value = "/{deploymentDesignId}/devices/{deviceId}/deploy")
-    public ResultEntity deploy(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deploymentDesignId") String deploymentDesignId, @PathVariable(value = "deviceId") String deviceId) throws IOException {
-        deploymentDesignService.deploy(deploymentDesignId, deviceId);
-        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, NotificationMessage.DEPLOY_STARTED);
+    public ResultEntity deploy(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deploymentDesignId") String deploymentDesignId, @PathVariable(value = "deviceId") String deviceId) throws IOException, ExecutionException, InterruptedException {
+        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, deploymentDesignService.deploy(deploymentDesignId, deviceId));
     }
 
     // 部署部署图
     @PutMapping(value = "/{deploymentDesignId}/deploy")
-    public ResultEntity deploy(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deploymentDesignId") String deploymentDesignId) throws IOException {
-        deploymentDesignService.deploy(deploymentDesignId);
-        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, NotificationMessage.DEPLOY_STARTED);
+    public ResultEntity deploy(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deploymentDesignId") String deploymentDesignId) throws IOException, ExecutionException, InterruptedException {
+        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, deploymentDesignService.deploy(deploymentDesignId));
     }
 }
