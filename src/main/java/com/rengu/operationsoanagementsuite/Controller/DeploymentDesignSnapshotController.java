@@ -11,6 +11,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 @RestController
 @RequestMapping(value = "/deploymentdesignsnapshots")
@@ -40,8 +41,7 @@ public class DeploymentDesignSnapshotController {
 
     // 部署快照
     @PutMapping(value = "/{deploymentdesignsnapshotId}/deploy")
-    public ResultEntity deployDeploymentDesignSnapshots(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deploymentdesignsnapshotId") String deploymentdesignsnapshotId) throws IOException {
-        deploymentDesignSnapshotService.deployDeploymentDesignSnapshots(deploymentdesignsnapshotId);
-        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, NotificationMessage.DEPLOY_STARTED);
+    public ResultEntity deployDeploymentDesignSnapshots(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deploymentdesignsnapshotId") String deploymentdesignsnapshotId) throws IOException, ExecutionException, InterruptedException {
+        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, deploymentDesignSnapshotService.deployDeploymentDesignSnapshots(deploymentdesignsnapshotId));
     }
 }

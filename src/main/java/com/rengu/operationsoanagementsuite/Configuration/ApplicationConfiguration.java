@@ -20,106 +20,59 @@ public class ApplicationConfiguration {
     private int deviceLogoutDelay = 5;
 
     // 组件部署参数
-    private int socketTimeout = 1000;
+    private int socketTimeout = 2000;
+    private int maxWaitTimes = 5;
     private int maxRetryTimes = 10;
 
     // 不可修改项-自动从运行环境获取
     private String componentLibraryPath = "";
 
-    public static int getDeviceUDPPort() {
-        return deviceUDPPort;
-    }
-
-    public static int getDeviceTCPPort() {
-        return deviceTCPPort;
-    }
-
     public String getDefultUsername() {
         return defultUsername;
-    }
-
-    public void setDefultUsername(String defultUsername) {
-        this.defultUsername = defultUsername;
     }
 
     public String getDefultPassword() {
         return defultPassword;
     }
 
-    public void setDefultPassword(String defultPassword) {
-        this.defultPassword = defultPassword;
-    }
-
     public String getComponentLibraryName() {
         return componentLibraryName;
-    }
-
-    public void setComponentLibraryName(String componentLibraryName) {
-        this.componentLibraryName = componentLibraryName;
     }
 
     public String getJsonFileName() {
         return jsonFileName;
     }
 
-    public void setJsonFileName(String jsonFileName) {
-        this.jsonFileName = jsonFileName;
-    }
-
     public String getCompressFileName() {
         return compressFileName;
-    }
-
-    public void setCompressFileName(String compressFileName) {
-        this.compressFileName = compressFileName;
     }
 
     public int getHearbeatSendPort() {
         return hearbeatSendPort;
     }
 
-    public void setHearbeatSendPort(int hearbeatSendPort) {
-        this.hearbeatSendPort = hearbeatSendPort;
-    }
-
     public int getHearbeatReceivePort() {
         return hearbeatReceivePort;
-    }
-
-    public void setHearbeatReceivePort(int hearbeatReceivePort) {
-        this.hearbeatReceivePort = hearbeatReceivePort;
     }
 
     public int getTcpReceivePort() {
         return tcpReceivePort;
     }
 
-    public void setTcpReceivePort(int tcpReceivePort) {
-        this.tcpReceivePort = tcpReceivePort;
-    }
-
     public int getDeviceLogoutDelay() {
         return deviceLogoutDelay;
-    }
-
-    public void setDeviceLogoutDelay(int deviceLogoutDelay) {
-        this.deviceLogoutDelay = deviceLogoutDelay;
     }
 
     public int getSocketTimeout() {
         return socketTimeout;
     }
 
-    public void setSocketTimeout(int socketTimeout) {
-        this.socketTimeout = socketTimeout;
+    public int getMaxWaitTimes() {
+        return maxWaitTimes;
     }
 
     public int getMaxRetryTimes() {
         return maxRetryTimes;
-    }
-
-    public void setMaxRetryTimes(int maxRetryTimes) {
-        this.maxRetryTimes = maxRetryTimes;
     }
 
     public String getComponentLibraryPath() {

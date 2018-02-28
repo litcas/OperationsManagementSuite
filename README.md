@@ -8,24 +8,7 @@
 点击[这里](https://github.com/MagnyCopper/OperationsManagementSuite/blob/dev/CHANGELOG.md)查看更新日志。
 
 ## 接口文档
-   ```
-   http://localhost:8080/swagger-ui.html
-   ```
+`http://localhost:8080/swagger-ui.html`
 
-## 开发环境配置说明
-
-### MySQL安装配置
-
-* 安装MySQL数据库。
-* 建立数据库用户，并分配权限。
-    ```
-    CREATE USER 'rengu'@'%' IDENTIFIED BY 'rengu';
-    GRANT ALL ON *.* TO 'rengu'@'%';
-    ```
-* 建立名为OperationsManagementSuiteDB的数据库。
-    ```
-    CREATE DATABASE OperationsManagementSuiteDB;
-    ```
-### Redis安装配置
-
-* 安装Redis数据库。
+## 安装配置说明
+点击[这里](https://github.com/MagnyCopper/OperationsManagementSuite/wiki/%E8%BF%90%E7%BB%B4%E5%B9%B3%E5%8F%B0%E5%AE%89%E8%A3%85%E9%85%8D%E7%BD%AE%E8%AF%B4%E6%98%8E%E6%89%8B%E5%86%8C)安装配置说明。

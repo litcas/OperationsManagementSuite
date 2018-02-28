@@ -128,7 +128,7 @@ public class AsyncTask {
                 } catch (IOException exception) {
                     count = count + 1;
                     dataOutputStream.write("fileRecvEnd".getBytes());
-                    if (count == applicationConfiguration.getMaxRetryTimes()) {
+                    if (count == applicationConfiguration.getMaxWaitTimes()) {
                         errorFileList.add(new DeployFileEntity(componentEntity, componentDetailEntity, deployPath + componentDetailEntity.getPath()));
                         logger.info("文件名：" + (deployPath + componentDetailEntity.getPath()).replace("//", "/") + ",大小：" + componentDetailEntity.getSize() + ",发送失败(" + fileNum + "/" + componentEntity.getComponentDetailEntities().size() + ")");
                         break;
@@ -169,7 +169,7 @@ public class AsyncTask {
                     } catch (IOException exception) {
                         count = count + 1;
                         dataOutputStream.write("fileRecvEnd".getBytes());
-                        if (count == applicationConfiguration.getMaxRetryTimes()) {
+                        if (count == applicationConfiguration.getMaxWaitTimes()) {
                             break;
                         }
                     }
@@ -178,10 +178,10 @@ public class AsyncTask {
         }
         if (errorFileList.size() != 0) {
             deployLogService.updateDeployLog(deployLogEntity, DeployLogService.FAIL_STATE);
-            logger.info("组件：" + componentEntity.getName() + "文件发送失败，发送失败文件数量：" + errorFileList.size());
         } else {
             deployLogService.updateDeployLog(deployLogEntity, DeployLogService.COMPLETE_STATE);
         }
+        logger.info("组件：" + componentEntity.getName() + "文件发送结束，发送失败文件数量：" + errorFileList.size());
         return new TupleEntity(sendCount, errorFileList);
     }
 
