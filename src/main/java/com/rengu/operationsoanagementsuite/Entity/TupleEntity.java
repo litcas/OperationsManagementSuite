@@ -4,16 +4,16 @@ import java.util.List;
 
 public class TupleEntity {
 
-    private long sendSize;
+    private int sendCount;
     private List<DeployFileEntity> errorFileList;
 
-    public TupleEntity(long sendSize, List<DeployFileEntity> errorFileList) {
-        this.sendSize = sendSize;
+    public TupleEntity(int sendCount, List<DeployFileEntity> errorFileList) {
+        this.sendCount = sendCount;
         this.errorFileList = errorFileList;
     }
 
-    public long getSendSize() {
-        return sendSize;
+    public int getSendCount() {
+        return sendCount;
     }
 
     public List<DeployFileEntity> getErrorFileList() {

@@ -8,6 +8,7 @@ public class ApplicationConfiguration {
     // Device 通信端口
     public static final int deviceUDPPort = 3087;
     public static final int deviceTCPPort = 3088;
+
     private String defultUsername = "admin";
     private String defultPassword = "admin";
     private String componentLibraryName = "lib";
@@ -17,8 +18,21 @@ public class ApplicationConfiguration {
     private int hearbeatReceivePort = 6004;
     private int tcpReceivePort = 6005;
     private int deviceLogoutDelay = 5;
+
+    // 组件部署参数
+    private int socketTimeout = 1000;
+    private int maxRetryTimes = 10;
+
     // 不可修改项-自动从运行环境获取
     private String componentLibraryPath = "";
+
+    public static int getDeviceUDPPort() {
+        return deviceUDPPort;
+    }
+
+    public static int getDeviceTCPPort() {
+        return deviceTCPPort;
+    }
 
     public String getDefultUsername() {
         return defultUsername;
@@ -92,11 +106,19 @@ public class ApplicationConfiguration {
         this.deviceLogoutDelay = deviceLogoutDelay;
     }
 
-    public String getComponentLibraryPath() {
-        return componentLibraryPath;
+    public int getSocketTimeout() {
+        return socketTimeout;
     }
 
-    public void setComponentLibraryPath(String componentLibraryPath) {
-        this.componentLibraryPath = componentLibraryPath;
+    public void setSocketTimeout(int socketTimeout) {
+        this.socketTimeout = socketTimeout;
+    }
+
+    public int getMaxRetryTimes() {
+        return maxRetryTimes;
+    }
+
+    public void setMaxRetryTimes(int maxRetryTimes) {
+        this.maxRetryTimes = maxRetryTimes;
     }
 }
