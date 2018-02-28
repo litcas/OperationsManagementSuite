@@ -121,4 +121,12 @@ public class ApplicationConfiguration {
     public void setMaxRetryTimes(int maxRetryTimes) {
         this.maxRetryTimes = maxRetryTimes;
     }
+
+    public String getComponentLibraryPath() {
+        return componentLibraryPath;
+    }
+
+    public void setComponentLibraryPath(String componentLibraryPath) {
+        this.componentLibraryPath = componentLibraryPath;
+    }
 }

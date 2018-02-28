@@ -1,6 +1,7 @@
 package com.rengu.operationsoanagementsuite.Service;
 
 import com.rengu.operationsoanagementsuite.Configuration.ApplicationConfiguration;
+import com.rengu.operationsoanagementsuite.Entity.DeployFileEntity;
 import com.rengu.operationsoanagementsuite.Entity.DeploymentDesignEntity;
 import com.rengu.operationsoanagementsuite.Entity.DeploymentDesignSnapshotDetailEntity;
 import com.rengu.operationsoanagementsuite.Entity.DeploymentDesignSnapshotEntity;
@@ -18,6 +19,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 @Service
@@ -78,12 +80,14 @@ public class DeploymentDesignSnapshotService {
     }
 
     @Transactional
-    public void deployDeploymentDesignSnapshots(String deploymentdesignsnapshotId) throws IOException {
+    public List<DeployFileEntity> deployDeploymentDesignSnapshots(String deploymentdesignsnapshotId) throws IOException, ExecutionException, InterruptedException {
         List<DeploymentDesignSnapshotDetailEntity> deploymentDesignSnapshotDetailEntities = getDeploymentDesignSnapshots(deploymentdesignsnapshotId).getDeploymentDesignSnapshots();
         Map<String, List<DeploymentDesignSnapshotDetailEntity>> ipMap = deploymentDesignSnapshotDetailEntities.stream().collect(Collectors.groupingBy(DeploymentDesignSnapshotDetailEntity::getIp));
+        List<DeployFileEntity> errorList = new ArrayList<>();
         for (Map.Entry<String, List<DeploymentDesignSnapshotDetailEntity>> entry : ipMap.entrySet()) {
-            asyncTask.deploySnapshot(deploymentdesignsnapshotId, entry.getKey(), ApplicationConfiguration.deviceTCPPort, entry.getValue());
+            errorList.addAll(asyncTask.deploySnapshot(deploymentdesignsnapshotId, entry.getKey(), ApplicationConfiguration.deviceTCPPort, entry.getValue()).get());
         }
+        return errorList;
     }
 
     public List<DeploymentDesignSnapshotDetailEntity> addDeploymentDesignSnapshotDetails(DeploymentDesignSnapshotEntity deploymentDesignSnapshotEntity, List<DeploymentDesignSnapshotDetailEntity> deploymentDesignSnapshotDetailEntityList) {

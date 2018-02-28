@@ -74,7 +74,7 @@ public class AsyncTask {
 
     // 部署组件异步方法
     @Async
-    public void deploySnapshot(String deploymentdesignsnapshotId, String ip, int port, List<DeploymentDesignSnapshotDetailEntity> deploymentDesignSnapshotDetailEntityList) throws IOException {
+    public Future<List<DeployFileEntity>> deploySnapshot(String deploymentdesignsnapshotId, String ip, int port, List<DeploymentDesignSnapshotDetailEntity> deploymentDesignSnapshotDetailEntityList) throws IOException {
         Socket socket = new Socket(ip, port);
         socket.setTcpNoDelay(true);
         socket.setSoTimeout(applicationConfiguration.getSocketTimeout());
@@ -97,6 +97,7 @@ public class AsyncTask {
         dataOutputStream.flush();
         dataOutputStream.close();
         socket.close();
+        return new AsyncResult<>(errorFileList);
     }
 
     // 部署
