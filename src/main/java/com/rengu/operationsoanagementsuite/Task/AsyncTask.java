@@ -23,6 +23,7 @@ import java.io.DataOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -43,6 +44,7 @@ public class AsyncTask {
     private DeviceService deviceService;
     @Autowired
     private DeployLogService deployLogService;
+    private NumberFormat numberFormat = NumberFormat.getNumberInstance();
 
     // 部署组件异步方法
     @Async
@@ -56,6 +58,7 @@ public class AsyncTask {
         int size = 0;
         int sendCount = 0;
         List<DeployFileEntity> errorFileList = new ArrayList<>();
+        stringRedisTemplate.opsForValue().getAndSet(deviceId, numberFormat.format(0));
         for (DeploymentDesignDetailEntity DeploymentDesignDetailEntity : deploymentDesignDetailEntityList) {
             size = size + DeploymentDesignDetailEntity.getComponentEntity().getComponentDetailEntities().size();
         }
@@ -85,6 +88,7 @@ public class AsyncTask {
         int size = 0;
         int sendCount = 0;
         List<DeployFileEntity> errorFileList = new ArrayList<>();
+        stringRedisTemplate.opsForValue().getAndSet(deploymentdesignsnapshotId, numberFormat.format(0));
         for (DeploymentDesignSnapshotDetailEntity deploymentDesignSnapshotDetailEntity : deploymentDesignSnapshotDetailEntityList) {
             size = size + deploymentDesignSnapshotDetailEntity.getComponentEntity().getComponentDetailEntities().size();
         }
@@ -121,7 +125,8 @@ public class AsyncTask {
                     }
                 } catch (IOException exception) {
                     pathRetryCount = pathRetryCount + 1;
-                    if (pathRetryCount == applicationConfiguration.getMaxRetryTimes()) {
+                    if (pathRetryCount == applicationConfiguration.getMaxWaitTimes()) {
+                        deployLogService.updateDeployLog(deployLogEntity, DeployLogService.FAIL_STATE);
                         throw new CustomizeException(NotificationMessage.DISK_NOT_FOUND);
                     }
                 }
@@ -136,8 +141,8 @@ public class AsyncTask {
                 try {
                     if (dataInputStream.read() == 102) {
                         sendCount = sendCount + 1;
-                        stringRedisTemplate.opsForValue().getAndSet(id, String.valueOf(sendCount / (double) size * 100));
-                        logger.info("文件名：" + (deployPath + componentDetailEntity.getPath()).replace("//", "/") + ",大小：" + componentDetailEntity.getSize() + ",发送成功,当前发送进度：" + String.valueOf(sendCount / (double) size * 100) + "%(" + fileNum + "/" + componentEntity.getComponentDetailEntities().size() + ")");
+                        stringRedisTemplate.opsForValue().getAndSet(id, numberFormat.format(sendCount / (double) size * 100));
+                        logger.info("文件名：" + (deployPath + componentDetailEntity.getPath()).replace("//", "/") + ",大小：" + componentDetailEntity.getSize() + ",发送成功,当前发送进度：" + numberFormat.format(sendCount / (double) size * 100) + "%(" + fileNum + "/" + componentEntity.getComponentDetailEntities().size() + ")");
                         break;
                     }
                 } catch (IOException exception) {
@@ -190,8 +195,8 @@ public class AsyncTask {
                         if (dataInputStream.read() == 102) {
                             deployFileEntityIterable.remove();
                             sendCount = sendCount + 1;
-                            stringRedisTemplate.opsForValue().getAndSet(id, String.valueOf(sendCount / (double) size * 100));
-                            logger.info("文件名：" + deployFileEntity.getDestPath() + ",大小：" + deployFileEntity.getComponentDetailEntity().getSize() + ",重新发送成功,当前发送进度:" + String.valueOf(sendCount / (double) size * 100) + "%(剩余发送失败文件数量：" + errorFileList.size() + ")");
+                            stringRedisTemplate.opsForValue().getAndSet(id, numberFormat.format(sendCount / (double) size * 100));
+                            logger.info("文件名：" + deployFileEntity.getDestPath() + ",大小：" + deployFileEntity.getComponentDetailEntity().getSize() + ",重新发送成功,当前发送进度:" + numberFormat.format(sendCount / (double) size * 100) + "%(剩余发送失败文件数量：" + errorFileList.size() + ")");
                             break;
                         }
                     } catch (IOException exception) {

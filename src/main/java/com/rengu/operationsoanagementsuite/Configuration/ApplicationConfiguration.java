@@ -20,9 +20,9 @@ public class ApplicationConfiguration {
     private int deviceLogoutDelay = 5;
 
     // 组件部署参数
-    private int socketTimeout = 2000;
-    private int maxWaitTimes = 5;
-    private int maxRetryTimes = 10;
+    private int socketTimeout = 1000;
+    private int maxWaitTimes = 10;
+    private int maxRetryTimes = 5;
 
     // 不可修改项-自动从运行环境获取
     private String componentLibraryPath = "";

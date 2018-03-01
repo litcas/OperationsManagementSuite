@@ -19,9 +19,8 @@ public class AsyncConfiguration implements AsyncConfigurer {
     @Override
     public Executor getAsyncExecutor() {
         ThreadPoolTaskExecutor threadPoolTaskExecutor = new ThreadPoolTaskExecutor();
-        threadPoolTaskExecutor.setCorePoolSize(3);
-        threadPoolTaskExecutor.setMaxPoolSize(50);
-        threadPoolTaskExecutor.setQueueCapacity(50);
+        threadPoolTaskExecutor.setCorePoolSize(50);
+        threadPoolTaskExecutor.setMaxPoolSize(100);
         threadPoolTaskExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
         threadPoolTaskExecutor.setThreadNamePrefix("OMS-Thread");
         threadPoolTaskExecutor.initialize();
