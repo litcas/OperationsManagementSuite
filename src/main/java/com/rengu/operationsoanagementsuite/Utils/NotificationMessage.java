@@ -10,7 +10,6 @@ public class NotificationMessage {
     // 用户相关错误信息
     public static final String USER_NOT_FOUND = "user不存在。";
     public static final String USER_EXISTS = "user已存在。";
-    public static final String USER_ID_NOT_FOUND = "user.id不存在。";
     public static final String USER_USERNAME_NOT_FOUND = "user.username不存在。";
     public static final String USER_PASSWORD_NOT_FOUND = "user.password不存在。";
     public static final String USER_DETETE = "user已删除。";
@@ -58,13 +57,8 @@ public class NotificationMessage {
     public static final String DEPLOYMENT_DESIGN_SNAPSHOT_EXISTS = "deploymentdesignsnapshot已存在";
     public static final String DEPLOYMENT_DESIGN_SNAPSHOT_DELETED = "deploymentdesignsnapshot已删除";
 
-    // 部署日志相关错误信息
-    public static final String DEPLOY_LOG_NOT_FOUND = "deploylog不存在";
-
-    // 通用提示
-    public static final String DEPLOY_STARTED = "部署已开始";
-
     // 通用错误
     public static final String CACHE_CREAT_FAILED = "缓存文件创建失败。";
     public static final String COMPRESS_FAILED = "文件压缩失败。";
+    public static final String DISK_NOT_FOUND = "目标磁盘不存在";
 }

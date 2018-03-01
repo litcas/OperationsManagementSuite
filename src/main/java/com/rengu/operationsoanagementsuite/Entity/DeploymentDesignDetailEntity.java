@@ -16,13 +16,25 @@ public class DeploymentDesignDetailEntity implements Serializable {
     private String id = UUID.randomUUID().toString();
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime = new Date();
-    private String deployPath;
     @ManyToOne
     private DeviceEntity deviceEntity;
     @ManyToOne
     private ComponentEntity componentEntity;
     @ManyToOne
     private DeploymentDesignEntity deploymentDesignEntity;
+
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null || getClass() != object.getClass()) return false;
+        DeploymentDesignDetailEntity that = (DeploymentDesignDetailEntity) object;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 
     public String getId() {
         return id;
@@ -38,14 +50,6 @@ public class DeploymentDesignDetailEntity implements Serializable {
 
     public void setCreateTime(Date createTime) {
         this.createTime = createTime;
-    }
-
-    public String getDeployPath() {
-        return deployPath;
-    }
-
-    public void setDeployPath(String deployPath) {
-        this.deployPath = deployPath;
     }
 
     public DeviceEntity getDeviceEntity() {
@@ -70,18 +74,5 @@ public class DeploymentDesignDetailEntity implements Serializable {
 
     public void setDeploymentDesignEntity(DeploymentDesignEntity deploymentDesignEntity) {
         this.deploymentDesignEntity = deploymentDesignEntity;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        DeploymentDesignDetailEntity that = (DeploymentDesignDetailEntity) o;
-        return Objects.equals(id, that.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
     }
 }

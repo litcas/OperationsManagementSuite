@@ -52,7 +52,6 @@ public class DeploymentDesignDetailService {
         deploymentDesignDetailEntity.setDeploymentDesignEntity(deploymentDesignService.getDeploymentDesigns(deploymentDesignId));
         deploymentDesignDetailEntity.setDeviceEntity(deviceService.getDevices(deviceId));
         deploymentDesignDetailEntity.setComponentEntity(componentService.getComponents(componentId));
-        deploymentDesignDetailEntity.setDeployPath((deviceService.getDevices(deviceId).getDeployPath() + componentService.getComponents(componentId).getDeployPath()).replace("//", "/"));
         return deploymentDesignDetailRepository.save(deploymentDesignDetailEntity);
     }
 

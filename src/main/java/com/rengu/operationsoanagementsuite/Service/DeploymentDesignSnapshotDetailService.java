@@ -14,11 +14,12 @@ public class DeploymentDesignSnapshotDetailService {
         List<DeploymentDesignSnapshotDetailEntity> deploymentDesignSnapshotDetailEntityList = new ArrayList<>();
         for (DeploymentDesignDetailEntity deploymentDesignDetailEntity : deploymentDesignDetailEntities) {
             DeploymentDesignSnapshotDetailEntity deploymentDesignSnapshotDetailEntity = new DeploymentDesignSnapshotDetailEntity();
+            String deployPath = (deploymentDesignDetailEntity.getDeviceEntity().getDeployPath() + deploymentDesignDetailEntity.getComponentEntity().getDeployPath()).replace("//", "/");
             deploymentDesignSnapshotDetailEntity.setIp(deploymentDesignDetailEntity.getDeviceEntity().getIp());
             deploymentDesignSnapshotDetailEntity.setTCPPort(deploymentDesignDetailEntity.getDeviceEntity().getTCPPort());
             deploymentDesignSnapshotDetailEntity.setUDPPort(deploymentDesignDetailEntity.getDeviceEntity().getUDPPort());
             deploymentDesignSnapshotDetailEntity.setComponentEntity(deploymentDesignDetailEntity.getComponentEntity());
-            deploymentDesignSnapshotDetailEntity.setDeployPath(deploymentDesignDetailEntity.getDeployPath());
+            deploymentDesignSnapshotDetailEntity.setDeployPath(deployPath);
             deploymentDesignSnapshotDetailEntityList.add(deploymentDesignSnapshotDetailEntity);
         }
         return deploymentDesignSnapshotDetailEntityList;
