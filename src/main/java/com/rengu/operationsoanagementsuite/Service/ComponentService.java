@@ -66,17 +66,33 @@ public class ComponentService {
     }
 
     @Transactional
-    public ComponentEntity updateComponents(String componentId, ComponentEntity componentArgs, MultipartFile[] componentFiles) throws IOException {
+    public ComponentEntity updateComponents(String componentId, String[] removeIds, ComponentEntity componentArgs, MultipartFile[] componentFiles) throws IOException {
         ComponentEntity componentEntity = getComponents(componentId);
-        if (!componentEntity.getName().equals(componentArgs.getName()) || !componentEntity.getVersion().equals(componentArgs.getVersion())) {
-            if (hasNameAndVersion(componentArgs.getName(), componentArgs.getVersion())) {
-                throw new CustomizeException(NotificationMessage.COMPONENT_EXISTS);
+        // 移除组件的实体文件
+        if (removeIds.length != 0) {
+            for (String id : removeIds) {
+                ComponentDetailEntity componentDetailEntity = componentDetailService.getComponentDetails(id);
+                // 组件是否包含该文件
+                if (componentEntity.getComponentDetailEntities().contains(componentDetailEntity)) {
+                    // 删除是否成功
+                    if (new File(componentEntity.getFilePath() + componentDetailEntity.getPath()).delete()) {
+                        componentEntity.getComponentDetailEntities().remove(componentDetailEntity);
+                    }
+                }
             }
         }
-        BeanUtils.copyProperties(componentArgs, componentEntity, "id", "createTime", "filePath", "size", "componentDetailEntities");
-        if (componentFiles.length != 0) {
-            componentEntity.setComponentDetailEntities(addComponentDetails(componentEntity, componentDetailService.getComponentDetails(componentEntity, componentFiles)));
-            componentEntity.setSize(getSize(componentEntity));
+        // 更新组件信息
+        if (!StringUtils.isEmpty(componentArgs.getName()) || !StringUtils.isEmpty(componentArgs.getVersion()) || !StringUtils.isEmpty(componentArgs.getDescription())) {
+            if (!componentEntity.getName().equals(componentArgs.getName()) || !componentEntity.getVersion().equals(componentArgs.getVersion())) {
+                if (hasNameAndVersion(componentArgs.getName(), componentArgs.getVersion())) {
+                    throw new CustomizeException(NotificationMessage.COMPONENT_EXISTS);
+                }
+            }
+            BeanUtils.copyProperties(componentArgs, componentEntity, "id", "createTime", "filePath", "size", "componentDetailEntities");
+            if (componentFiles.length != 0) {
+                componentEntity.setComponentDetailEntities(addComponentDetails(componentEntity, componentDetailService.getComponentDetails(componentEntity, componentFiles)));
+                componentEntity.setSize(getSize(componentEntity));
+            }
         }
         return componentRepository.save(componentEntity);
     }

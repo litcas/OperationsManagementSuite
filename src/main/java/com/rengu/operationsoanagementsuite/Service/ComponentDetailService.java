@@ -2,9 +2,13 @@ package com.rengu.operationsoanagementsuite.Service;
 
 import com.rengu.operationsoanagementsuite.Entity.ComponentDetailEntity;
 import com.rengu.operationsoanagementsuite.Entity.ComponentEntity;
+import com.rengu.operationsoanagementsuite.Exception.CustomizeException;
+import com.rengu.operationsoanagementsuite.Repository.ComponentDetailRepository;
+import com.rengu.operationsoanagementsuite.Utils.NotificationMessage;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -18,6 +22,9 @@ import java.util.UUID;
 
 @Service
 public class ComponentDetailService {
+
+    @Autowired
+    private ComponentDetailRepository componentDetailRepository;
 
     public List<ComponentDetailEntity> getComponentDetails(ComponentEntity componentEntity, MultipartFile[] multipartFiles) throws IOException {
         String cacheFilePath = FileUtils.getTempDirectoryPath() + UUID.randomUUID().toString() + "/";
@@ -45,5 +52,16 @@ public class ComponentDetailService {
             componentDetailEntityList.add(componentDetailEntity);
         }
         return componentDetailEntityList;
+    }
+
+    public ComponentDetailEntity getComponentDetails(String componentDetailId) {
+        if (!hasComponentDetails(componentDetailId)) {
+            throw new CustomizeException(NotificationMessage.COMPONENT_FILE_NOT_FOUND);
+        }
+        return componentDetailRepository.getOne(componentDetailId);
+    }
+
+    public boolean hasComponentDetails(String componentDetailId) {
+        return componentDetailRepository.exists(componentDetailId);
     }
 }
