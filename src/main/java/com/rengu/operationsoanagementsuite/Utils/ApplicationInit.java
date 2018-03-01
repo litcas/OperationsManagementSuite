@@ -64,6 +64,9 @@ public class ApplicationInit implements CommandLineRunner {
         }
         // 3.初始化组件存储路径
         String libraryPath = Objects.requireNonNull(ClassUtils.getDefaultClassLoader().getResource("")).getPath();
+        if (libraryPath.startsWith("/")) {
+            libraryPath = libraryPath.replaceFirst("/", "");
+        }
         // 调试环境组件库路径
         if (libraryPath.endsWith("/target/classes/")) {
             applicationConfiguration.setComponentLibraryPath(libraryPath.replace("classes/", applicationConfiguration.getComponentLibraryName() + "/"));

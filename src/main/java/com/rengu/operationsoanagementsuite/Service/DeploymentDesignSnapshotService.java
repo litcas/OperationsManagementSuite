@@ -39,6 +39,8 @@ public class DeploymentDesignSnapshotService {
     private DeploymentDesignDetailService deploymentDesignDetailService;
     @Autowired
     private ProjectService projectService;
+    @Autowired
+    private DeviceService deviceService;
 
     @Transactional
     public DeploymentDesignSnapshotEntity saveDeploymentDesignSnapshots(String deploymentDesignId, DeploymentDesignSnapshotEntity deploymentDesignSnapshotArgs) {
@@ -85,7 +87,9 @@ public class DeploymentDesignSnapshotService {
         Map<String, List<DeploymentDesignSnapshotDetailEntity>> ipMap = deploymentDesignSnapshotDetailEntities.stream().collect(Collectors.groupingBy(DeploymentDesignSnapshotDetailEntity::getIp));
         List<DeployFileEntity> errorList = new ArrayList<>();
         for (Map.Entry<String, List<DeploymentDesignSnapshotDetailEntity>> entry : ipMap.entrySet()) {
-            errorList.addAll(asyncTask.deploySnapshot(deploymentdesignsnapshotId, entry.getKey(), ApplicationConfiguration.deviceTCPPort, entry.getValue()).get());
+            if (deviceService.isOnline(entry.getKey())) {
+                errorList.addAll(asyncTask.deploySnapshot(deploymentdesignsnapshotId, entry.getKey(), ApplicationConfiguration.deviceTCPPort, entry.getValue()).get());
+            }
         }
         return errorList;
     }

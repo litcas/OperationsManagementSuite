@@ -138,6 +138,18 @@ public class DeviceService {
         return deviceEntityList;
     }
 
+    public boolean isOnline(String ip) {
+        List<HeartbeatEntity> onlineDevices = new ArrayList<>(onlineHeartbeats);
+        if (onlineDevices.size() != 0) {
+            for (HeartbeatEntity heartbeatEntity : onlineDevices) {
+                if (ip.equals(heartbeatEntity.getInetAddress().getHostAddress())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public DeviceEntity onlineChecker(DeviceEntity deviceEntity) {
         List<HeartbeatEntity> onlineDevices = new ArrayList<>(onlineHeartbeats);
         if (onlineDevices.size() != 0) {
