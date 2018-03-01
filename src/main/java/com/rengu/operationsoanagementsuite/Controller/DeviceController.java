@@ -14,30 +14,37 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping(value = "/devices")
 public class DeviceController {
+
     @Autowired
     private DeviceService deviceService;
 
     // 删除设备
     @DeleteMapping(value = "/{deviceId}")
-    public ResultEntity deleteDevice(@AuthenticationPrincipal UserEntity loginUser, @PathVariable("deviceId") String deviceId) {
-        deviceService.deleteDevice(deviceId);
-        return ResultUtils.resultBuilder(HttpStatus.NO_CONTENT, ResultUtils.HTTPRESPONSE, loginUser, NotificationMessage.deviceDeleteMessage(deviceId));
+    public ResultEntity deleteDevices(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deviceId") String deviceId) {
+        deviceService.deleteDevices(deviceId);
+        return ResultUtils.resultBuilder(loginUser, HttpStatus.NO_CONTENT, NotificationMessage.DEVICE_DELETED);
     }
 
     // 更新设备
     @PatchMapping(value = "/{deviceId}")
-    public ResultEntity updateDevice(@AuthenticationPrincipal UserEntity loginUser, @PathVariable("deviceId") String deviceId, DeviceEntity deviceArgs) {
-        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, deviceService.updateDevice(deviceId, deviceArgs));
+    public ResultEntity updateDevices(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deviceId") String deviceId, DeviceEntity deviceArgs) {
+        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, deviceService.updateDevices(deviceId, deviceArgs));
     }
 
     // 查询设备
     @GetMapping(value = "/{deviceId}")
-    public ResultEntity getDevice(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deviceId") String deviceId) {
-        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, deviceService.getDevice(deviceId));
+    public ResultEntity getDevices(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deviceId") String deviceId) {
+        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, deviceService.getDevices(deviceId));
     }
 
-    @PostMapping(value = "/copy/{deviceId}")
-    public ResultEntity copyDevice(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deviceId") String deviceId) {
-        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, deviceService.copyDevice(deviceId));
+    // 查询设备
+    @GetMapping
+    public ResultEntity getDevices(@AuthenticationPrincipal UserEntity loginUser) {
+        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, deviceService.getDevices());
+    }
+
+    @PostMapping(value = "/{deviceId}/copy")
+    public ResultEntity copyDevices(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deviceId") String deviceId) {
+        return ResultUtils.resultBuilder(loginUser, HttpStatus.CREATED, deviceService.copyDevices(deviceId));
     }
 }

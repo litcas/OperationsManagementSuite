@@ -4,33 +4,37 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
+import java.io.Serializable;
 import java.util.Date;
-import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Entity
-public class DeployLogEntity {
+public class DeployLogEntity implements Serializable {
     @Id
     private String id = UUID.randomUUID().toString();
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime = new Date();
-    private boolean started = false;
-    private boolean finished = false;
-    private long size;
-    private double remainingTime;
-    private double speed = 0;
-    private int fileNums;
-    private int finishedNums;
-    @ManyToOne
-    private DeviceEntity deviceEntity;
-    @ManyToOne
-    private DeployPlanEntity deployPlanEntity;
-    @ManyToMany
-    private List<ComponentEntity> componentEntities;
-    @ManyToOne
-    private ProjectEntity projectEntity;
+    private String ip;
+    private String path;
+    private Date finishTime;
+    private int state;
+    @OneToOne
+    private ComponentEntity componentEntity;
+
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null || getClass() != object.getClass()) return false;
+        DeployLogEntity that = (DeployLogEntity) object;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 
     public String getId() {
         return id;
@@ -48,91 +52,43 @@ public class DeployLogEntity {
         this.createTime = createTime;
     }
 
-    public boolean isStarted() {
-        return started;
+    public String getIp() {
+        return ip;
     }
 
-    public void setStarted(boolean started) {
-        this.started = started;
+    public void setIp(String ip) {
+        this.ip = ip;
     }
 
-    public boolean isFinished() {
-        return finished;
+    public String getPath() {
+        return path;
     }
 
-    public void setFinished(boolean finished) {
-        this.finished = finished;
+    public void setPath(String path) {
+        this.path = path;
     }
 
-    public long getSize() {
-        return size;
+    public Date getFinishTime() {
+        return finishTime;
     }
 
-    public void setSize(long size) {
-        this.size = size;
+    public void setFinishTime(Date finishTime) {
+        this.finishTime = finishTime;
     }
 
-    public double getRemainingTime() {
-        return remainingTime;
+    public int getState() {
+        return state;
     }
 
-    public void setRemainingTime(double remainingTime) {
-        this.remainingTime = remainingTime;
+    public void setState(int state) {
+        this.state = state;
     }
 
-    public double getSpeed() {
-        return speed;
+    public ComponentEntity getComponentEntity() {
+        return componentEntity;
     }
 
-    public void setSpeed(double speed) {
-        this.speed = speed;
-    }
-
-    public int getFileNums() {
-        return fileNums;
-    }
-
-    public void setFileNums(int fileNums) {
-        this.fileNums = fileNums;
-    }
-
-    public int getFinishedNums() {
-        return finishedNums;
-    }
-
-    public void setFinishedNums(int finishedNums) {
-        this.finishedNums = finishedNums;
-    }
-
-    public DeviceEntity getDeviceEntity() {
-        return deviceEntity;
-    }
-
-    public void setDeviceEntity(DeviceEntity deviceEntity) {
-        this.deviceEntity = deviceEntity;
-    }
-
-    public DeployPlanEntity getDeployPlanEntity() {
-        return deployPlanEntity;
-    }
-
-    public void setDeployPlanEntity(DeployPlanEntity deployPlanEntity) {
-        this.deployPlanEntity = deployPlanEntity;
-    }
-
-    public List<ComponentEntity> getComponentEntities() {
-        return componentEntities;
-    }
-
-    public void setComponentEntities(List<ComponentEntity> componentEntities) {
-        this.componentEntities = componentEntities;
-    }
-
-    public ProjectEntity getProjectEntity() {
-        return projectEntity;
-    }
-
-    public void setProjectEntity(ProjectEntity projectEntity) {
-        this.projectEntity = projectEntity;
+    public void setComponentEntity(ComponentEntity componentEntity) {
+        this.componentEntity = componentEntity;
     }
 }

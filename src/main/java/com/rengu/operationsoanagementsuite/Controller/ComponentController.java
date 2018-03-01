@@ -4,6 +4,7 @@ import com.rengu.operationsoanagementsuite.Entity.ComponentEntity;
 import com.rengu.operationsoanagementsuite.Entity.ResultEntity;
 import com.rengu.operationsoanagementsuite.Entity.UserEntity;
 import com.rengu.operationsoanagementsuite.Service.ComponentService;
+import com.rengu.operationsoanagementsuite.Utils.NotificationMessage;
 import com.rengu.operationsoanagementsuite.Utils.ResultUtils;
 import net.lingala.zip4j.exception.ZipException;
 import org.apache.commons.io.IOUtils;
@@ -22,51 +23,45 @@ import java.net.URLConnection;
 @RestController
 @RequestMapping(value = "/components")
 public class ComponentController {
+
     @Autowired
     private ComponentService componentService;
 
     // 保存组件
     @PostMapping
-    public ResultEntity saveComponents(@AuthenticationPrincipal UserEntity loginUser, ComponentEntity componentEntity, @RequestParam(value = "componentfile") MultipartFile[] multipartFiles) throws IOException {
-        return ResultUtils.resultBuilder(HttpStatus.CREATED, ResultUtils.HTTPRESPONSE, loginUser, componentService.saveComponents(componentEntity, multipartFiles));
+    public ResultEntity saveComponents(@AuthenticationPrincipal UserEntity loginUser, ComponentEntity componentArgs, @RequestParam(value = "componentfiles") MultipartFile[] componentFiles) throws IOException {
+        return ResultUtils.resultBuilder(loginUser, HttpStatus.CREATED, componentService.saveComponents(componentArgs, componentFiles));
     }
 
     // 删除组件
     @DeleteMapping(value = "/{componentId}")
-    public ResultEntity deleteComponents(@AuthenticationPrincipal UserEntity loginUser, @PathVariable String componentId) {
-        return ResultUtils.resultBuilder(HttpStatus.NO_CONTENT, ResultUtils.HTTPRESPONSE, loginUser, componentService.deleteComponents(componentId));
+    public ResultEntity deleteComponents(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "componentId") String componentId) {
+        componentService.deleteComponents(componentId);
+        return ResultUtils.resultBuilder(loginUser, HttpStatus.NO_CONTENT, NotificationMessage.COMPONENT_DELETE);
     }
 
-    // 更新组件
+    // 修改组件
     @PostMapping(value = "/{componentId}/update")
-    public ResultEntity updateComponents(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "componentId") String componentId, ComponentEntity componentArgs, @RequestParam(value = "componentfile") MultipartFile[] multipartFiles) throws IOException {
-        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, componentService.updateComponents(componentId, componentArgs, multipartFiles));
+    public ResultEntity updateComponents(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "componentId") String componentId, @RequestParam(value = "removeIds", required = false) String[] removeIds, ComponentEntity componentArgs, @RequestParam(value = "componentfiles") MultipartFile[] componentFiles) throws IOException {
+        return ResultUtils.resultBuilder(loginUser, HttpStatus.NO_CONTENT, componentService.updateComponents(componentId, removeIds, componentArgs, componentFiles));
+    }
+
+    // 查询所有组件
+    @GetMapping
+    public ResultEntity getComponents(@AuthenticationPrincipal UserEntity loginUser, @RequestParam(value = "isShowHistory") boolean isShowHistory) {
+        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, componentService.getComponents(isShowHistory));
     }
 
     // 查询组件
     @GetMapping(value = "/{componentId}")
     public ResultEntity getComponents(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "componentId") String componentId) {
-        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, componentService.getComponent(componentId));
-    }
-
-    // 查询组件
-    @GetMapping
-    public ResultEntity getComponents(@AuthenticationPrincipal UserEntity loginUser, ComponentEntity componentArgs) {
-        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, componentService.getComponents(componentArgs));
-    }
-
-    // 导入组件
-    @PostMapping(value = "/import")
-    public ResultEntity importComponents(@AuthenticationPrincipal UserEntity loginUser, @RequestParam(value = "importComponents") MultipartFile[] multipartFiles) throws IOException, ZipException {
-        return ResultUtils.resultBuilder(HttpStatus.OK, ResultUtils.HTTPRESPONSE, loginUser, componentService.importComponents(multipartFiles));
+        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, componentService.getComponents(componentId));
     }
 
     // 导出组件
-    @GetMapping(value = "/export/{componentId}")
-    public void exportComponents(HttpServletResponse httpServletResponse, @PathVariable(value = "componentId") String componentId) throws IOException {
-        // 获取导出文件
+    @GetMapping(value = "/{componentId}/export")
+    public void exportComponents(@PathVariable(value = "componentId") String componentId, HttpServletResponse httpServletResponse) throws IOException {
         File exportComponents = componentService.exportComponents(componentId);
-        // 设置请求相关信息
         //判断文件类型
         String mimeType = URLConnection.guessContentTypeFromName(exportComponents.getName());
         if (mimeType == null) {
@@ -80,8 +75,15 @@ public class ComponentController {
         httpServletResponse.flushBuffer();
     }
 
-    @PostMapping(value = "/copy/{componentId}")
-    public ResultEntity copyComponents(@AuthenticationPrincipal UserEntity loginUser, @PathVariable String componentId) throws IOException {
-        return ResultUtils.resultBuilder(HttpStatus.CREATED, ResultUtils.HTTPRESPONSE, loginUser, componentService.copyComponents(componentId));
+    // 导入组件
+    @PostMapping(value = "/import")
+    public ResultEntity importComponents(@AuthenticationPrincipal UserEntity loginUser, @RequestParam(value = "importComponents") MultipartFile[] multipartFiles) throws IOException, ZipException {
+        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, componentService.importComponents(multipartFiles));
+    }
+
+    // 复制组件
+    @PostMapping(value = "/{componentId}/copy")
+    public ResultEntity copyComponents(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "componentId") String componentId) throws IOException {
+        return ResultUtils.resultBuilder(loginUser, HttpStatus.CREATED, componentService.copyComponents(componentId));
     }
 }

@@ -1,62 +1,64 @@
 package com.rengu.operationsoanagementsuite.Utils;
 
 public class NotificationMessage {
-    // 用户相关
-    public static final String USER_NOT_FOUND = "参数解析异常：user不存在.";
-    public static final String USER_EXISTS = "参数解析异常：user已存在.";
-    public static final String USER_NAME_NOT_FOUND = "参数解析异常：user.username不存在.";
-    public static final String USER_PASSWORD_NOT_FOUND = "参数解析异常：user.password不存在.";
 
-    // 角色相关
-    public static final String ROLE_EXISTS = "参数解析异常：role已存在.";
-    public static final String ROLE_NOT_FOUND = "参数解析异常：role不存在.";
-    public static final String ROLE_NAME_NOT_FOUND = "参数解析异常：role.name不存在.";
+    // 角色相关错误信息
+    public static final String ROLE_NOT_FOUND = "role不存在。";
+    public static final String ROLE_EXISTS = "role.name已存在。";
+    public static final String ROLE_NAME_NOT_FOUND = "role.name不存在。";
 
-    // 组件相关
-    public static final String COMPONENT_EXISTS = "参数解析异常：component已存在.";
-    public static final String COMPONENT_VERSION_EXISTS = "参数解析异常：component.version已存在.";
-    public static final String COMPONENT_NOT_FOUND = "参数解析异常：component不存在.";
-    public static final String COMPONENT_ID_NOT_FOUND = "参数解析异常：component.id不存在.";
-    public static final String COMPONENT_NAME_NOT_FOUND = "参数解析异常：component.name不存在.";
-    public static final String COMPONENT_UPLOAD_FILE_NOT_FOUND = "参数解析异常：component.uploadfile不存在.";
+    // 用户相关错误信息
+    public static final String USER_NOT_FOUND = "user不存在。";
+    public static final String USER_EXISTS = "user已存在。";
+    public static final String USER_USERNAME_NOT_FOUND = "user.username不存在。";
+    public static final String USER_PASSWORD_NOT_FOUND = "user.password不存在。";
+    public static final String USER_DETETE = "user已删除。";
 
-    // 工程相关
-    public static final String PROJECT_EXISTS = "参数解析异常：project已存在.";
-    public static final String PROJECT_NOT_FOUND = "参数解析异常：project不存在.";
-    public static final String PROJECT_NAME_NOT_FOUND = "参数解析异常：project.name不存在.";
+    // 工程相关错误信息
+    public static final String PROJECT_NOT_FOUND = "project不存在。";
+    public static final String PROJECT_EXISTS = "project已存在。";
+    public static final String PROJECT_NAME_NOT_FOUND = "project.name不存在。";
+    public static final String PROJECT_DELETE = "project已删除。";
 
-    // 部署设计相关
-    public static final String DEPLOY_PLAN_EXISTS = "参数解析异常：deployplan已存在.";
-    public static final String DEPLOY_PLAN_NOT_FOUND = "参数解析异常：deployplan不存在.";
-    public static final String DEPLOY_PLAN_NAME_NOT_FOUND = "参数解析异常：deployplan.name不存在.";
-    public static final String DEPLOY_PLAN_DEPLOY_PATH_NOT_FOUND = "参数解析异常：deployplan.deploypath不存在.";
+    // 组件相关错误信息
+    public static final String COMPONENT_EXISTS = "component已存在。";
+    public static final String COMPONENT_NOT_FOUND = "component不存在。";
+    public static final String COMPONENT_NAME_NOT_FOUND = "component.name不存在。";
+    public static final String COMPONENT_VERSION_NOT_FOUND = "component.version不存在。";
+    public static final String COMPONENT_DEPLOY_PATH_NOT_FOUND = "component.deploypath不存在。";
+    public static final String COMPONENT_FILE_NOT_FOUND = "component.file不存在。";
+    public static final String COMPONENT_DELETE = "component已删除。";
 
-    // 部署设计相关
-    public static final String DEPLOY_PLAN_DETAIL_NOT_FOUND = "参数解析异常：deployplandetail不存在.";
+    // 部署设计相关错误信息
+    public static final String DEPLOYMENT_DESIGN_EXISTS = "deploymentdesign已存在";
+    public static final String DEPLOYMENT_DESIGN_NOT_FOUND = "deploymentdesign不存在";
+    public static final String DEPLOYMENT_DESIGN_NAME_NOT_FOUND = "deploymentdesign.name不存在";
+    public static final String DEPLOYMENT_DESIGN_DELETED = "deploymentdesign已删除";
 
-    // 设备相关
-    public static final String DEVICE_EXISTS = "参数解析异常：device已存在.";
-    public static final String DEVICE_IP_EXISTS = "参数解析异常：device已存在.";
-    public static final String DEVICE_NOT_FOUND = "参数解析异常：device不存在.";
-    public static final String DEVICE_IP_NOT_FOUND = "参数解析异常：device.ip不存在.";
+    // 部署设计详情相关错误信息
+    public static final String DEPLOYMENT_DESIGN_DETAIL_NOT_FOUND = "deploymentdesigndetail不存在";
+    public static final String DEPLOYMENT_DESIGN_DETAIL_DELETED = "deploymentdesigndetail已删除";
 
-    public static String userDeleteMessage(String userId) {
-        return "删除id为" + userId + "的用户成功。";
-    }
+    // 设备相关错误
+    public static final String DEVICE_EXISTS = "device已存在";
+    public static final String DEVICE_NOT_FOUND = "device不存在";
+    public static final String DEVICE_IP_NOT_FOUND = "device.ip不存在";
+    public static final String DEVICE_DEPLOY_PATH_NOT_FOUND = "device.deployPath不存在";
+    public static final String DEVICE_DELETED = "device已删除";
 
-    public static String projectDeleteMessage(String projectId) {
-        return "删除id为" + projectId + "的工程成功。";
-    }
+    // 组件包相关错误
+    public static final String COMPONENT_PACKAGE_COMPONENTIDS_NOT_FOUND = "componentpackage.componentIds不存在";
+    public static final String COMPONENT_PACKAGE_EXISTS = "componentpackage已存在";
+    public static final String COMPONENT_PACKAGE_NOT_FOUND = "componentpackage不存在";
+    public static final String COMPONENT_PACKAGE_DELETED = "componentpackage已删除";
 
-    public static String deviceDeleteMessage(String deviceId) {
-        return "删除id为" + deviceId + "的设备成功。";
-    }
+    // 部署设计快照相关错误
+    public static final String DEPLOYMENT_DESIGN_SNAPSHOT_NOT_FOUND = "deploymentdesignsnapshot不存在";
+    public static final String DEPLOYMENT_DESIGN_SNAPSHOT_EXISTS = "deploymentdesignsnapshot已存在";
+    public static final String DEPLOYMENT_DESIGN_SNAPSHOT_DELETED = "deploymentdesignsnapshot已删除";
 
-    public static String deployplanDeleteMessage(String deployplanId) {
-        return "删除id为" + deployplanId + "的部署设计成功。";
-    }
-
-    public static String deployplandetailDeleteMessage(String deployplandetailId) {
-        return "删除id为" + deployplandetailId + "的部署设计信息成功。";
-    }
+    // 通用错误
+    public static final String CACHE_CREAT_FAILED = "缓存文件创建失败。";
+    public static final String COMPRESS_FAILED = "文件压缩失败。";
+    public static final String DISK_NOT_FOUND = "目标磁盘不存在";
 }
