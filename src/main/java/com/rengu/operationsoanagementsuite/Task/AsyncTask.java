@@ -142,7 +142,7 @@ public class AsyncTask {
                     if (dataInputStream.read() == 102) {
                         sendCount = sendCount + 1;
                         stringRedisTemplate.opsForValue().getAndSet(id, numberFormat.format(sendCount / (double) size * 100));
-                        logger.info("文件名：" + (deployPath + componentDetailEntity.getPath()).replace("//", "/") + ",大小：" + componentDetailEntity.getSize() + ",发送成功,当前发送进度：" + numberFormat.format(sendCount / (double) size * 100) + "%(" + fileNum + "/" + componentEntity.getComponentDetailEntities().size() + ")");
+                        logger.info("文件名：" + (deployPath + componentDetailEntity.getPath()).replace("//", "/") + ",MD5:" + componentDetailEntity.getMD5() + ",大小：" + componentDetailEntity.getSize() + ",发送成功,当前发送进度：" + numberFormat.format(sendCount / (double) size * 100) + "%(" + fileNum + "/" + componentEntity.getComponentDetailEntities().size() + ")");
                         break;
                     }
                 } catch (IOException exception) {
@@ -150,7 +150,7 @@ public class AsyncTask {
                     dataOutputStream.write("fileRecvEnd".getBytes());
                     if (count == applicationConfiguration.getMaxWaitTimes()) {
                         errorFileList.add(new DeployFileEntity(componentEntity, componentDetailEntity, deployPath + componentDetailEntity.getPath()));
-                        logger.info("文件名：" + (deployPath + componentDetailEntity.getPath()).replace("//", "/") + ",大小：" + componentDetailEntity.getSize() + ",发送失败(" + fileNum + "/" + componentEntity.getComponentDetailEntities().size() + ")");
+                        logger.info("文件名：" + (deployPath + componentDetailEntity.getPath()).replace("//", "/") + ",MD5:" + componentDetailEntity.getMD5() + ",大小：" + componentDetailEntity.getSize() + ",发送失败(" + fileNum + "/" + componentEntity.getComponentDetailEntities().size() + ")");
                         break;
                     }
                 }
@@ -196,7 +196,7 @@ public class AsyncTask {
                             deployFileEntityIterable.remove();
                             sendCount = sendCount + 1;
                             stringRedisTemplate.opsForValue().getAndSet(id, numberFormat.format(sendCount / (double) size * 100));
-                            logger.info("文件名：" + deployFileEntity.getDestPath() + ",大小：" + deployFileEntity.getComponentDetailEntity().getSize() + ",重新发送成功,当前发送进度:" + numberFormat.format(sendCount / (double) size * 100) + "%(剩余发送失败文件数量：" + errorFileList.size() + ")");
+                            logger.info("文件名：" + deployFileEntity.getDestPath() + ",MD5:" + deployFileEntity.getComponentDetailEntity().getMD5() + ",大小：" + deployFileEntity.getComponentDetailEntity().getSize() + ",重新发送成功,当前发送进度:" + numberFormat.format(sendCount / (double) size * 100) + "%(剩余发送失败文件数量：" + errorFileList.size() + ")");
                             break;
                         }
                     } catch (IOException exception) {
@@ -222,7 +222,7 @@ public class AsyncTask {
     @Async
     public Future<ScanResultEntity> scan(String id, DeploymentDesignDetailEntity deploymentDesignDetailEntity, String... extensions) throws IOException, InterruptedException {
         String deployPath = (deploymentDesignDetailEntity.getDeviceEntity().getDeployPath() + deploymentDesignDetailEntity.getComponentEntity().getDeployPath()).replace("//", "/");
-        if (extensions == null) {
+        if (extensions == null || extensions.length == 0) {
             udpService.sendScanDeviceOrderMessage(id, deploymentDesignDetailEntity.getDeviceEntity().getIp(), deploymentDesignDetailEntity.getDeviceEntity().getUDPPort(), deploymentDesignDetailEntity.getDeviceEntity().getId(), deploymentDesignDetailEntity.getComponentEntity().getId(), deployPath);
         } else {
             udpService.sendScanDeviceOrderMessage(id, deploymentDesignDetailEntity.getDeviceEntity().getIp(), deploymentDesignDetailEntity.getDeviceEntity().getUDPPort(), deploymentDesignDetailEntity.getDeviceEntity().getId(), deploymentDesignDetailEntity.getComponentEntity().getId(), deployPath, extensions);
@@ -239,7 +239,7 @@ public class AsyncTask {
                     boolean fileExists = false;
                     for (ComponentDetailEntity componentFile : componentEntity.getComponentDetailEntities()) {
                         // 路径是否一致
-                        if (scanResult.getPath().replace(deployPath, "").equals(componentFile.getPath())) {
+                        if (scanResult.getPath().replace(deployPath, "/").equals(componentFile.getPath())) {
                             fileExists = true;
                             // MD5是否相同
                             if (scanResult.getMD5().equals(componentFile.getMD5())) {
