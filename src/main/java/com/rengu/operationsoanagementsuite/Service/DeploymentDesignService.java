@@ -174,26 +174,22 @@ public class DeploymentDesignService {
     }
 
 
-    public List<DeployFileEntity> deploy(String deploymentDesignId, String deviceId, String componentId) throws IOException, ExecutionException, InterruptedException {
-        List<DeployFileEntity> errorFileList = new ArrayList<>();
-        errorFileList.addAll(asyncTask.deployDesign(deviceId, deploymentDesignDetailService.getDeploymentDesignDetailsByDeploymentDesignEntityIdAndDeviceEntityIdAndComponentEntityId(deploymentDesignId, deviceId, componentId)).get());
-        return errorFileList;
+    public List<DeployResultEntity> deploy(String deploymentDesignId, String deviceId, String componentId) throws IOException, ExecutionException, InterruptedException {
+        return asyncTask.deployDesign(deviceId, deploymentDesignDetailService.getDeploymentDesignDetailsByDeploymentDesignEntityIdAndDeviceEntityIdAndComponentEntityId(deploymentDesignId, deviceId, componentId)).get();
     }
 
-    public List<DeployFileEntity> deploy(String deploymentDesignId, String deviceId) throws IOException, ExecutionException, InterruptedException {
-        List<DeployFileEntity> errorFileList = new ArrayList<>();
-        errorFileList.addAll(asyncTask.deployDesign(deviceId, deploymentDesignDetailService.getDeploymentDesignDetailsByDeploymentDesignEntityIdAndDeviceEntityId(deploymentDesignId, deviceId)).get());
-        return errorFileList;
+    public List<DeployResultEntity> deploy(String deploymentDesignId, String deviceId) throws IOException, ExecutionException, InterruptedException {
+        return asyncTask.deployDesign(deviceId, deploymentDesignDetailService.getDeploymentDesignDetailsByDeploymentDesignEntityIdAndDeviceEntityId(deploymentDesignId, deviceId)).get();
     }
 
-    public List<DeployFileEntity> deploy(String deploymentDesignId) throws IOException, ExecutionException, InterruptedException {
+    public List<DeployResultEntity> deploy(String deploymentDesignId) throws IOException, ExecutionException, InterruptedException {
         List<DeploymentDesignDetailEntity> deploymentDesignDetailEntityList = getDeploymentDesignDetailsByDeploymentDesignId(deploymentDesignId);
         Map<DeviceEntity, List<DeploymentDesignDetailEntity>> deviceMap = deploymentDesignDetailEntityList.stream().collect(Collectors.groupingBy(DeploymentDesignDetailEntity::getDeviceEntity));
-        List<DeployFileEntity> errorFileList = new ArrayList<>();
+        List<DeployResultEntity> deployResultEntityList = new ArrayList<>();
         for (Map.Entry<DeviceEntity, List<DeploymentDesignDetailEntity>> entry : deviceMap.entrySet()) {
-            errorFileList.addAll(asyncTask.deployDesign(entry.getKey().getId(), entry.getValue()).get());
+            deployResultEntityList.addAll(asyncTask.deployDesign(entry.getKey().getId(), entry.getValue()).get());
         }
-        return errorFileList;
+        return deployResultEntityList;
     }
 
 

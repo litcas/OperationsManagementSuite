@@ -48,16 +48,18 @@ public class AsyncTask {
 
     // 部署组件异步方法
     @Async
-    public Future<List<DeployFileEntity>> deployDesign(String deviceId, List<DeploymentDesignDetailEntity> deploymentDesignDetailEntityList) throws IOException {
+    public Future<List<DeployResultEntity>> deployDesign(String deviceId, List<DeploymentDesignDetailEntity> deploymentDesignDetailEntityList) throws IOException {
+
+        int size = 0;
+        int sendCount = 0;
+        List<DeployResultEntity> deployResultEntityList = new ArrayList<>();
+
         DeviceEntity deviceEntity = deviceService.getDevices(deviceId);
         Socket socket = new Socket(deviceEntity.getIp(), deviceEntity.getTCPPort());
         socket.setTcpNoDelay(true);
         socket.setSoTimeout(applicationConfiguration.getSocketTimeout());
         DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
         DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
-        int size = 0;
-        int sendCount = 0;
-        List<DeployFileEntity> errorFileList = new ArrayList<>();
         stringRedisTemplate.opsForValue().getAndSet(deviceId, numberFormat.format(0));
         for (DeploymentDesignDetailEntity DeploymentDesignDetailEntity : deploymentDesignDetailEntityList) {
             size = size + DeploymentDesignDetailEntity.getComponentEntity().getComponentDetailEntities().size();
@@ -67,27 +69,29 @@ public class AsyncTask {
             String deployPath = (deploymentDesignDetailEntity.getDeviceEntity().getDeployPath() + componentEntity.getDeployPath()).replace("//", "/");
             TupleEntity tupleEntity = deploy(deviceId, size, sendCount, deployLogService.saveDeployLog(deviceEntity, componentEntity), dataOutputStream, dataInputStream, componentEntity, deployPath);
             sendCount = tupleEntity.getSendCount();
-            errorFileList.addAll(tupleEntity.getErrorFileList());
+            deployResultEntityList.add(new DeployResultEntity(componentEntity, tupleEntity.getErrorFileList(), tupleEntity.getCompletedFileList()));
         }
         // 发送部署结束标志
         dataOutputStream.write("DeployEnd".getBytes());
         dataOutputStream.flush();
         dataOutputStream.close();
         socket.close();
-        return new AsyncResult<>(errorFileList);
+        return new AsyncResult<>(deployResultEntityList);
     }
 
     // 部署组件异步方法
     @Async
-    public Future<List<DeployFileEntity>> deploySnapshot(String deploymentdesignsnapshotId, String ip, int port, List<DeploymentDesignSnapshotDetailEntity> deploymentDesignSnapshotDetailEntityList) throws IOException {
+    public Future<List<DeployResultEntity>> deploySnapshot(String deploymentdesignsnapshotId, String ip, int port, List<DeploymentDesignSnapshotDetailEntity> deploymentDesignSnapshotDetailEntityList) throws IOException {
+
+        int size = 0;
+        int sendCount = 0;
+        List<DeployResultEntity> deployResultEntityList = new ArrayList<>();
+
         Socket socket = new Socket(ip, port);
         socket.setTcpNoDelay(true);
         socket.setSoTimeout(applicationConfiguration.getSocketTimeout());
         DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
         DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
-        int size = 0;
-        int sendCount = 0;
-        List<DeployFileEntity> errorFileList = new ArrayList<>();
         stringRedisTemplate.opsForValue().getAndSet(deploymentdesignsnapshotId, numberFormat.format(0));
         for (DeploymentDesignSnapshotDetailEntity deploymentDesignSnapshotDetailEntity : deploymentDesignSnapshotDetailEntityList) {
             size = size + deploymentDesignSnapshotDetailEntity.getComponentEntity().getComponentDetailEntities().size();
@@ -96,20 +100,21 @@ public class AsyncTask {
             ComponentEntity componentEntity = deploymentDesignSnapshotDetailEntity.getComponentEntity();
             TupleEntity tupleEntity = deploy(deploymentdesignsnapshotId, size, sendCount, deployLogService.saveDeployLog(ip, deploymentDesignSnapshotDetailEntity.getDeployPath(), componentEntity), dataOutputStream, dataInputStream, componentEntity, deploymentDesignSnapshotDetailEntity.getDeployPath());
             sendCount = tupleEntity.getSendCount();
-            errorFileList.addAll(tupleEntity.getErrorFileList());
+            deployResultEntityList.add(new DeployResultEntity(componentEntity, tupleEntity.getErrorFileList(), tupleEntity.getCompletedFileList()));
         }
         // 发送部署结束标志
         dataOutputStream.write("DeployEnd".getBytes());
         dataOutputStream.flush();
         dataOutputStream.close();
         socket.close();
-        return new AsyncResult<>(errorFileList);
+        return new AsyncResult<>(deployResultEntityList);
     }
 
     // 部署
     private TupleEntity deploy(String id, int size, int sendCount, DeployLogEntity deployLogEntity, DataOutputStream dataOutputStream, DataInputStream dataInputStream, ComponentEntity componentEntity, String deployPath) throws IOException {
         int fileNum = 0;
         List<DeployFileEntity> errorFileList = new ArrayList<>();
+        List<DeployFileEntity> completedFileList = new ArrayList<>();
         for (ComponentDetailEntity componentDetailEntity : componentEntity.getComponentDetailEntities()) {
             fileNum = fileNum + 1;
             // 组件部署逻辑
@@ -141,6 +146,7 @@ public class AsyncTask {
                 try {
                     if (dataInputStream.read() == 102) {
                         sendCount = sendCount + 1;
+                        completedFileList.add(new DeployFileEntity(componentEntity, componentDetailEntity, deployPath + componentDetailEntity.getPath()));
                         stringRedisTemplate.opsForValue().getAndSet(id, numberFormat.format(sendCount / (double) size * 100));
                         logger.info("文件名：" + (deployPath + componentDetailEntity.getPath()).replace("//", "/") + ",MD5:" + componentDetailEntity.getMD5() + ",大小：" + componentDetailEntity.getSize() + ",发送成功,当前发送进度：" + numberFormat.format(sendCount / (double) size * 100) + "%(" + fileNum + "/" + componentEntity.getComponentDetailEntities().size() + ")");
                         break;
@@ -195,6 +201,7 @@ public class AsyncTask {
                         if (dataInputStream.read() == 102) {
                             deployFileEntityIterable.remove();
                             sendCount = sendCount + 1;
+                            completedFileList.add(new DeployFileEntity(componentEntity, deployFileEntity.getComponentDetailEntity(), deployFileEntity.getDestPath()));
                             stringRedisTemplate.opsForValue().getAndSet(id, numberFormat.format(sendCount / (double) size * 100));
                             logger.info("文件名：" + deployFileEntity.getDestPath() + ",MD5:" + deployFileEntity.getComponentDetailEntity().getMD5() + ",大小：" + deployFileEntity.getComponentDetailEntity().getSize() + ",重新发送成功,当前发送进度:" + numberFormat.format(sendCount / (double) size * 100) + "%(剩余发送失败文件数量：" + errorFileList.size() + ")");
                             break;
@@ -215,7 +222,7 @@ public class AsyncTask {
             deployLogService.updateDeployLog(deployLogEntity, DeployLogService.COMPLETE_STATE);
         }
         logger.info("组件：" + componentEntity.getName() + "文件发送结束，发送失败文件数量：" + errorFileList.size());
-        return new TupleEntity(sendCount, errorFileList);
+        return new TupleEntity(sendCount, errorFileList, completedFileList);
     }
 
     // 扫描设备

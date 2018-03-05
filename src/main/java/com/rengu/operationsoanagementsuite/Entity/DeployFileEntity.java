@@ -3,6 +3,7 @@ package com.rengu.operationsoanagementsuite.Entity;
 import java.io.Serializable;
 
 public class DeployFileEntity implements Serializable {
+
     private ComponentEntity componentEntity;
     private ComponentDetailEntity componentDetailEntity;
     private String destPath;
