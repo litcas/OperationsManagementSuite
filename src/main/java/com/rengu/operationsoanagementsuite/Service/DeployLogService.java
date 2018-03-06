@@ -36,9 +36,15 @@ public class DeployLogService {
     }
 
     @Transactional
-    public DeployLogEntity updateDeployLog(DeployLogEntity deployLogEntity, int state) {
-        deployLogEntity.setState(state);
+    public DeployLogEntity updateDeployLog(DeployLogEntity deployLogEntity, long sendSize, int errorFileNum, int completedFileNum, int state) {
         deployLogEntity.setFinishTime(new Date());
+        // 秒
+        deployLogEntity.setTime((deployLogEntity.getCreateTime().getTime() - deployLogEntity.getFinishTime().getTime()) / 1000);
+        // mb/s
+        deployLogEntity.setTransferRate((sendSize / 1024) / deployLogEntity.getTime());
+        deployLogEntity.setErrorFileNum(errorFileNum);
+        deployLogEntity.setCompletedFileNum(completedFileNum);
+        deployLogEntity.setState(state);
         return deployLogRepository.save(deployLogEntity);
     }
 

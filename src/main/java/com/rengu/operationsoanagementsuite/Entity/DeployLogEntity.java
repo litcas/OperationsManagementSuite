@@ -19,6 +19,10 @@ public class DeployLogEntity implements Serializable {
     private String ip;
     private String path;
     private Date finishTime;
+    private long time;
+    private double transferRate;
+    private int errorFileNum;
+    private int completedFileNum;
     private int state;
     @OneToOne
     private ComponentEntity componentEntity;
@@ -76,12 +80,44 @@ public class DeployLogEntity implements Serializable {
         this.finishTime = finishTime;
     }
 
+    public long getTime() {
+        return time;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
+    }
+
+    public double getTransferRate() {
+        return transferRate;
+    }
+
+    public void setTransferRate(double transferRate) {
+        this.transferRate = transferRate;
+    }
+
     public int getState() {
         return state;
     }
 
     public void setState(int state) {
         this.state = state;
+    }
+
+    public int getErrorFileNum() {
+        return errorFileNum;
+    }
+
+    public void setErrorFileNum(int errorFileNum) {
+        this.errorFileNum = errorFileNum;
+    }
+
+    public int getCompletedFileNum() {
+        return completedFileNum;
+    }
+
+    public void setCompletedFileNum(int completedFileNum) {
+        this.completedFileNum = completedFileNum;
     }
 
     public ComponentEntity getComponentEntity() {

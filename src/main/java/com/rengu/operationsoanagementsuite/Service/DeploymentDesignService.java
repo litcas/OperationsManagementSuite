@@ -175,11 +175,13 @@ public class DeploymentDesignService {
 
 
     public List<DeployResultEntity> deploy(String deploymentDesignId, String deviceId, String componentId) throws IOException, ExecutionException, InterruptedException {
-        return asyncTask.deployDesign(deviceId, deploymentDesignDetailService.getDeploymentDesignDetailsByDeploymentDesignEntityIdAndDeviceEntityIdAndComponentEntityId(deploymentDesignId, deviceId, componentId)).get();
+        DeviceEntity deviceEntity = deviceService.getDevices(deviceId);
+        return asyncTask.deployDesign(deviceEntity, deploymentDesignDetailService.getDeploymentDesignDetailsByDeploymentDesignEntityIdAndDeviceEntityIdAndComponentEntityId(deploymentDesignId, deviceId, componentId)).get();
     }
 
     public List<DeployResultEntity> deploy(String deploymentDesignId, String deviceId) throws IOException, ExecutionException, InterruptedException {
-        return asyncTask.deployDesign(deviceId, deploymentDesignDetailService.getDeploymentDesignDetailsByDeploymentDesignEntityIdAndDeviceEntityId(deploymentDesignId, deviceId)).get();
+        DeviceEntity deviceEntity = deviceService.getDevices(deviceId);
+        return asyncTask.deployDesign(deviceEntity, deploymentDesignDetailService.getDeploymentDesignDetailsByDeploymentDesignEntityIdAndDeviceEntityId(deploymentDesignId, deviceId)).get();
     }
 
     public List<DeployResultEntity> deploy(String deploymentDesignId) throws IOException, ExecutionException, InterruptedException {
@@ -187,7 +189,10 @@ public class DeploymentDesignService {
         Map<DeviceEntity, List<DeploymentDesignDetailEntity>> deviceMap = deploymentDesignDetailEntityList.stream().collect(Collectors.groupingBy(DeploymentDesignDetailEntity::getDeviceEntity));
         List<DeployResultEntity> deployResultEntityList = new ArrayList<>();
         for (Map.Entry<DeviceEntity, List<DeploymentDesignDetailEntity>> entry : deviceMap.entrySet()) {
-            deployResultEntityList.addAll(asyncTask.deployDesign(entry.getKey().getId(), entry.getValue()).get());
+            DeviceEntity deviceEntity = deviceService.getDevices(entry.getKey().getId());
+            if (deviceService.isOnline(deviceEntity.getIp())) {
+                deployResultEntityList.addAll(asyncTask.deployDesign(deviceEntity, entry.getValue()).get());
+            }
         }
         return deployResultEntityList;
     }
