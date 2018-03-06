@@ -48,6 +48,7 @@ public class ComponentDetailService {
             componentDetailEntity.setMD5(DigestUtils.md5Hex(new FileInputStream(file)));
             componentDetailEntity.setType(FilenameUtils.getExtension(file.getName()));
             componentDetailEntity.setSize(FileUtils.sizeOf(file));
+            componentDetailEntity.setDisplaySize(FileUtils.byteCountToDisplaySize(componentDetailEntity.getSize()));
             componentDetailEntity.setPath(componentFile.getAbsolutePath().replace("\\", "/").replace(componentEntity.getFilePath().replace("\\", "/"), "/"));
             componentDetailEntityList.add(componentDetailEntity);
         }

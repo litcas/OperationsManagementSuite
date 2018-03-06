@@ -53,7 +53,8 @@ public class ComponentService {
         componentArgs.setFilePath(getFilePath(componentArgs, null));
         if (componentFiles.length != 0) {
             componentArgs.setComponentDetailEntities(addComponentDetails(componentArgs, componentDetailService.getComponentDetails(componentArgs, componentFiles)));
-            componentArgs.setSize(getSize(componentArgs));
+            componentArgs.setSize(FileUtils.sizeOfDirectory(new File(componentArgs.getFilePath())));
+            componentArgs.setDisplaySize(FileUtils.byteCountToDisplaySize(componentArgs.getSize()));
         }
         return componentRepository.save(componentArgs);
     }
@@ -91,7 +92,8 @@ public class ComponentService {
             BeanUtils.copyProperties(componentArgs, componentEntity, "id", "createTime", "filePath", "size", "componentDetailEntities");
             if (componentFiles.length != 0) {
                 componentEntity.setComponentDetailEntities(addComponentDetails(componentEntity, componentDetailService.getComponentDetails(componentEntity, componentFiles)));
-                componentEntity.setSize(getSize(componentEntity));
+                componentEntity.setSize(FileUtils.sizeOfDirectory(new File(componentEntity.getFilePath())));
+                componentEntity.setDisplaySize(FileUtils.byteCountToDisplaySize(componentEntity.getSize()));
             }
         }
         return componentRepository.save(componentEntity);
@@ -147,7 +149,8 @@ public class ComponentService {
             }
             componentEntity.setFilePath(getFilePath(componentEntity, null));
             componentEntity.setComponentDetailEntities(addComponentDetails(componentEntity, componentDetailService.getComponentDetails(componentEntity, new File(cacheDir.getAbsolutePath() + "/" + JsonUtils.readJsonFile(new File(cacheDir + "/" + applicationConfiguration.getJsonFileName()), ComponentEntity.class).getId()))));
-            componentEntity.setSize(getSize(componentEntity));
+            componentEntity.setSize(FileUtils.sizeOfDirectory(new File(componentEntity.getFilePath())));
+            componentEntity.setDisplaySize(FileUtils.byteCountToDisplaySize(componentEntity.getSize()));
             componentEntityList.add(componentRepository.save(componentEntity));
         }
         return componentEntityList;
@@ -170,7 +173,8 @@ public class ComponentService {
         componentEntity.setFilePath(getFilePath(componentEntity, null));
         if (new File(componentArgs.getFilePath()).exists()) {
             componentEntity.setComponentDetailEntities(addComponentDetails(componentEntity, componentDetailService.getComponentDetails(componentEntity, new File(componentArgs.getFilePath()))));
-            componentEntity.setSize(getSize(componentEntity));
+            componentEntity.setSize(FileUtils.sizeOfDirectory(new File(componentEntity.getFilePath())));
+            componentEntity.setDisplaySize(FileUtils.byteCountToDisplaySize(componentEntity.getSize()));
         }
         return componentRepository.save(componentEntity);
     }
@@ -202,10 +206,6 @@ public class ComponentService {
         // 替换斜线方向
         String deployPath = componentEntity.getDeployPath().replace("\\", "/");
         return deployPath.startsWith("/") ? deployPath : "/" + deployPath + "/" + componentEntity.getName() + "-" + componentEntity.getVersion();
-    }
-
-    public long getSize(ComponentEntity componentEntity) {
-        return FileUtils.sizeOfDirectory(new File(componentEntity.getFilePath()));
     }
 
     public boolean hasNameAndVersion(String name, String version, boolean isDeleted) {
