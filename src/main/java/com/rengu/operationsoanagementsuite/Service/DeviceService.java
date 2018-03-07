@@ -17,6 +17,7 @@ import java.util.Iterator;
 import java.util.List;
 
 @Service
+@Transactional
 public class DeviceService {
 
     public static volatile List<HeartbeatEntity> onlineHeartbeats = new ArrayList<>();
@@ -29,7 +30,7 @@ public class DeviceService {
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
 
-    @Transactional
+
     public DeviceEntity saveDevices(String projectId, DeviceEntity deviceArgs) {
         if (!projectService.hasProject(projectId)) {
             throw new CustomizeException(NotificationMessage.PROJECT_NOT_FOUND);
@@ -47,7 +48,7 @@ public class DeviceService {
         return deviceRepository.save(deviceEntity);
     }
 
-    @Transactional
+
     public void deleteDevices(String deviceId) {
         if (!hasDevices(deviceId)) {
             throw new CustomizeException(NotificationMessage.DEVICE_NOT_FOUND);
@@ -57,7 +58,7 @@ public class DeviceService {
         deviceRepository.delete(deviceId);
     }
 
-    @Transactional
+
     public DeviceEntity updateDevices(String deviceId, DeviceEntity deviceArgs) {
         if (StringUtils.isEmpty(deviceArgs.getIp())) {
             throw new CustomizeException(NotificationMessage.DEVICE_IP_NOT_FOUND);
@@ -72,7 +73,7 @@ public class DeviceService {
         return deviceRepository.save(deviceEntity);
     }
 
-    @Transactional
+
     public DeviceEntity getDevices(String deviceId) {
         if (!hasDevices(deviceId)) {
             throw new CustomizeException(NotificationMessage.DEVICE_NOT_FOUND);
@@ -80,7 +81,7 @@ public class DeviceService {
         return onlineChecker(progressChecker(deviceRepository.findOne(deviceId)));
     }
 
-    @Transactional
+
     public List<DeviceEntity> getDevicesByProjectId(String projectId) {
         if (!projectService.hasProject(projectId)) {
             throw new CustomizeException(NotificationMessage.PROJECT_NOT_FOUND);
@@ -88,12 +89,12 @@ public class DeviceService {
         return onlineChecker(progressChecker(deviceRepository.findByProjectEntityId(projectId)));
     }
 
-    @Transactional
+
     public List<DeviceEntity> getDevices() {
         return onlineChecker(progressChecker(deviceRepository.findAll()));
     }
 
-    @Transactional
+
     public DeviceEntity copyDevices(String deviceId) {
         DeviceEntity deviceArgs = getDevices(deviceId);
         DeviceEntity deviceEntity = new DeviceEntity();

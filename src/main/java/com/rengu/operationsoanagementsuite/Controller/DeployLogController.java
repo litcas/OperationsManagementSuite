@@ -1,5 +1,6 @@
 package com.rengu.operationsoanagementsuite.Controller;
 
+import com.rengu.operationsoanagementsuite.Entity.DeployLogEntity;
 import com.rengu.operationsoanagementsuite.Entity.ResultEntity;
 import com.rengu.operationsoanagementsuite.Entity.UserEntity;
 import com.rengu.operationsoanagementsuite.Service.DeployLogService;
@@ -23,7 +24,7 @@ public class DeployLogController {
     }
 
     @GetMapping
-    public ResultEntity getDeployLogs(@AuthenticationPrincipal UserEntity loginUser) {
-        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, deployLogService.getDeployLogs());
+    public ResultEntity getDeployLogs(@AuthenticationPrincipal UserEntity loginUser, DeployLogEntity deployLogEntity) {
+        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, deployLogService.getDeployLogs(deployLogEntity));
     }
 }

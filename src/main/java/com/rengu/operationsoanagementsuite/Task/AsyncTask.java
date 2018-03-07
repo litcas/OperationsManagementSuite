@@ -5,6 +5,7 @@ import com.rengu.operationsoanagementsuite.Entity.*;
 import com.rengu.operationsoanagementsuite.Exception.CustomizeException;
 import com.rengu.operationsoanagementsuite.Service.DeployLogService;
 import com.rengu.operationsoanagementsuite.Service.UDPService;
+import com.rengu.operationsoanagementsuite.Utils.FormatUtils;
 import com.rengu.operationsoanagementsuite.Utils.JsonUtils;
 import com.rengu.operationsoanagementsuite.Utils.NotificationMessage;
 import com.rengu.operationsoanagementsuite.Utils.Utils;
@@ -22,7 +23,6 @@ import java.io.DataOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -41,7 +41,6 @@ public class AsyncTask {
     private UDPService udpService;
     @Autowired
     private DeployLogService deployLogService;
-    private NumberFormat numberFormat = NumberFormat.getNumberInstance();
 
     // 部署组件异步方法
     @Async
@@ -56,7 +55,7 @@ public class AsyncTask {
         socket.setSoTimeout(applicationConfiguration.getSocketTimeout());
         DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
         DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
-        stringRedisTemplate.opsForValue().getAndSet(deviceEntity.getId(), numberFormat.format(0));
+        stringRedisTemplate.opsForValue().getAndSet(deviceEntity.getId(), String.valueOf(FormatUtils.doubleFormater(0, FormatUtils.doubleFormatPattern)));
         for (DeploymentDesignDetailEntity DeploymentDesignDetailEntity : deploymentDesignDetailEntityList) {
             size = size + DeploymentDesignDetailEntity.getComponentEntity().getComponentDetailEntities().size();
         }
@@ -88,13 +87,13 @@ public class AsyncTask {
         socket.setSoTimeout(applicationConfiguration.getSocketTimeout());
         DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
         DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
-        stringRedisTemplate.opsForValue().getAndSet(deploymentdesignsnapshotId, numberFormat.format(0));
+        stringRedisTemplate.opsForValue().getAndSet(deploymentdesignsnapshotId, String.valueOf(FormatUtils.doubleFormater(0, FormatUtils.doubleFormatPattern)));
         for (DeploymentDesignSnapshotDetailEntity deploymentDesignSnapshotDetailEntity : deploymentDesignSnapshotDetailEntityList) {
             size = size + deploymentDesignSnapshotDetailEntity.getComponentEntity().getComponentDetailEntities().size();
         }
         for (DeploymentDesignSnapshotDetailEntity deploymentDesignSnapshotDetailEntity : deploymentDesignSnapshotDetailEntityList) {
             ComponentEntity componentEntity = deploymentDesignSnapshotDetailEntity.getComponentEntity();
-            TupleEntity tupleEntity = deploy(deploymentdesignsnapshotId, size, sendCount, deployLogService.saveDeployLog(ip, deploymentDesignSnapshotDetailEntity.getDeployPath(), componentEntity), dataOutputStream, dataInputStream, componentEntity, deploymentDesignSnapshotDetailEntity.getDeployPath());
+            TupleEntity tupleEntity = deploy(deploymentdesignsnapshotId, size, sendCount, deployLogService.saveDeployLog(deploymentDesignSnapshotDetailEntity, componentEntity), dataOutputStream, dataInputStream, componentEntity, deploymentDesignSnapshotDetailEntity.getDeployPath());
             sendCount = tupleEntity.getSendCount();
             deployResultEntityList.add(new DeployResultEntity(componentEntity, tupleEntity.getErrorFileList(), tupleEntity.getCompletedFileList()));
         }
@@ -145,8 +144,8 @@ public class AsyncTask {
                         sendCount = sendCount + 1;
                         sendSize = sendSize + componentDetailEntity.getSize();
                         completedFileList.add(new DeployFileEntity(componentEntity, componentDetailEntity, deployPath + componentDetailEntity.getPath()));
-                        stringRedisTemplate.opsForValue().getAndSet(id, numberFormat.format(sendCount / (double) size * 100));
-                        logger.info("部署路径：" + (deployPath + componentDetailEntity.getPath()).replace("//", "/") + ",MD5:" + componentDetailEntity.getMD5() + ",大小：" + componentDetailEntity.getDisplaySize() + ",发送成功,当前发送进度：" + numberFormat.format(sendCount / (double) size * 100) + "%(" + fileNum + "/" + componentEntity.getComponentDetailEntities().size() + ")");
+                        stringRedisTemplate.opsForValue().getAndSet(id, String.valueOf(FormatUtils.doubleFormater((sendCount / (double) size) * 100, FormatUtils.doubleFormatPattern)));
+                        logger.info("部署路径：" + (deployPath + componentDetailEntity.getPath()).replace("//", "/") + ",MD5:" + componentDetailEntity.getMD5() + ",大小：" + componentDetailEntity.getDisplaySize() + ",发送成功,当前发送进度：" + FormatUtils.doubleFormater((sendCount / (double) size) * 100, FormatUtils.doubleFormatPattern) + "%(" + fileNum + "/" + componentEntity.getComponentDetailEntities().size() + ")");
                         break;
                     }
                 } catch (IOException exception) {
@@ -202,8 +201,8 @@ public class AsyncTask {
                             sendCount = sendCount + 1;
                             sendSize = sendSize + deployFileEntity.getComponentDetailEntity().getSize();
                             completedFileList.add(new DeployFileEntity(componentEntity, deployFileEntity.getComponentDetailEntity(), deployFileEntity.getDestPath()));
-                            stringRedisTemplate.opsForValue().getAndSet(id, numberFormat.format(sendCount / (double) size * 100));
-                            logger.info("部署路径：" + deployFileEntity.getDestPath() + ",MD5:" + deployFileEntity.getComponentDetailEntity().getMD5() + ",大小：" + deployFileEntity.getComponentDetailEntity().getDisplaySize() + ",重新发送成功,当前发送进度:" + numberFormat.format(sendCount / (double) size * 100) + "%(剩余发送失败文件数量：" + errorFileList.size() + ")");
+                            stringRedisTemplate.opsForValue().getAndSet(id, String.valueOf(FormatUtils.doubleFormater((sendCount / (double) size) * 100, FormatUtils.doubleFormatPattern)));
+                            logger.info("部署路径：" + deployFileEntity.getDestPath() + ",MD5:" + deployFileEntity.getComponentDetailEntity().getMD5() + ",大小：" + deployFileEntity.getComponentDetailEntity().getDisplaySize() + ",重新发送成功,当前发送进度:" + FormatUtils.doubleFormater((sendCount / (double) size) * 100, FormatUtils.doubleFormatPattern) + "%(剩余发送失败文件数量：" + errorFileList.size() + ")");
                             break;
                         }
                     } catch (IOException exception) {

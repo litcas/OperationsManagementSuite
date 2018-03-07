@@ -23,6 +23,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class DeploymentDesignSnapshotService {
 
     @Autowired
@@ -42,7 +43,6 @@ public class DeploymentDesignSnapshotService {
     @Autowired
     private DeviceService deviceService;
 
-    @Transactional
     public DeploymentDesignSnapshotEntity saveDeploymentDesignSnapshots(String deploymentDesignId, DeploymentDesignSnapshotEntity deploymentDesignSnapshotArgs) {
         DeploymentDesignEntity deploymentDesignEntity = deploymentDesignService.getDeploymentDesigns(deploymentDesignId);
         if (hasProjectIdAndName(deploymentDesignEntity.getProjectEntity().getId(), deploymentDesignSnapshotArgs.getName())) {
@@ -55,7 +55,7 @@ public class DeploymentDesignSnapshotService {
         return deploymentDesignSnapshotRepository.save(deploymentDesignSnapshotEntity);
     }
 
-    @Transactional
+
     public void deleteDeploymentDesignSnapshots(String deploymentdesignsnapshotId) {
         if (!hasDeploymentDesignSnapshots(deploymentdesignsnapshotId)) {
             throw new CustomizeException(NotificationMessage.DEPLOYMENT_DESIGN_SNAPSHOT_NOT_FOUND);
@@ -63,7 +63,7 @@ public class DeploymentDesignSnapshotService {
         deploymentDesignSnapshotRepository.delete(deploymentdesignsnapshotId);
     }
 
-    @Transactional
+
     public DeploymentDesignSnapshotEntity getDeploymentDesignSnapshots(String deploymentDesignSnapshotId) {
         if (!hasDeploymentDesignSnapshots(deploymentDesignSnapshotId)) {
             throw new ClassCastException(NotificationMessage.DEPLOYMENT_DESIGN_SNAPSHOT_NOT_FOUND);
@@ -71,17 +71,17 @@ public class DeploymentDesignSnapshotService {
         return progressChecker(deploymentDesignSnapshotRepository.findOne(deploymentDesignSnapshotId));
     }
 
-    @Transactional
+
     public List<DeploymentDesignSnapshotEntity> getDeploymentDesignSnapshots() {
         return progressChecker(deploymentDesignSnapshotRepository.findAll());
     }
 
-    @Transactional
+
     public List<DeploymentDesignSnapshotEntity> getDeploymentDesignSnapshotsByProjectId(String projectId) {
         return progressChecker(deploymentDesignSnapshotRepository.findByProjectEntityId(projectService.getProjects(projectId).getId()));
     }
 
-    @Transactional
+
     public List<DeployResultEntity> deployDeploymentDesignSnapshots(String deploymentdesignsnapshotId) throws IOException, ExecutionException, InterruptedException {
         List<DeploymentDesignSnapshotDetailEntity> deploymentDesignSnapshotDetailEntities = getDeploymentDesignSnapshots(deploymentdesignsnapshotId).getDeploymentDesignSnapshots();
         Map<String, List<DeploymentDesignSnapshotDetailEntity>> ipMap = deploymentDesignSnapshotDetailEntities.stream().collect(Collectors.groupingBy(DeploymentDesignSnapshotDetailEntity::getIp));

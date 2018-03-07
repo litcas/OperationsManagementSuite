@@ -3,11 +3,13 @@ package com.rengu.operationsoanagementsuite.Service;
 import com.rengu.operationsoanagementsuite.Entity.DeploymentDesignDetailEntity;
 import com.rengu.operationsoanagementsuite.Entity.DeploymentDesignSnapshotDetailEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@Transactional
 public class DeploymentDesignSnapshotDetailService {
 
     public List<DeploymentDesignSnapshotDetailEntity> saveDeploymentDesignSnapshotDetails(List<DeploymentDesignDetailEntity> deploymentDesignDetailEntities) {

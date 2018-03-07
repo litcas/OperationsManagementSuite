@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@Transactional
 public class DeploymentDesignDetailService {
 
     @Autowired
@@ -23,12 +24,12 @@ public class DeploymentDesignDetailService {
     @Autowired
     private ComponentService componentService;
 
-    @Transactional
+
     public DeploymentDesignDetailEntity saveDeploymentDesignDetails(String deploymentDesignId, String deviceId, String componentId) {
         return saveDeploymentDesignDetail(deploymentDesignId, deviceId, componentId);
     }
 
-    @Transactional
+
     public List<DeploymentDesignDetailEntity> saveDeploymentDesignDetails(String deploymentDesignId, String deviceId, String[] componentIds) {
         List<DeploymentDesignDetailEntity> deploymentDesignDetailEntityList = new ArrayList<>();
         for (String componentId : componentIds) {
@@ -37,7 +38,7 @@ public class DeploymentDesignDetailService {
         return deploymentDesignDetailEntityList;
     }
 
-    @Transactional
+
     public List<DeploymentDesignDetailEntity> saveDeploymentDesignDetails(String deploymentDesignId, String[] deviceIds, String[] componentIds) {
         List<DeploymentDesignDetailEntity> deploymentDesignDetailEntityList = new ArrayList<>();
         for (int i = 0; i < deviceIds.length; i++) {
@@ -46,7 +47,7 @@ public class DeploymentDesignDetailService {
         return deploymentDesignDetailEntityList;
     }
 
-    @Transactional
+
     public DeploymentDesignDetailEntity saveDeploymentDesignDetail(String deploymentDesignId, String deviceId, String componentId) {
         DeploymentDesignDetailEntity deploymentDesignDetailEntity = new DeploymentDesignDetailEntity();
         deploymentDesignDetailEntity.setDeploymentDesignEntity(deploymentDesignService.getDeploymentDesigns(deploymentDesignId));
@@ -55,7 +56,7 @@ public class DeploymentDesignDetailService {
         return deploymentDesignDetailRepository.save(deploymentDesignDetailEntity);
     }
 
-    @Transactional
+
     public void deleteDeploymentDesignDetails(String deploymentdesigndetailId) {
         if (!hasDeploymentDesignDetail(deploymentdesigndetailId)) {
             throw new CustomizeException(NotificationMessage.DEPLOYMENT_DESIGN_DETAIL_NOT_FOUND);
@@ -63,34 +64,34 @@ public class DeploymentDesignDetailService {
         deploymentDesignDetailRepository.delete(deploymentdesigndetailId);
     }
 
-    @Transactional
+
     public void deleteDeploymentDesignDetailsByDeploymentDesignId(String deploymentDesignId) {
         List<DeploymentDesignDetailEntity> deploymentDesignDetailEntityList = getDeploymentDesignDetailsByDeploymentDesignId(deploymentDesignId);
         deploymentDesignDetailRepository.delete(deploymentDesignDetailEntityList);
     }
 
-    @Transactional
+
     public void deleteDeploymentDesignDetailsByDeviceId(String deviceId) {
         List<DeploymentDesignDetailEntity> deploymentDesignDetailEntityList = deploymentDesignDetailRepository.findByDeviceEntityId(deviceId);
         deploymentDesignDetailRepository.delete(deploymentDesignDetailEntityList);
     }
 
-    @Transactional
+
     public List<DeploymentDesignDetailEntity> getDeploymentDesignDetails() {
         return deploymentDesignDetailRepository.findAll();
     }
 
-    @Transactional
+
     public DeploymentDesignDetailEntity getDeploymentDesignDetails(String deploymentDesignDetailId) {
         return deploymentDesignDetailRepository.findOne(deploymentDesignDetailId);
     }
 
-    @Transactional
+
     public List<DeploymentDesignDetailEntity> getDeploymentDesignDetailsByDeviceId(String deviceId) {
         return deploymentDesignDetailRepository.findByDeploymentDesignEntityId(deviceId);
     }
 
-    @Transactional
+
     public List<DeploymentDesignDetailEntity> getDeploymentDesignDetailsByDeploymentDesignId(String deploymentDesignId) {
         if (!deploymentDesignService.hasDeploymentDesigns(deploymentDesignId)) {
             throw new CustomizeException(NotificationMessage.DEPLOYMENT_DESIGN_NOT_FOUND);
@@ -103,7 +104,7 @@ public class DeploymentDesignDetailService {
     }
 
     // 按设备id查询
-    @Transactional
+
     public List<DeploymentDesignDetailEntity> getDeploymentDesignDetailsByDeploymentDesignEntityIdAndDeviceEntityId(String deploymentDesignId, String deviceId) {
         if (!deploymentDesignService.hasDeploymentDesigns(deploymentDesignId)) {
             throw new CustomizeException(NotificationMessage.DEPLOYMENT_DESIGN_NOT_FOUND);
@@ -115,7 +116,7 @@ public class DeploymentDesignDetailService {
     }
 
     // 按组件id查询
-    @Transactional
+
     public List<DeploymentDesignDetailEntity> getDeploymentDesignDetailsByDeploymentDesignEntityIdAndComponentEntityId(String deploymentDesignId, String componentId) {
         if (!deploymentDesignService.hasDeploymentDesigns(deploymentDesignId)) {
             throw new CustomizeException(NotificationMessage.DEPLOYMENT_DESIGN_NOT_FOUND);
@@ -127,7 +128,7 @@ public class DeploymentDesignDetailService {
     }
 
     // 按设备id和组件id查询
-    @Transactional
+
     public List<DeploymentDesignDetailEntity> getDeploymentDesignDetailsByDeploymentDesignEntityIdAndDeviceEntityIdAndComponentEntityId(String deploymentDesignId, String deviceId, String componentId) {
         if (!deploymentDesignService.hasDeploymentDesigns(deploymentDesignId)) {
             throw new CustomizeException(NotificationMessage.DEPLOYMENT_DESIGN_NOT_FOUND);
@@ -141,7 +142,7 @@ public class DeploymentDesignDetailService {
         return deploymentDesignDetailRepository.findByDeploymentDesignEntityIdAndDeviceEntityIdAndComponentEntityId(deploymentDesignId, deviceId, componentId);
     }
 
-    @Transactional
+
     public List<DeploymentDesignDetailEntity> copyDeploymentDesignDetail(String deploymentDesignId) {
         List<DeploymentDesignDetailEntity> deploymentDesignDetailEntities = getDeploymentDesignDetailsByDeploymentDesignId(deploymentDesignId);
         List<DeploymentDesignDetailEntity> deploymentDesignDetailEntityList = new ArrayList<>();

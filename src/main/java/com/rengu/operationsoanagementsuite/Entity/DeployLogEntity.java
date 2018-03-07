@@ -15,9 +15,10 @@ public class DeployLogEntity implements Serializable {
     @Id
     private String id = UUID.randomUUID().toString();
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    private Date createTime = new Date();
+    private Date createTime;
     private String ip;
     private String path;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date finishTime;
     private long time;
     private double transferRate;

@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
+@Transactional
 public class ComponentService {
 
     private final ApplicationConfiguration applicationConfiguration;
@@ -38,7 +39,7 @@ public class ComponentService {
         this.componentDetailService = componentDetailService;
     }
 
-    @Transactional
+
     public ComponentEntity saveComponents(ComponentEntity componentArgs, MultipartFile[] componentFiles) throws IOException {
         if (StringUtils.isEmpty(componentArgs.getName())) {
             throw new CustomizeException(NotificationMessage.COMPONENT_NAME_NOT_FOUND);
@@ -59,14 +60,14 @@ public class ComponentService {
         return componentRepository.save(componentArgs);
     }
 
-    @Transactional
+
     public void deleteComponents(String componentId) {
         ComponentEntity componentEntity = getComponents(componentId);
         componentEntity.setDeleted(true);
         componentRepository.save(componentEntity);
     }
 
-    @Transactional
+
     public ComponentEntity updateComponents(String componentId, String[] removeIds, ComponentEntity componentArgs, MultipartFile[] componentFiles) throws IOException {
         ComponentEntity componentEntity = getComponents(componentId);
         // 移除组件的实体文件
@@ -99,12 +100,12 @@ public class ComponentService {
         return componentRepository.save(componentEntity);
     }
 
-    @Transactional
+
     public List<ComponentEntity> getComponents(boolean isShowHistory) {
         return isShowHistory ? componentRepository.findAll() : componentRepository.findByDeleted(false);
     }
 
-    @Transactional
+
     public ComponentEntity getComponents(String componentId) {
         if (!hasComponent(componentId)) {
             throw new CustomizeException(NotificationMessage.COMPONENT_NOT_FOUND);
@@ -112,7 +113,7 @@ public class ComponentService {
         return componentRepository.findOne(componentId);
     }
 
-    @Transactional
+
     public File exportComponents(String componentId) throws IOException {
         ComponentEntity componentEntity = getComponents(componentId);
         // 建立缓存文件夹
@@ -130,7 +131,7 @@ public class ComponentService {
         }
     }
 
-    @Transactional
+
     public List<ComponentEntity> importComponents(MultipartFile[] multipartFiles) throws IOException, ZipException {
         if (multipartFiles.length == 0) {
             throw new CustomizeException(NotificationMessage.COMPONENT_FILE_NOT_FOUND);
@@ -156,7 +157,7 @@ public class ComponentService {
         return componentEntityList;
     }
 
-    @Transactional
+
     public ComponentEntity copyComponents(String componentId) throws IOException {
         ComponentEntity componentArgs = getComponents(componentId);
         ComponentEntity componentEntity = new ComponentEntity();
