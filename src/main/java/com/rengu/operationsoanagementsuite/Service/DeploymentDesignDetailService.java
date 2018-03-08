@@ -49,6 +49,9 @@ public class DeploymentDesignDetailService {
 
 
     public DeploymentDesignDetailEntity saveDeploymentDesignDetail(String deploymentDesignId, String deviceId, String componentId) {
+        if (hasDeploymentDesignDetail(deploymentDesignId, deviceId, componentId)) {
+            throw new CustomizeException(NotificationMessage.DEPLOYMENT_DESIGN_DETAIL_EXISTS);
+        }
         DeploymentDesignDetailEntity deploymentDesignDetailEntity = new DeploymentDesignDetailEntity();
         deploymentDesignDetailEntity.setDeploymentDesignEntity(deploymentDesignService.getDeploymentDesigns(deploymentDesignId));
         deploymentDesignDetailEntity.setDeviceEntity(deviceService.getDevices(deviceId));
@@ -84,11 +87,6 @@ public class DeploymentDesignDetailService {
 
     public DeploymentDesignDetailEntity getDeploymentDesignDetails(String deploymentDesignDetailId) {
         return deploymentDesignDetailRepository.findOne(deploymentDesignDetailId);
-    }
-
-
-    public List<DeploymentDesignDetailEntity> getDeploymentDesignDetailsByDeviceId(String deviceId) {
-        return deploymentDesignDetailRepository.findByDeploymentDesignEntityId(deviceId);
     }
 
 
@@ -154,5 +152,9 @@ public class DeploymentDesignDetailService {
 
     public boolean hasDeploymentDesignDetail(String deploymentdesigndetailId) {
         return deploymentDesignDetailRepository.exists(deploymentdesigndetailId);
+    }
+
+    public boolean hasDeploymentDesignDetail(String deploymentdesigndetailId, String deviceId, String componentId) {
+        return getDeploymentDesignDetailsByDeploymentDesignEntityIdAndDeviceEntityIdAndComponentEntityId(deploymentdesigndetailId, deviceId, componentId).size() != 0;
     }
 }

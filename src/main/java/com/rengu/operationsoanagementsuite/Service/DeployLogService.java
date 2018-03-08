@@ -17,6 +17,7 @@ import java.util.Date;
 import java.util.List;
 
 @Service
+@Transactional
 public class DeployLogService {
 
     public static final int FAIL_STATE = 0;
@@ -25,19 +26,19 @@ public class DeployLogService {
     @Autowired
     private DeployLogRepository deployLogRepository;
 
-    @Transactional
+
     public DeployLogEntity saveDeployLog(DeviceEntity deviceEntity, ComponentEntity componentEntity) {
         String deployPath = (deviceEntity.getDeployPath() + componentEntity.getDeployPath()).replace("//", "/");
         return saveDeployLog(deviceEntity.getIp(), deployPath, componentEntity);
     }
 
-    @Transactional
+
     public DeployLogEntity saveDeployLog(DeploymentDesignSnapshotDetailEntity deploymentDesignSnapshotDetailEntity, ComponentEntity componentEntity) {
         String deployPath = (deploymentDesignSnapshotDetailEntity.getDeployPath() + componentEntity.getDeployPath()).replace("//", "/");
         return saveDeployLog(deploymentDesignSnapshotDetailEntity.getIp(), deployPath, componentEntity);
     }
 
-    @Transactional
+
     public DeployLogEntity saveDeployLog(String ip, String path, ComponentEntity componentEntity) {
         DeployLogEntity deployLogEntity = new DeployLogEntity();
         deployLogEntity.setCreateTime(new Date());
@@ -48,7 +49,7 @@ public class DeployLogService {
         return deployLogRepository.save(deployLogEntity);
     }
 
-    @Transactional
+
     public DeployLogEntity updateDeployLog(DeployLogEntity deployLogEntity, long sendSize, int errorFileNum, int completedFileNum, int state) {
         deployLogEntity.setFinishTime(new Date());
         // 秒
@@ -61,7 +62,7 @@ public class DeployLogService {
         return deployLogRepository.save(deployLogEntity);
     }
 
-    @Transactional
+
     public List<DeployLogEntity> getDeployLogs(DeployLogEntity deployLogEntity) {
         return deployLogRepository.findAll((root, query, cb) -> {
             List<Predicate> predicateList = new ArrayList<>();

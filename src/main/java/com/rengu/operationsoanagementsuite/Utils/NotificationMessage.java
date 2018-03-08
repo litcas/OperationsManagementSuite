@@ -38,6 +38,7 @@ public class NotificationMessage {
     // 部署设计详情相关错误信息
     public static final String DEPLOYMENT_DESIGN_DETAIL_NOT_FOUND = "deploymentdesigndetail不存在";
     public static final String DEPLOYMENT_DESIGN_DETAIL_DELETED = "deploymentdesigndetail已删除";
+    public static final String DEPLOYMENT_DESIGN_DETAIL_EXISTS = "deploymentdesigndetail已存在";
 
     // 设备相关错误
     public static final String DEVICE_EXISTS = "device已存在";

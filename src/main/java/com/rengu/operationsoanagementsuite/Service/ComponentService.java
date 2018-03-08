@@ -52,10 +52,10 @@ public class ComponentService {
         }
         componentArgs.setDeployPath(getDeployPath(componentArgs));
         componentArgs.setFilePath(getFilePath(componentArgs, null));
+        componentArgs.setSize(FileUtils.sizeOfDirectory(new File(componentArgs.getFilePath())));
+        componentArgs.setDisplaySize(FileUtils.byteCountToDisplaySize(componentArgs.getSize()));
         if (componentFiles.length != 0) {
             componentArgs.setComponentDetailEntities(addComponentDetails(componentArgs, componentDetailService.getComponentDetails(componentArgs, componentFiles)));
-            componentArgs.setSize(FileUtils.sizeOfDirectory(new File(componentArgs.getFilePath())));
-            componentArgs.setDisplaySize(FileUtils.byteCountToDisplaySize(componentArgs.getSize()));
         }
         return componentRepository.save(componentArgs);
     }
@@ -123,7 +123,8 @@ public class ComponentService {
             // 1、写入Json文件
             JsonUtils.writeJsonFile(componentEntity, new File(cacheDirPath + applicationConfiguration.getJsonFileName()));
             // 2、复制实体文件到缓存目录
-            FileUtils.copyDirectory(new File(componentEntity.getFilePath()), new File(cacheDirPath + "/" + componentEntity.getId() + "/"));
+//            new File(cacheDirPath + componentEntity.getId() + "/").mkdir();
+            FileUtils.copyDirectory(new File(componentEntity.getFilePath()), new File(cacheDirPath + componentEntity.getId() + "/"));
             // 3、压缩文件
             return CompressUtils.compress(cacheDir, new File(FileUtils.getTempDirectoryPath() + applicationConfiguration.getCompressFileName()));
         } else {
@@ -197,7 +198,9 @@ public class ComponentService {
         if (basePath == null) {
             basePath = "";
         }
-        return (applicationConfiguration.getComponentLibraryPath() + basePath + "/" + componentEntity.getId() + "/").replace("//", "/");
+        String componentPath = (applicationConfiguration.getComponentLibraryPath() + basePath + "/" + componentEntity.getId() + "/").replace("//", "/");
+        new File(componentPath).mkdir();
+        return componentPath;
     }
 
     public String getDeployPath(ComponentEntity componentEntity) {
