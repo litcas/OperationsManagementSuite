@@ -56,6 +56,8 @@ public class ComponentService {
         componentArgs.setDisplaySize(FileUtils.byteCountToDisplaySize(componentArgs.getSize()));
         if (componentFiles.length != 0) {
             componentArgs.setComponentDetailEntities(addComponentDetails(componentArgs, componentDetailService.getComponentDetails(componentArgs, componentFiles)));
+            componentArgs.setSize(FileUtils.sizeOfDirectory(new File(componentArgs.getFilePath())));
+            componentArgs.setDisplaySize(FileUtils.byteCountToDisplaySize(componentArgs.getSize()));
         }
         return componentRepository.save(componentArgs);
     }
@@ -194,12 +196,12 @@ public class ComponentService {
         return componentDetailEntityList;
     }
 
-    public String getFilePath(ComponentEntity componentEntity, String basePath) {
+    public String getFilePath(ComponentEntity componentEntity, String basePath) throws IOException {
         if (basePath == null) {
             basePath = "";
         }
         String componentPath = (applicationConfiguration.getComponentLibraryPath() + basePath + "/" + componentEntity.getId() + "/").replace("//", "/");
-        new File(componentPath).mkdir();
+        FileUtils.forceMkdir( new File(componentPath));
         return componentPath;
     }
 

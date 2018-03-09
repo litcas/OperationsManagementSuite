@@ -17,7 +17,7 @@ public class Utils {
     public static int getPlatform() {
         String osName = System.getProperty("os.name");
         // Windows平台
-        if (osName.contains("windows")) {
+        if (osName.contains("Windows")) {
             return WINDOWS_PLATFORM;
         }
         // macOS平台
