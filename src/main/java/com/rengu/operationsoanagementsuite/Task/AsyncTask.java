@@ -128,7 +128,7 @@ public class AsyncTask {
                     pathRetryCount = pathRetryCount + 1;
                     if (pathRetryCount == applicationConfiguration.getMaxWaitTimes()) {
                         deployLogService.updateDeployLog(deployLogEntity, sendSize, errorFileList.size(), completedFileList.size(), DeployLogService.FAIL_STATE);
-                        throw new CustomizeException(NotificationMessage.DISK_NOT_FOUND);
+                        throw new CustomizeException(NotificationMessage.PATH_ERROR);
                     }
                 }
             }
@@ -184,7 +184,7 @@ public class AsyncTask {
                         pathRetryCount = pathRetryCount + 1;
                         if (pathRetryCount == applicationConfiguration.getMaxRetryTimes() / 2) {
                             deployLogService.updateDeployLog(deployLogEntity, sendSize, errorFileList.size(), completedFileList.size(), DeployLogService.FAIL_STATE);
-                            throw new CustomizeException(NotificationMessage.DISK_NOT_FOUND);
+                            throw new CustomizeException(NotificationMessage.PATH_ERROR);
                         }
                     }
                 }

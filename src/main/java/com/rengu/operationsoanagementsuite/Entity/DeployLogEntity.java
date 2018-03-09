@@ -1,6 +1,7 @@
 package com.rengu.operationsoanagementsuite.Entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -14,17 +15,19 @@ import java.util.UUID;
 public class DeployLogEntity implements Serializable {
     @Id
     private String id = UUID.randomUUID().toString();
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime;
     private String ip;
     private String path;
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date finishTime;
     private long time;
     private double transferRate;
     private int errorFileNum;
     private int completedFileNum;
-    private int state;
+    private String state;
     @OneToOne
     private ComponentEntity componentEntity;
 
@@ -97,14 +100,6 @@ public class DeployLogEntity implements Serializable {
         this.transferRate = transferRate;
     }
 
-    public int getState() {
-        return state;
-    }
-
-    public void setState(int state) {
-        this.state = state;
-    }
-
     public int getErrorFileNum() {
         return errorFileNum;
     }
@@ -119,6 +114,14 @@ public class DeployLogEntity implements Serializable {
 
     public void setCompletedFileNum(int completedFileNum) {
         this.completedFileNum = completedFileNum;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
     }
 
     public ComponentEntity getComponentEntity() {

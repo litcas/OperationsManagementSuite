@@ -20,9 +20,9 @@ import java.util.List;
 @Transactional
 public class DeployLogService {
 
-    public static final int FAIL_STATE = 0;
-    public static final int PROCEED_STATE = 1;
-    public static final int COMPLETE_STATE = 2;
+    public static final String FAIL_STATE = "0";
+    public static final String PROCEED_STATE = "1";
+    public static final String COMPLETE_STATE = "2";
     @Autowired
     private DeployLogRepository deployLogRepository;
 
@@ -50,7 +50,7 @@ public class DeployLogService {
     }
 
 
-    public DeployLogEntity updateDeployLog(DeployLogEntity deployLogEntity, long sendSize, int errorFileNum, int completedFileNum, int state) {
+    public DeployLogEntity updateDeployLog(DeployLogEntity deployLogEntity, long sendSize, int errorFileNum, int completedFileNum, String state) {
         deployLogEntity.setFinishTime(new Date());
         // 秒
         deployLogEntity.setTime((deployLogEntity.getFinishTime().getTime() - deployLogEntity.getCreateTime().getTime()) / 1000);
@@ -63,7 +63,7 @@ public class DeployLogService {
     }
 
 
-    public List<DeployLogEntity> getDeployLogs(DeployLogEntity deployLogEntity) {
+    public List<DeployLogEntity> getDeployLogs(DeployLogEntity deployLogEntity, String componentName, String startTime, String endTime) {
         return deployLogRepository.findAll((root, query, cb) -> {
             List<Predicate> predicateList = new ArrayList<>();
             if (!StringUtils.isEmpty(deployLogEntity.getIp())) {
@@ -72,18 +72,21 @@ public class DeployLogService {
             if (!StringUtils.isEmpty(deployLogEntity.getPath())) {
                 predicateList.add(cb.like(root.get("path").as(String.class), "%" + deployLogEntity.getPath() + "%"));
             }
-            if (!StringUtils.isEmpty(deployLogEntity.getComponentEntity().getName())) {
-                predicateList.add(cb.like(root.get("componentEntity").get("name").as(String.class), "%" + deployLogEntity.getComponentEntity().getName() + "%"));
+            if (!StringUtils.isEmpty(deployLogEntity.getState())) {
+                predicateList.add(cb.equal(root.get("state").as(String.class), deployLogEntity.getState()));
             }
-            if (deployLogEntity.getCreateTime() != null || deployLogEntity.getFinishTime() != null) {
-                if (deployLogEntity.getCreateTime() != null && deployLogEntity.getFinishTime() != null) {
-                    predicateList.add(cb.between(root.get("createTime").as(Date.class), deployLogEntity.getCreateTime(), deployLogEntity.getFinishTime()));
+            if (!StringUtils.isEmpty(componentName)) {
+                predicateList.add(cb.like(root.get("componentEntity").get("name").as(String.class), "%" + componentName + "%"));
+            }
+            if (!StringUtils.isEmpty(startTime) || !StringUtils.isEmpty(endTime)) {
+                if (!StringUtils.isEmpty(startTime) && !StringUtils.isEmpty(endTime)) {
+                    predicateList.add(cb.between(root.get("createTime").as(Date.class), FormatUtils.dateFormat(Long.parseLong(startTime), "yyyy-MM-dd"), FormatUtils.dateFormat(Long.parseLong(endTime), "yyyy-MM-dd")));
                 } else {
-                    if (deployLogEntity.getCreateTime() != null) {
-                        predicateList.add(cb.between(root.get("createTime").as(Date.class), deployLogEntity.getCreateTime(), new Date()));
+                    if (!StringUtils.isEmpty(startTime)) {
+                        predicateList.add(cb.between(root.get("createTime").as(Date.class), FormatUtils.dateFormat(Long.parseLong(startTime), "yyyy-MM-dd"), new Date()));
                     }
-                    if (deployLogEntity.getFinishTime() != null) {
-                        predicateList.add(cb.between(root.get("createTime").as(Date.class), new Date(), deployLogEntity.getFinishTime()));
+                    if (!StringUtils.isEmpty(endTime)) {
+                        predicateList.add(cb.between(root.get("createTime").as(Date.class), new Date(), FormatUtils.dateFormat(Long.parseLong(endTime), "yyyy-MM-dd")));
                     }
                 }
             }

@@ -61,5 +61,5 @@ public class NotificationMessage {
     // 通用错误
     public static final String CACHE_CREAT_FAILED = "缓存文件创建失败。";
     public static final String COMPRESS_FAILED = "文件压缩失败。";
-    public static final String DISK_NOT_FOUND = "目标磁盘不存在";
+    public static final String PATH_ERROR = "路径接收异常";
 }

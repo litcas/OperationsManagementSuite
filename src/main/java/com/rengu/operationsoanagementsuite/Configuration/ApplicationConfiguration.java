@@ -20,7 +20,7 @@ public class ApplicationConfiguration {
     private int deviceLogoutDelay = 5;
 
     // 组件部署参数
-    private int socketTimeout = 1000;
+    private int socketTimeout = 2000;
     private int maxWaitTimes = 10;
     private int maxRetryTimes = 5;
 
