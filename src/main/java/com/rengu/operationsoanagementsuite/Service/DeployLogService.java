@@ -55,7 +55,7 @@ public class DeployLogService {
         // 秒
         deployLogEntity.setTime((deployLogEntity.getFinishTime().getTime() - deployLogEntity.getCreateTime().getTime()) / 1000);
         // kb/s
-        deployLogEntity.setTransferRate(FormatUtils.doubleFormater((double) (sendSize / 1024) / deployLogEntity.getTime(), FormatUtils.doubleFormatPattern));
+        deployLogEntity.setTransferRate(deployLogEntity.getTime() == 0 ? 0 : FormatUtils.doubleFormater((double) (sendSize / 1024) / deployLogEntity.getTime(), FormatUtils.doubleFormatPattern));
         deployLogEntity.setErrorFileNum(errorFileNum);
         deployLogEntity.setCompletedFileNum(completedFileNum);
         deployLogEntity.setState(state);
