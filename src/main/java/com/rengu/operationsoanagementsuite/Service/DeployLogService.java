@@ -1,9 +1,6 @@
 package com.rengu.operationsoanagementsuite.Service;
 
-import com.rengu.operationsoanagementsuite.Entity.ComponentEntity;
-import com.rengu.operationsoanagementsuite.Entity.DeployLogEntity;
-import com.rengu.operationsoanagementsuite.Entity.DeploymentDesignSnapshotDetailEntity;
-import com.rengu.operationsoanagementsuite.Entity.DeviceEntity;
+import com.rengu.operationsoanagementsuite.Entity.*;
 import com.rengu.operationsoanagementsuite.Repository.DeployLogRepository;
 import com.rengu.operationsoanagementsuite.Utils.FormatUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +25,7 @@ public class DeployLogService {
 
 
     public DeployLogEntity saveDeployLog(DeviceEntity deviceEntity, ComponentEntity componentEntity) {
-        String deployPath = (deviceEntity.getDeployPath() + componentEntity.getDeployPath()).replace("//", "/");
+        String deployPath = FormatUtils.pathFormat(deviceEntity.getDeployPath() + componentEntity.getDeployPath());
         return saveDeployLog(deviceEntity.getIp(), deployPath, componentEntity);
     }
 
@@ -50,15 +47,15 @@ public class DeployLogService {
     }
 
 
-    public DeployLogEntity updateDeployLog(DeployLogEntity deployLogEntity, long sendSize, int errorFileNum, int completedFileNum, String state) {
+    public DeployLogEntity updateDeployLog(DeployLogEntity deployLogEntity, List<DeployLogDetailEntity> errorFileList, List<DeployLogDetailEntity> CompletedFileList, long sendFileSize, String state) {
         deployLogEntity.setFinishTime(new Date());
+        deployLogEntity.setErrorFileList(errorFileList);
+        deployLogEntity.setCompletedFileList(CompletedFileList);
+        deployLogEntity.setState(state);
         // 秒
         deployLogEntity.setTime((deployLogEntity.getFinishTime().getTime() - deployLogEntity.getCreateTime().getTime()) / 1000);
         // kb/s
-        deployLogEntity.setTransferRate(deployLogEntity.getTime() == 0 ? 0 : FormatUtils.doubleFormater((double) (sendSize / 1024) / deployLogEntity.getTime(), FormatUtils.doubleFormatPattern));
-        deployLogEntity.setErrorFileNum(errorFileNum);
-        deployLogEntity.setCompletedFileNum(completedFileNum);
-        deployLogEntity.setState(state);
+        deployLogEntity.setTransferRate(deployLogEntity.getTime() == 0 ? 0 : FormatUtils.doubleFormater((double) (sendFileSize / 1024) / deployLogEntity.getTime(), FormatUtils.doubleFormatPattern));
         return deployLogRepository.save(deployLogEntity);
     }
 

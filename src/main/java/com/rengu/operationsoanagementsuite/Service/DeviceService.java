@@ -1,9 +1,11 @@
 package com.rengu.operationsoanagementsuite.Service;
 
+import com.rengu.operationsoanagementsuite.Entity.DeployStatusEntity;
 import com.rengu.operationsoanagementsuite.Entity.DeviceEntity;
 import com.rengu.operationsoanagementsuite.Entity.HeartbeatEntity;
 import com.rengu.operationsoanagementsuite.Exception.CustomizeException;
 import com.rengu.operationsoanagementsuite.Repository.DeviceRepository;
+import com.rengu.operationsoanagementsuite.Task.AsyncTask;
 import com.rengu.operationsoanagementsuite.Utils.NotificationMessage;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,7 +80,7 @@ public class DeviceService {
         if (!hasDevices(deviceId)) {
             throw new CustomizeException(NotificationMessage.DEVICE_NOT_FOUND);
         }
-        return onlineChecker(progressChecker(deviceRepository.findOne(deviceId)));
+        return onlineChecker(deployProgressChecker(deviceRepository.findOne(deviceId)));
     }
 
 
@@ -86,12 +88,12 @@ public class DeviceService {
         if (!projectService.hasProject(projectId)) {
             throw new CustomizeException(NotificationMessage.PROJECT_NOT_FOUND);
         }
-        return onlineChecker(progressChecker(deviceRepository.findByProjectEntityId(projectId)));
+        return onlineChecker(deployProgressChecker(deviceRepository.findByProjectEntityId(projectId)));
     }
 
 
     public List<DeviceEntity> getDevices() {
-        return onlineChecker(progressChecker(deviceRepository.findAll()));
+        return onlineChecker(deployProgressChecker(deviceRepository.findAll()));
     }
 
 
@@ -123,18 +125,22 @@ public class DeviceService {
         return deployPath.endsWith("/") ? deployPath : deployPath + "/";
     }
 
-    public DeviceEntity progressChecker(DeviceEntity deviceEntity) {
-        if (stringRedisTemplate.hasKey(deviceEntity.getId())) {
-            deviceEntity.setProgress(Double.parseDouble(stringRedisTemplate.opsForValue().get(deviceEntity.getId())));
+    public DeviceEntity deployProgressChecker(DeviceEntity deviceEntity) {
+        for (DeployStatusEntity deployStatusEntity : AsyncTask.deployStatusEntities) {
+            if (deployStatusEntity.getIp().equals(deviceEntity.getIp())) {
+                deviceEntity.setProgress(deployStatusEntity.getProgress());
+                deviceEntity.setTransferRate(deployStatusEntity.getTransferRate());
+                deviceEntity.setErrorFileList(deployStatusEntity.getErrorFileList());
+                deviceEntity.setCompletedFileList(deployStatusEntity.getCompletedFileList());
+                break;
+            }
         }
         return deviceEntity;
     }
 
-    public List<DeviceEntity> progressChecker(List<DeviceEntity> deviceEntityList) {
+    public List<DeviceEntity> deployProgressChecker(List<DeviceEntity> deviceEntityList) {
         for (DeviceEntity deviceEntity : deviceEntityList) {
-            if (stringRedisTemplate.hasKey(deviceEntity.getId())) {
-                deviceEntity.setProgress(Double.parseDouble(stringRedisTemplate.opsForValue().get(deviceEntity.getId())));
-            }
+            deployProgressChecker(deviceEntity);
         }
         return deviceEntityList;
     }

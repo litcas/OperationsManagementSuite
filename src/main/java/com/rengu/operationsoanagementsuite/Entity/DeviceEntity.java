@@ -9,6 +9,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -30,22 +31,15 @@ public class DeviceEntity implements Serializable {
     @Transient
     private boolean virtual = false;
     @Transient
+    private double transferRate;
+    @Transient
     private double progress;
+    @Transient
+    private List<DeployLogDetailEntity> errorFileList;
+    @Transient
+    private List<DeployLogDetailEntity> completedFileList;
     @ManyToOne
     private ProjectEntity projectEntity;
-
-    @Override
-    public boolean equals(Object object) {
-        if (this == object) return true;
-        if (object == null || getClass() != object.getClass()) return false;
-        DeviceEntity that = (DeviceEntity) object;
-        return Objects.equals(id, that.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
 
     public String getId() {
         return id;
@@ -127,6 +121,14 @@ public class DeviceEntity implements Serializable {
         this.virtual = virtual;
     }
 
+    public double getTransferRate() {
+        return transferRate;
+    }
+
+    public void setTransferRate(double transferRate) {
+        this.transferRate = transferRate;
+    }
+
     public double getProgress() {
         return progress;
     }
@@ -135,11 +137,40 @@ public class DeviceEntity implements Serializable {
         this.progress = progress;
     }
 
+    public List<DeployLogDetailEntity> getErrorFileList() {
+        return errorFileList;
+    }
+
+    public void setErrorFileList(List<DeployLogDetailEntity> errorFileList) {
+        this.errorFileList = errorFileList;
+    }
+
+    public List<DeployLogDetailEntity> getCompletedFileList() {
+        return completedFileList;
+    }
+
+    public void setCompletedFileList(List<DeployLogDetailEntity> completedFileList) {
+        this.completedFileList = completedFileList;
+    }
+
     public ProjectEntity getProjectEntity() {
         return projectEntity;
     }
 
     public void setProjectEntity(ProjectEntity projectEntity) {
         this.projectEntity = projectEntity;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null || getClass() != object.getClass()) return false;
+        DeviceEntity that = (DeviceEntity) object;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

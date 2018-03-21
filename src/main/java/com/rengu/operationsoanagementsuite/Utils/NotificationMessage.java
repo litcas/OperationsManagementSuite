@@ -62,4 +62,5 @@ public class NotificationMessage {
     public static final String CACHE_CREAT_FAILED = "缓存文件创建失败。";
     public static final String COMPRESS_FAILED = "文件压缩失败。";
     public static final String PATH_ERROR = "路径接收异常";
+    public static final String DEVICE_DEPLOYING = "该设备正在部署";
 }

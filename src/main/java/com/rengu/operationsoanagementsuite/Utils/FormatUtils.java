@@ -25,4 +25,16 @@ public class FormatUtils {
         }
         return null;
     }
+
+    // 文件路径格式化
+    public static String pathFormat(String path) {
+        String reg0 = "\\\\＋";
+        String reg = "\\\\＋|/＋";
+        String temp = path.trim().replaceAll(reg0, "/");
+        temp = temp.replaceAll(reg, "/");
+        if (temp.endsWith("/")) {
+            temp = temp.substring(0, temp.length() - 1);
+        }
+        return temp.replace("//", "/");
+    }
 }

@@ -154,7 +154,7 @@ public class DeploymentDesignService {
         List<DeviceEntity> deviceEntityList = new ArrayList<>();
         for (DeploymentDesignDetailEntity deploymentDesignDetailEntity : deploymentDesignDetailService.getDeploymentDesignDetailsByDeploymentDesignId(deploymentDesignId)) {
             if (!deviceEntityList.contains(deploymentDesignDetailEntity.getDeviceEntity())) {
-                deviceEntityList.add(deviceService.onlineChecker(deviceService.progressChecker(deploymentDesignDetailEntity.getDeviceEntity())));
+                deviceEntityList.add(deviceService.onlineChecker(deviceService.deployProgressChecker(deploymentDesignDetailEntity.getDeviceEntity())));
             }
         }
         return deviceEntityList;
@@ -181,27 +181,25 @@ public class DeploymentDesignService {
     }
 
 
-    public List<DeployResultEntity> deploy(String deploymentDesignId, String deviceId, String componentId) throws IOException, ExecutionException, InterruptedException {
+    public void deploy(String deploymentDesignId, String deviceId, String componentId) {
         DeviceEntity deviceEntity = deviceService.getDevices(deviceId);
-        return asyncTask.deployDesign(deviceEntity, deploymentDesignDetailService.getDeploymentDesignDetailsByDeploymentDesignEntityIdAndDeviceEntityIdAndComponentEntityId(deploymentDesignId, deviceId, componentId)).get();
+        asyncTask.deployDesign(deviceEntity, deploymentDesignDetailService.getDeploymentDesignDetailsByDeploymentDesignEntityIdAndDeviceEntityIdAndComponentEntityId(deploymentDesignId, deviceId, componentId));
     }
 
-    public List<DeployResultEntity> deploy(String deploymentDesignId, String deviceId) throws IOException, ExecutionException, InterruptedException {
+    public void deploy(String deploymentDesignId, String deviceId) {
         DeviceEntity deviceEntity = deviceService.getDevices(deviceId);
-        return asyncTask.deployDesign(deviceEntity, deploymentDesignDetailService.getDeploymentDesignDetailsByDeploymentDesignEntityIdAndDeviceEntityId(deploymentDesignId, deviceId)).get();
+        asyncTask.deployDesign(deviceEntity, deploymentDesignDetailService.getDeploymentDesignDetailsByDeploymentDesignEntityIdAndDeviceEntityId(deploymentDesignId, deviceId));
     }
 
-    public List<DeployResultEntity> deploy(String deploymentDesignId) throws IOException, ExecutionException, InterruptedException {
+    public void deploy(String deploymentDesignId) {
         List<DeploymentDesignDetailEntity> deploymentDesignDetailEntityList = getDeploymentDesignDetailsByDeploymentDesignId(deploymentDesignId);
         Map<DeviceEntity, List<DeploymentDesignDetailEntity>> deviceMap = deploymentDesignDetailEntityList.stream().collect(Collectors.groupingBy(DeploymentDesignDetailEntity::getDeviceEntity));
-        List<DeployResultEntity> deployResultEntityList = new ArrayList<>();
         for (Map.Entry<DeviceEntity, List<DeploymentDesignDetailEntity>> entry : deviceMap.entrySet()) {
             DeviceEntity deviceEntity = deviceService.getDevices(entry.getKey().getId());
             if (deviceService.isOnline(deviceEntity.getIp())) {
-                deployResultEntityList.addAll(asyncTask.deployDesign(deviceEntity, entry.getValue()).get());
+                asyncTask.deployDesign(deviceEntity, entry.getValue());
             }
         }
-        return deployResultEntityList;
     }
 
 

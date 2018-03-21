@@ -1,7 +1,6 @@
 package com.rengu.operationsoanagementsuite.Service;
 
 import com.rengu.operationsoanagementsuite.Configuration.ApplicationConfiguration;
-import com.rengu.operationsoanagementsuite.Entity.DeployResultEntity;
 import com.rengu.operationsoanagementsuite.Entity.DeploymentDesignEntity;
 import com.rengu.operationsoanagementsuite.Entity.DeploymentDesignSnapshotDetailEntity;
 import com.rengu.operationsoanagementsuite.Entity.DeploymentDesignSnapshotEntity;
@@ -15,11 +14,9 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 @Service
@@ -82,16 +79,14 @@ public class DeploymentDesignSnapshotService {
     }
 
 
-    public List<DeployResultEntity> deployDeploymentDesignSnapshots(String deploymentdesignsnapshotId) throws IOException, ExecutionException, InterruptedException {
+    public void deployDeploymentDesignSnapshots(String deploymentdesignsnapshotId) {
         List<DeploymentDesignSnapshotDetailEntity> deploymentDesignSnapshotDetailEntities = getDeploymentDesignSnapshots(deploymentdesignsnapshotId).getDeploymentDesignSnapshots();
         Map<String, List<DeploymentDesignSnapshotDetailEntity>> ipMap = deploymentDesignSnapshotDetailEntities.stream().collect(Collectors.groupingBy(DeploymentDesignSnapshotDetailEntity::getIp));
-        List<DeployResultEntity> deployResultEntityList = new ArrayList<>();
         for (Map.Entry<String, List<DeploymentDesignSnapshotDetailEntity>> entry : ipMap.entrySet()) {
             if (deviceService.isOnline(entry.getKey())) {
-                deployResultEntityList.addAll(asyncTask.deploySnapshot(deploymentdesignsnapshotId, entry.getKey(), ApplicationConfiguration.deviceTCPPort, entry.getValue()).get());
+                asyncTask.deploySnapshot(entry.getKey(), ApplicationConfiguration.deviceTCPPort, entry.getValue());
             }
         }
-        return deployResultEntityList;
     }
 
     public List<DeploymentDesignSnapshotDetailEntity> addDeploymentDesignSnapshotDetails(DeploymentDesignSnapshotEntity deploymentDesignSnapshotEntity, List<DeploymentDesignSnapshotDetailEntity> deploymentDesignSnapshotDetailEntityList) {

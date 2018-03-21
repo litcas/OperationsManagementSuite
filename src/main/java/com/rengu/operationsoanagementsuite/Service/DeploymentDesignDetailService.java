@@ -96,7 +96,7 @@ public class DeploymentDesignDetailService {
         }
         List<DeploymentDesignDetailEntity> deploymentDesignDetailEntityList = deploymentDesignDetailRepository.findByDeploymentDesignEntityId(deploymentDesignId);
         for (DeploymentDesignDetailEntity deploymentDesignDetailEntity : deploymentDesignDetailEntityList) {
-            deploymentDesignDetailEntity.setDeviceEntity(deviceService.onlineChecker(deviceService.progressChecker(deploymentDesignDetailEntity.getDeviceEntity())));
+            deploymentDesignDetailEntity.setDeviceEntity(deviceService.onlineChecker(deviceService.deployProgressChecker(deploymentDesignDetailEntity.getDeviceEntity())));
         }
         return deploymentDesignDetailEntityList;
     }
