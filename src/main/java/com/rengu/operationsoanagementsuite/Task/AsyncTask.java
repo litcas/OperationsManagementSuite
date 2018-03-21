@@ -189,7 +189,7 @@ public class AsyncTask {
                                     sendFileNum = sendFileNum + 1;
                                     sendFileSize = sendFileSize + componentDetailEntity.getSize();
                                     // 更新设备发送进度
-                                    completedFileList.add(new DeployLogDetailEntity(destPath, componentDetailEntity));
+                                    completedFileList.add(new DeployLogDetailEntity(destPath, componentEntity,componentDetailEntity));
                                     updateDeployStatus(deviceEntity.getIp(), deployStartTime, errorFileList, completedFileList, sendFileNum, totalFileNum, sendFileSize);
                                     logger.info("在<" + deviceEntity.getIp() + ">--->上部署" + destPath + "成功");
                                     break;
@@ -199,7 +199,7 @@ public class AsyncTask {
                                 dataOutputStream.write("fileRecvEnd".getBytes());
                                 if (endRetryCount == applicationConfiguration.getMaxWaitTimes()) {
                                     // 加入失败列表。
-                                    errorFileList.add(new DeployLogDetailEntity(destPath, componentDetailEntity));
+                                    errorFileList.add(new DeployLogDetailEntity(destPath, componentEntity,componentDetailEntity));
                                     updateDeployStatus(deviceEntity.getIp(), deployStartTime, errorFileList, completedFileList, sendFileNum, totalFileNum, sendFileSize);
                                     logger.info("在<" + deviceEntity.getIp() + ">--->部署" + destPath + "失败");
                                     break;
@@ -315,7 +315,7 @@ public class AsyncTask {
                                     sendFileNum = sendFileNum + 1;
                                     sendFileSize = sendFileSize + componentDetailEntity.getSize();
                                     // 更新设备发送进度
-                                    completedFileList.add(new DeployLogDetailEntity(destPath, componentDetailEntity));
+                                    completedFileList.add(new DeployLogDetailEntity(destPath, componentEntity,componentDetailEntity));
                                     updateDeployStatus(ip, deployStartTime, errorFileList, completedFileList, sendFileNum, totalFileNum, sendFileSize);
                                     logger.info("在<" + ip + ">--->上部署" + destPath + "成功");
                                     break;
@@ -325,7 +325,7 @@ public class AsyncTask {
                                 dataOutputStream.write("fileRecvEnd".getBytes());
                                 if (endRetryCount == applicationConfiguration.getMaxWaitTimes()) {
                                     // 加入失败列表。
-                                    errorFileList.add(new DeployLogDetailEntity(destPath, componentDetailEntity));
+                                    errorFileList.add(new DeployLogDetailEntity(destPath, componentEntity,componentDetailEntity));
                                     updateDeployStatus(ip, deployStartTime, errorFileList, completedFileList, sendFileNum, totalFileNum, sendFileSize);
                                     logger.info("在<" + ip + ">--->部署" + destPath + "失败");
                                     break;

@@ -6,6 +6,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.Transient;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.UUID;
@@ -18,14 +19,17 @@ public class DeployLogDetailEntity implements Serializable {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime = new Date();
     private String destPath;
+    @Transient
+    private ComponentEntity componentEntity;
     @ManyToOne
     private ComponentDetailEntity componentDetailEntity;
 
     public DeployLogDetailEntity() {
     }
 
-    public DeployLogDetailEntity(String destPath, ComponentDetailEntity componentDetailEntity) {
+    public DeployLogDetailEntity(String destPath, ComponentEntity componentEntity, ComponentDetailEntity componentDetailEntity) {
         this.destPath = destPath;
+        this.componentEntity = componentEntity;
         this.componentDetailEntity = componentDetailEntity;
     }
 
@@ -51,6 +55,14 @@ public class DeployLogDetailEntity implements Serializable {
 
     public void setDestPath(String destPath) {
         this.destPath = destPath;
+    }
+
+    public ComponentEntity getComponentEntity() {
+        return componentEntity;
+    }
+
+    public void setComponentEntity(ComponentEntity componentEntity) {
+        this.componentEntity = componentEntity;
     }
 
     public ComponentDetailEntity getComponentDetailEntity() {
