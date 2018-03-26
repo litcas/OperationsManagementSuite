@@ -44,10 +44,14 @@ public class AsyncTask {
     private DeployLogService deployLogService;
 
     public static CopyOnWriteArrayList<DeployStatusEntity> deployStatusEntities = new CopyOnWriteArrayList<>();
+    private String recvEndFlag = Utils.fixedLengthString("fileRecvEnd", 512);
+//    private String recvEndFlag ="fileRecvEnd";
 
     // 扫描设备
     @Async
     public Future<ScanResultEntity> scan(String id, DeploymentDesignDetailEntity deploymentDesignDetailEntity, String... extensions) throws IOException, InterruptedException {
+        Date scanStartTime = new Date();
+        logger.info("<" + deploymentDesignDetailEntity.getDeviceEntity().getIp() + ">:组件: " + deploymentDesignDetailEntity.getComponentEntity().getName() + "-" + deploymentDesignDetailEntity.getComponentEntity().getVersion() + "--->扫描开始。");
         String deployPath = (deploymentDesignDetailEntity.getDeviceEntity().getDeployPath() + deploymentDesignDetailEntity.getComponentEntity().getDeployPath()).replace("//", "/");
         if (extensions == null || extensions.length == 0) {
             udpService.sendScanDeviceOrderMessage(id, deploymentDesignDetailEntity.getDeviceEntity().getIp(), deploymentDesignDetailEntity.getDeviceEntity().getUDPPort(), deploymentDesignDetailEntity.getDeviceEntity().getId(), deploymentDesignDetailEntity.getComponentEntity().getId(), deployPath);
@@ -57,6 +61,7 @@ public class AsyncTask {
         int count = 0;
         while (true) {
             if (stringRedisTemplate.hasKey(id)) {
+                logger.info("<" + deploymentDesignDetailEntity.getDeviceEntity().getIp() + ">:组件: " + deploymentDesignDetailEntity.getComponentEntity().getName() + "-" + deploymentDesignDetailEntity.getComponentEntity().getVersion() + "--->收到扫描结果,耗时：" + (new Date().getTime() - scanStartTime.getTime()) / 1000 + "秒");
                 ScanResultEntity scanResultEntity = JsonUtils.readJsonString(stringRedisTemplate.opsForValue().get(id), ScanResultEntity.class);
                 ComponentEntity componentEntity = deploymentDesignDetailEntity.getComponentEntity();
                 List<ComponentDetailEntity> correctComponentFiles = new ArrayList<>();
@@ -72,9 +77,11 @@ public class AsyncTask {
                             if (scanResult.getMD5().equals(componentFile.getMD5())) {
                                 correctComponentFiles.add(componentFile);
                                 scanResultEntity.setHasCorrectComponentFiles(true);
+                                logger.info("正确文件：" + componentFile.getPath() + "-标准MD5：" + componentFile.getMD5() + "-计算MD5：" + scanResult.getMD5());
                             } else {
                                 modifyedComponentFiles.add(componentFile);
                                 scanResultEntity.setHasModifyedComponentFiles(true);
+                                logger.info("修改文件：" + componentFile.getPath() + "-标准MD5：" + componentFile.getMD5() + "-计算MD5：" + scanResult.getMD5());
                             }
                             break;
                         }
@@ -92,12 +99,14 @@ public class AsyncTask {
                 scanResultEntity.setModifyedComponentFiles(modifyedComponentFiles);
                 scanResultEntity.setUnknownFiles(unknownFiles);
                 scanResultEntity.setHasMissingFile(scanResultEntity.getOriginalScanResultList().size() - unknownFiles.size() != componentEntity.getComponentDetailEntities().size());
+                logger.info("<" + deploymentDesignDetailEntity.getDeviceEntity().getIp() + ">:组件: " + deploymentDesignDetailEntity.getComponentEntity().getName() + "-" + deploymentDesignDetailEntity.getComponentEntity().getVersion() + "--->扫描成功。");
                 return new AsyncResult<>(scanResultEntity);
             } else {
-                Thread.sleep(applicationConfiguration.getSocketTimeout() * 10);
+                Thread.sleep(applicationConfiguration.getSocketTimeout() * 30);
                 count = count + 1;
                 if (count == applicationConfiguration.getMaxRetryTimes()) {
-                    throw new CustomizeException("扫描'" + deploymentDesignDetailEntity.getDeviceEntity().getIp() + "'上的'" + deploymentDesignDetailEntity.getComponentEntity().getName() + "-" + deploymentDesignDetailEntity.getComponentEntity().getVersion() + "'组件超时。");
+                    logger.info("<" + deploymentDesignDetailEntity.getDeviceEntity().getIp() + ">:组件: " + deploymentDesignDetailEntity.getComponentEntity().getName() + "-" + deploymentDesignDetailEntity.getComponentEntity().getVersion() + "--->扫描失败。");
+                    throw new CustomizeException("<" + deploymentDesignDetailEntity.getDeviceEntity().getIp() + ">:组件: " + deploymentDesignDetailEntity.getComponentEntity().getName() + "-" + deploymentDesignDetailEntity.getComponentEntity().getVersion() + "--->扫描失败。");
                 }
             }
         }
@@ -117,7 +126,6 @@ public class AsyncTask {
         Date deployStartTime = new Date();
 
         try {
-
             // 检查是否正在部署
             DeployStatusEntity deployStatusEntity = getDepoloyStatusEntity(deviceEntity.getIp());
             if (deployStatusEntity != null) {
@@ -144,7 +152,7 @@ public class AsyncTask {
             dataOutputStream = new DataOutputStream(socket.getOutputStream());
             dataInputStream = new DataInputStream(socket.getInputStream());
             // 循环发送组件
-            logger.info("在<" + deviceEntity.getIp() + ">--->部署开始");
+            logger.info("<" + deviceEntity.getIp() + ">--->部署开始,文件发送结束标志符长度：" + recvEndFlag.getBytes().length);
             for (DeploymentDesignDetailEntity deploymentDesignDetailEntity : deploymentDesignDetailEntityList) {
                 List<DeployLogDetailEntity> errorFileList = new ArrayList<>();
                 List<DeployLogDetailEntity> completedFileList = new ArrayList<>();
@@ -171,7 +179,7 @@ public class AsyncTask {
                                 if (pathRetryCount == applicationConfiguration.getMaxWaitTimes()) {
                                     deployLogService.updateDeployLog(deployLogEntity, errorFileList, completedFileList, sendFileSize, DeployLogService.FAIL_STATE);
                                     getDepoloyStatusEntity(deviceEntity.getIp()).setDeploying(false);
-                                    logger.info("在<" + deviceEntity.getIp() + ">--->部署" + destPath + "失败,发送终止。");
+                                    logger.info("<" + deviceEntity.getIp() + ">--->部署" + destPath + "文件失败,发送终止。");
                                     throw new CustomizeException(NotificationMessage.PATH_ERROR);
                                 }
                             }
@@ -179,7 +187,7 @@ public class AsyncTask {
                         // 发送文件实体
                         IOUtils.copy(new FileInputStream(componentEntity.getFilePath() + componentDetailEntity.getPath()), dataOutputStream);
                         // 单个文件发送结束标志
-                        dataOutputStream.write("fileRecvEnd".getBytes());
+                        dataOutputStream.write(recvEndFlag.getBytes());
                         // 接收结束标志回复
                         int endRetryCount = 0;
                         while (true) {
@@ -189,19 +197,19 @@ public class AsyncTask {
                                     sendFileNum = sendFileNum + 1;
                                     sendFileSize = sendFileSize + componentDetailEntity.getSize();
                                     // 更新设备发送进度
-                                    completedFileList.add(new DeployLogDetailEntity(destPath, componentEntity,componentDetailEntity));
+                                    completedFileList.add(new DeployLogDetailEntity(destPath, componentEntity, componentDetailEntity));
                                     updateDeployStatus(deviceEntity.getIp(), deployStartTime, errorFileList, completedFileList, sendFileNum, totalFileNum, sendFileSize);
-                                    logger.info("在<" + deviceEntity.getIp() + ">--->上部署" + destPath + "成功");
+                                    logger.info("<" + deviceEntity.getIp() + ">--->部署" + destPath + "文件成功");
                                     break;
                                 }
                             } catch (IOException exception) {
                                 endRetryCount = endRetryCount + 1;
-                                dataOutputStream.write("fileRecvEnd".getBytes());
+                                dataOutputStream.write(recvEndFlag.getBytes());
                                 if (endRetryCount == applicationConfiguration.getMaxWaitTimes()) {
                                     // 加入失败列表。
-                                    errorFileList.add(new DeployLogDetailEntity(destPath, componentEntity,componentDetailEntity));
+                                    errorFileList.add(new DeployLogDetailEntity(destPath, componentEntity, componentDetailEntity));
                                     updateDeployStatus(deviceEntity.getIp(), deployStartTime, errorFileList, completedFileList, sendFileNum, totalFileNum, sendFileSize);
-                                    logger.info("在<" + deviceEntity.getIp() + ">--->部署" + destPath + "失败");
+                                    logger.info("<" + deviceEntity.getIp() + ">--->部署" + destPath + "文件失败");
                                     break;
                                 }
                             }
@@ -220,7 +228,7 @@ public class AsyncTask {
             dataOutputStream.flush();
             dataOutputStream.close();
             socket.close();
-            logger.info("在<" + deviceEntity.getIp() + ">--->部署结束");
+            logger.info("<" + deviceEntity.getIp() + ">--->部署结束");
         } catch (IOException e) {
             e.printStackTrace();
             getDepoloyStatusEntity(deviceEntity.getIp()).setDeploying(false);
@@ -270,7 +278,7 @@ public class AsyncTask {
             dataOutputStream = new DataOutputStream(socket.getOutputStream());
             dataInputStream = new DataInputStream(socket.getInputStream());
             // 循环发送组件
-            logger.info("在<" + ip + ">--->部署开始");
+            logger.info("<" + ip + ">--->部署开始,文件发送结束标志符长度：" + recvEndFlag.getBytes().length);
             for (DeploymentDesignSnapshotDetailEntity deploymentDesignSnapshotDetailEntity : deploymentDesignSnapshotDetailEntityList) {
                 List<DeployLogDetailEntity> errorFileList = new ArrayList<>();
                 List<DeployLogDetailEntity> completedFileList = new ArrayList<>();
@@ -297,7 +305,7 @@ public class AsyncTask {
                                 if (pathRetryCount == applicationConfiguration.getMaxWaitTimes()) {
                                     deployLogService.updateDeployLog(deployLogEntity, errorFileList, completedFileList, sendFileSize, DeployLogService.FAIL_STATE);
                                     getDepoloyStatusEntity(ip).setDeploying(false);
-                                    logger.info("在<" + ip + ">--->部署" + destPath + "失败,发送终止。");
+                                    logger.info("<" + ip + ">--->部署" + destPath + "文件失败,发送终止。");
                                     throw new CustomizeException(NotificationMessage.PATH_ERROR);
                                 }
                             }
@@ -305,7 +313,7 @@ public class AsyncTask {
                         // 发送文件实体
                         IOUtils.copy(new FileInputStream(componentEntity.getFilePath() + componentDetailEntity.getPath()), dataOutputStream);
                         // 单个文件发送结束标志
-                        dataOutputStream.write("fileRecvEnd".getBytes());
+                        dataOutputStream.write(recvEndFlag.getBytes());
                         // 接收结束标志回复
                         int endRetryCount = 0;
                         while (true) {
@@ -315,19 +323,19 @@ public class AsyncTask {
                                     sendFileNum = sendFileNum + 1;
                                     sendFileSize = sendFileSize + componentDetailEntity.getSize();
                                     // 更新设备发送进度
-                                    completedFileList.add(new DeployLogDetailEntity(destPath, componentEntity,componentDetailEntity));
+                                    completedFileList.add(new DeployLogDetailEntity(destPath, componentEntity, componentDetailEntity));
                                     updateDeployStatus(ip, deployStartTime, errorFileList, completedFileList, sendFileNum, totalFileNum, sendFileSize);
-                                    logger.info("在<" + ip + ">--->上部署" + destPath + "成功");
+                                    logger.info("<" + ip + ">--->上部署" + destPath + "文件成功");
                                     break;
                                 }
                             } catch (IOException exception) {
                                 endRetryCount = endRetryCount + 1;
-                                dataOutputStream.write("fileRecvEnd".getBytes());
+                                dataOutputStream.write(recvEndFlag.getBytes());
                                 if (endRetryCount == applicationConfiguration.getMaxWaitTimes()) {
                                     // 加入失败列表。
-                                    errorFileList.add(new DeployLogDetailEntity(destPath, componentEntity,componentDetailEntity));
+                                    errorFileList.add(new DeployLogDetailEntity(destPath, componentEntity, componentDetailEntity));
                                     updateDeployStatus(ip, deployStartTime, errorFileList, completedFileList, sendFileNum, totalFileNum, sendFileSize);
-                                    logger.info("在<" + ip + ">--->部署" + destPath + "失败");
+                                    logger.info("<" + ip + ">--->部署" + destPath + "文件失败");
                                     break;
                                 }
                             }
@@ -346,7 +354,7 @@ public class AsyncTask {
             dataOutputStream.flush();
             dataOutputStream.close();
             socket.close();
-            logger.info("在<" + ip + ">--->部署结束");
+            logger.info("<" + ip + ">--->部署结束");
         } catch (IOException e) {
             e.printStackTrace();
             getDepoloyStatusEntity(ip).setDeploying(false);

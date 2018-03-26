@@ -14,6 +14,10 @@ public class Utils {
         return stringBuilder.toString();
     }
 
+    public static String fixedLengthString(String string, int length) {
+        return String.format("%1$-"+length+"s", string);
+    }
+
     public static int getPlatform() {
         String osName = System.getProperty("os.name");
         // Windows平台

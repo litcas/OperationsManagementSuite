@@ -68,9 +68,11 @@ public class HeartbeatTask {
         logger.info("启动客户端心跳监听线程，监听端口：" + applicationConfiguration.getHearbeatReceivePort());
         while (!datagramSocket.isClosed()) {
             datagramSocket.receive(datagramPacket);
+            // 解析心跳报文信息
             HeartbeatEntity heartbeatEntity = new HeartbeatEntity(datagramPacket.getAddress());
-            if (DeviceService.onlineHeartbeats.indexOf(heartbeatEntity) == -1) {
-                // 新发现的设备
+            int index = DeviceService.onlineHeartbeats.indexOf(heartbeatEntity);
+            if (index == -1) {
+                // 新发现的设备(向列表中添加)
                 DeviceService.onlineHeartbeats.add(heartbeatEntity);
                 logger.info(heartbeatEntity.getInetAddress().getHostAddress() + "--->已连线服务器。");
             } else {

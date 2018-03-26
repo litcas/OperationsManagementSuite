@@ -17,20 +17,19 @@ import org.springframework.util.StringUtils;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 @Service
 @Transactional
 public class DeviceService {
 
-    public static volatile List<HeartbeatEntity> onlineHeartbeats = new ArrayList<>();
+    public static ArrayList<HeartbeatEntity> onlineHeartbeats = new ArrayList<>();
     @Autowired
     private DeviceRepository deviceRepository;
     @Autowired
     private ProjectService projectService;
     @Autowired
     private DeploymentDesignService deploymentDesignService;
-    @Autowired
-    private StringRedisTemplate stringRedisTemplate;
 
 
     public DeviceEntity saveDevices(String projectId, DeviceEntity deviceArgs) {

@@ -1,10 +1,16 @@
 package com.rengu.operationsoanagementsuite.Entity;
 
+import com.rengu.operationsoanagementsuite.Configuration.ApplicationConfiguration;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import java.net.InetAddress;
 import java.util.Objects;
 
 public class HeartbeatEntity {
+
     private InetAddress inetAddress;
+    private String CPUInfo;
+    private long RAMSize;
     private int count;
 
     public HeartbeatEntity(InetAddress inetAddress) {
@@ -20,6 +26,22 @@ public class HeartbeatEntity {
         this.inetAddress = inetAddress;
     }
 
+    public String getCPUInfo() {
+        return CPUInfo;
+    }
+
+    public void setCPUInfo(String CPUInfo) {
+        this.CPUInfo = CPUInfo;
+    }
+
+    public long getRAMSize() {
+        return RAMSize;
+    }
+
+    public void setRAMSize(long RAMSize) {
+        this.RAMSize = RAMSize;
+    }
+
     public int getCount() {
         return count;
     }
@@ -29,10 +51,10 @@ public class HeartbeatEntity {
     }
 
     @Override
-    public boolean equals(Object object) {
-        if (this == object) return true;
-        if (object == null || getClass() != object.getClass()) return false;
-        HeartbeatEntity that = (HeartbeatEntity) object;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        HeartbeatEntity that = (HeartbeatEntity) o;
         return Objects.equals(inetAddress, that.inetAddress);
     }
 

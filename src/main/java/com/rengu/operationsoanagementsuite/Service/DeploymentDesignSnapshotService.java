@@ -26,8 +26,6 @@ public class DeploymentDesignSnapshotService {
     @Autowired
     private AsyncTask asyncTask;
     @Autowired
-    private StringRedisTemplate stringRedisTemplate;
-    @Autowired
     private DeploymentDesignSnapshotRepository deploymentDesignSnapshotRepository;
     @Autowired
     private DeploymentDesignSnapshotDetailService deploymentDesignSnapshotDetailService;
@@ -65,17 +63,17 @@ public class DeploymentDesignSnapshotService {
         if (!hasDeploymentDesignSnapshots(deploymentDesignSnapshotId)) {
             throw new ClassCastException(NotificationMessage.DEPLOYMENT_DESIGN_SNAPSHOT_NOT_FOUND);
         }
-        return progressChecker(deploymentDesignSnapshotRepository.findOne(deploymentDesignSnapshotId));
+        return deploymentDesignSnapshotRepository.findOne(deploymentDesignSnapshotId);
     }
 
 
     public List<DeploymentDesignSnapshotEntity> getDeploymentDesignSnapshots() {
-        return progressChecker(deploymentDesignSnapshotRepository.findAll());
+        return deploymentDesignSnapshotRepository.findAll();
     }
 
 
     public List<DeploymentDesignSnapshotEntity> getDeploymentDesignSnapshotsByProjectId(String projectId) {
-        return progressChecker(deploymentDesignSnapshotRepository.findByProjectEntityId(projectService.getProjects(projectId).getId()));
+        return deploymentDesignSnapshotRepository.findByProjectEntityId(projectService.getProjects(projectId).getId());
     }
 
 
@@ -100,22 +98,6 @@ public class DeploymentDesignSnapshotService {
             }
         }
         return deploymentDesignSnapshotDetailEntities;
-    }
-
-    public DeploymentDesignSnapshotEntity progressChecker(DeploymentDesignSnapshotEntity deploymentDesignSnapshotEntity) {
-        if (stringRedisTemplate.hasKey(deploymentDesignSnapshotEntity.getId())) {
-            deploymentDesignSnapshotEntity.setProgress(Double.parseDouble(stringRedisTemplate.opsForValue().get(deploymentDesignSnapshotEntity.getId())));
-        }
-        return deploymentDesignSnapshotEntity;
-    }
-
-    public List<DeploymentDesignSnapshotEntity> progressChecker(List<DeploymentDesignSnapshotEntity> deploymentDesignSnapshotEntityListe) {
-        for (DeploymentDesignSnapshotEntity deploymentDesignSnapshotEntity : deploymentDesignSnapshotEntityListe) {
-            if (stringRedisTemplate.hasKey(deploymentDesignSnapshotEntity.getId())) {
-                deploymentDesignSnapshotEntity.setProgress(Double.parseDouble(stringRedisTemplate.opsForValue().get(deploymentDesignSnapshotEntity.getId())));
-            }
-        }
-        return deploymentDesignSnapshotEntityListe;
     }
 
     public boolean hasDeploymentDesignSnapshots(String deploymentDesignSnapshotId) {
