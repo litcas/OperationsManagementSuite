@@ -14,7 +14,7 @@ public class Utils {
         return stringBuilder.toString();
     }
 
-    public static String fixedLengthString(String string, int length) {
+    public static String getFixedLengthString(String string, int length) {
         return String.format("%1$-"+length+"s", string);
     }
 

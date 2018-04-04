@@ -44,8 +44,52 @@ public class AsyncTask {
     private DeployLogService deployLogService;
 
     public static CopyOnWriteArrayList<DeployStatusEntity> deployStatusEntities = new CopyOnWriteArrayList<>();
-    private String recvEndFlag = Utils.fixedLengthString("fileRecvEnd", 512);
-//    private String recvEndFlag ="fileRecvEnd";
+    //    private String recvEndFlag = Utils.fixedLengthString("fileRecvEnd", 512);
+    private String recvEndFlag = "fileRecvEnd";
+
+    // 获取设备进程信息
+    @Async
+    public Future<DeviceTaskEntity> getDeviceTasks(String id, DeviceEntity deviceEntity) throws IOException, InterruptedException {
+        Date startTime = new Date();
+        udpService.sendGetDeviceTasksMessage(id, deviceEntity);
+        int retryTimes = 0;
+        while (true) {
+            if (stringRedisTemplate.hasKey(id)) {
+                logger.info("获取设备：" + deviceEntity.getIp() + "的进程信息成功，总计耗时：" + (new Date().getTime() - startTime.getTime()) / 1000 + "秒");
+                DeviceTaskEntity deviceTaskEntity = JsonUtils.readJsonString(stringRedisTemplate.opsForValue().get(id), DeviceTaskEntity.class);
+                return new AsyncResult<>(deviceTaskEntity);
+            } else {
+                Thread.sleep(applicationConfiguration.getSocketTimeout() * 30);
+                retryTimes = retryTimes + 1;
+                if (retryTimes == applicationConfiguration.getMaxRetryTimes()) {
+                    logger.info("获取设备：" + deviceEntity.getIp() + "的进程信息等待超时。");
+                    throw new CustomizeException("获取设备：" + deviceEntity.getIp() + "的进程信息等待超时。");
+                }
+            }
+        }
+    }
+
+    // 获取设备磁盘信息
+    @Async
+    public Future<DeviceDiskEntity> getDeviceDisks(String id, DeviceEntity deviceEntity) throws IOException, InterruptedException {
+        Date startTime = new Date();
+        udpService.sendGetDeviceDisksMessage(id, deviceEntity);
+        int retryTimes = 0;
+        while (true) {
+            if (stringRedisTemplate.hasKey(id)) {
+                logger.info("获取设备：" + deviceEntity.getIp() + "的磁盘信息成功，总计耗时：" + (new Date().getTime() - startTime.getTime()) / 1000 + "秒");
+                DeviceDiskEntity deviceDiskEntity = JsonUtils.readJsonString(stringRedisTemplate.opsForValue().get(id), DeviceDiskEntity.class);
+                return new AsyncResult<>(deviceDiskEntity);
+            } else {
+                Thread.sleep(applicationConfiguration.getSocketTimeout() * 30);
+                retryTimes = retryTimes + 1;
+                if (retryTimes == applicationConfiguration.getMaxRetryTimes()) {
+                    logger.info("获取设备：" + deviceEntity.getIp() + "的磁盘信息等待超时。");
+                    throw new CustomizeException("获取设备：" + deviceEntity.getIp() + "的磁盘信息等待超时。");
+                }
+            }
+        }
+    }
 
     // 扫描设备
     @Async
@@ -152,7 +196,6 @@ public class AsyncTask {
             dataOutputStream = new DataOutputStream(socket.getOutputStream());
             dataInputStream = new DataInputStream(socket.getInputStream());
             // 循环发送组件
-            logger.info("<" + deviceEntity.getIp() + ">--->部署开始,文件发送结束标志符长度：" + recvEndFlag.getBytes().length);
             for (DeploymentDesignDetailEntity deploymentDesignDetailEntity : deploymentDesignDetailEntityList) {
                 List<DeployLogDetailEntity> errorFileList = new ArrayList<>();
                 List<DeployLogDetailEntity> completedFileList = new ArrayList<>();
@@ -186,7 +229,7 @@ public class AsyncTask {
                         }
                         // 发送文件实体
                         IOUtils.copy(new FileInputStream(componentEntity.getFilePath() + componentDetailEntity.getPath()), dataOutputStream);
-                        // 单个文件发送结束标志
+                        // 单个文件发送结束标志d
                         dataOutputStream.write(recvEndFlag.getBytes());
                         // 接收结束标志回复
                         int endRetryCount = 0;
@@ -199,7 +242,7 @@ public class AsyncTask {
                                     // 更新设备发送进度
                                     completedFileList.add(new DeployLogDetailEntity(destPath, componentEntity, componentDetailEntity));
                                     updateDeployStatus(deviceEntity.getIp(), deployStartTime, errorFileList, completedFileList, sendFileNum, totalFileNum, sendFileSize);
-                                    logger.info("<" + deviceEntity.getIp() + ">--->部署" + destPath + "文件成功");
+                                    logger.info("<" + deviceEntity.getIp() + ">--->部署" + destPath + "成功，速度：" + getDepoloyStatusEntity(deviceEntity.getIp()).getTransferRate() + "kb/s");
                                     break;
                                 }
                             } catch (IOException exception) {
@@ -209,7 +252,7 @@ public class AsyncTask {
                                     // 加入失败列表。
                                     errorFileList.add(new DeployLogDetailEntity(destPath, componentEntity, componentDetailEntity));
                                     updateDeployStatus(deviceEntity.getIp(), deployStartTime, errorFileList, completedFileList, sendFileNum, totalFileNum, sendFileSize);
-                                    logger.info("<" + deviceEntity.getIp() + ">--->部署" + destPath + "文件失败");
+                                    logger.info("<" + deviceEntity.getIp() + ">--->部署" + destPath + "失败");
                                     break;
                                 }
                             }
@@ -325,7 +368,7 @@ public class AsyncTask {
                                     // 更新设备发送进度
                                     completedFileList.add(new DeployLogDetailEntity(destPath, componentEntity, componentDetailEntity));
                                     updateDeployStatus(ip, deployStartTime, errorFileList, completedFileList, sendFileNum, totalFileNum, sendFileSize);
-                                    logger.info("<" + ip + ">--->上部署" + destPath + "文件成功");
+                                    logger.info("<" + ip + ">--->上部署" + destPath + "成功，速度：" + getDepoloyStatusEntity(ip).getTransferRate() + "kb/s");
                                     break;
                                 }
                             } catch (IOException exception) {
@@ -335,7 +378,7 @@ public class AsyncTask {
                                     // 加入失败列表。
                                     errorFileList.add(new DeployLogDetailEntity(destPath, componentEntity, componentDetailEntity));
                                     updateDeployStatus(ip, deployStartTime, errorFileList, completedFileList, sendFileNum, totalFileNum, sendFileSize);
-                                    logger.info("<" + ip + ">--->部署" + destPath + "文件失败");
+                                    logger.info("<" + ip + ">--->部署" + destPath + "失败");
                                     break;
                                 }
                             }

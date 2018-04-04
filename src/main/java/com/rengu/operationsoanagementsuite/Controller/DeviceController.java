@@ -11,6 +11,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.util.concurrent.ExecutionException;
+
 @RestController
 @RequestMapping(value = "/devices")
 public class DeviceController {
@@ -41,6 +44,18 @@ public class DeviceController {
     @GetMapping
     public ResultEntity getDevices(@AuthenticationPrincipal UserEntity loginUser) {
         return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, deviceService.getDevices());
+    }
+
+    // 查询设备进程信息
+    @GetMapping(value = "/{deviceId}/tasks")
+    public ResultEntity getDeviceTasks(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deviceId") String deviceId) throws IOException, ExecutionException, InterruptedException {
+        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, deviceService.getDeviceTasks(deviceId));
+    }
+
+    // 查询设备进程信息
+    @GetMapping(value = "/{deviceId}/disks")
+    public ResultEntity getDeviceDisks(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deviceId") String deviceId) throws IOException, ExecutionException, InterruptedException {
+        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, deviceService.getDeviceDisks(deviceId));
     }
 
     @PostMapping(value = "/{deviceId}/copy")

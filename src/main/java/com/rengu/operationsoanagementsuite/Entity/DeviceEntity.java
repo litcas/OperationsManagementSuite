@@ -26,6 +26,20 @@ public class DeviceEntity implements Serializable {
     private int UDPPort = ApplicationConfiguration.deviceUDPPort;
     private int TCPPort = ApplicationConfiguration.deviceTCPPort;
     private String deployPath;
+    @ManyToOne
+    private ProjectEntity projectEntity;
+    // 设备基本信息
+    @Transient
+    private String CPUInfo;
+    @Transient
+    private String CPUClock;
+    @Transient
+    private String CPUUtilization;
+    @Transient
+    private int RAMSize;
+    @Transient
+    private int freeRAMSize;
+    // 设备部署信息
     @Transient
     private boolean online = false;
     @Transient
@@ -38,8 +52,6 @@ public class DeviceEntity implements Serializable {
     private List<DeployLogDetailEntity> errorFileList;
     @Transient
     private List<DeployLogDetailEntity> completedFileList;
-    @ManyToOne
-    private ProjectEntity projectEntity;
 
     public String getId() {
         return id;
@@ -105,6 +117,54 @@ public class DeviceEntity implements Serializable {
         this.deployPath = deployPath;
     }
 
+    public ProjectEntity getProjectEntity() {
+        return projectEntity;
+    }
+
+    public void setProjectEntity(ProjectEntity projectEntity) {
+        this.projectEntity = projectEntity;
+    }
+
+    public String getCPUInfo() {
+        return CPUInfo;
+    }
+
+    public void setCPUInfo(String CPUInfo) {
+        this.CPUInfo = CPUInfo;
+    }
+
+    public String getCPUClock() {
+        return CPUClock;
+    }
+
+    public void setCPUClock(String CPUClock) {
+        this.CPUClock = CPUClock;
+    }
+
+    public String getCPUUtilization() {
+        return CPUUtilization;
+    }
+
+    public void setCPUUtilization(String CPUUtilization) {
+        this.CPUUtilization = CPUUtilization;
+    }
+
+    public int getRAMSize() {
+        return RAMSize;
+    }
+
+    public void setRAMSize(int RAMSize) {
+        this.RAMSize = RAMSize;
+    }
+
+    public int getFreeRAMSize() {
+        return freeRAMSize;
+    }
+
+    public void setFreeRAMSize(int freeRAMSize) {
+        this.freeRAMSize = freeRAMSize;
+    }
+
     public boolean isOnline() {
         return online;
     }
@@ -151,14 +211,6 @@ public class DeviceEntity implements Serializable {
 
     public void setCompletedFileList(List<DeployLogDetailEntity> completedFileList) {
         this.completedFileList = completedFileList;
-    }
-
-    public ProjectEntity getProjectEntity() {
-        return projectEntity;
-    }
-
-    public void setProjectEntity(ProjectEntity projectEntity) {
-        this.projectEntity = projectEntity;
     }
 
     @Override

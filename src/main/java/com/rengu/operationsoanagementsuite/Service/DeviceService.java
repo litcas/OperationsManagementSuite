@@ -1,35 +1,40 @@
 package com.rengu.operationsoanagementsuite.Service;
 
-import com.rengu.operationsoanagementsuite.Entity.DeployStatusEntity;
-import com.rengu.operationsoanagementsuite.Entity.DeviceEntity;
-import com.rengu.operationsoanagementsuite.Entity.HeartbeatEntity;
+import com.rengu.operationsoanagementsuite.Entity.*;
 import com.rengu.operationsoanagementsuite.Exception.CustomizeException;
 import com.rengu.operationsoanagementsuite.Repository.DeviceRepository;
 import com.rengu.operationsoanagementsuite.Task.AsyncTask;
 import com.rengu.operationsoanagementsuite.Utils.NotificationMessage;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 @Service
 @Transactional
 public class DeviceService {
 
     public static ArrayList<HeartbeatEntity> onlineHeartbeats = new ArrayList<>();
+    private final DeviceRepository deviceRepository;
+    private final ProjectService projectService;
+    private final DeploymentDesignService deploymentDesignService;
+    private final AsyncTask asyncTask;
+
     @Autowired
-    private DeviceRepository deviceRepository;
-    @Autowired
-    private ProjectService projectService;
-    @Autowired
-    private DeploymentDesignService deploymentDesignService;
+    public DeviceService(DeviceRepository deviceRepository, ProjectService projectService, DeploymentDesignService deploymentDesignService, AsyncTask asyncTask) {
+        this.deviceRepository = deviceRepository;
+        this.projectService = projectService;
+        this.deploymentDesignService = deploymentDesignService;
+        this.asyncTask = asyncTask;
+    }
 
 
     public DeviceEntity saveDevices(String projectId, DeviceEntity deviceArgs) {
@@ -54,9 +59,12 @@ public class DeviceService {
         if (!hasDevices(deviceId)) {
             throw new CustomizeException(NotificationMessage.DEVICE_NOT_FOUND);
         }
+        DeviceEntity deviceEntity = getDevices(deviceId);
         // 从部署设计中移除设备
         deploymentDesignService.deleteDeploymentDesignDetailsByDeviceId(deviceId);
         deviceRepository.delete(deviceId);
+        // 从部署状态中移除设备部署信息
+        AsyncTask.deployStatusEntities.removeIf(deployStatusEntity -> deviceEntity.getIp().equals(deployStatusEntity.getIp()));
     }
 
 
@@ -95,6 +103,21 @@ public class DeviceService {
         return onlineChecker(deployProgressChecker(deviceRepository.findAll()));
     }
 
+    public DeviceTaskEntity getDeviceTasks(String deviceId) throws IOException, InterruptedException, ExecutionException {
+        if (!hasDevices(deviceId)) {
+            throw new CustomizeException(NotificationMessage.DEVICE_NOT_FOUND);
+        }
+        String id = UUID.randomUUID().toString();
+        return asyncTask.getDeviceTasks(id, getDevices(deviceId)).get();
+    }
+
+    public DeviceDiskEntity getDeviceDisks(String deviceId) throws IOException, InterruptedException, ExecutionException {
+        if (!hasDevices(deviceId)) {
+            throw new CustomizeException(NotificationMessage.DEVICE_NOT_FOUND);
+        }
+        String id = UUID.randomUUID().toString();
+        return asyncTask.getDeviceDisks(id, getDevices(deviceId)).get();
+    }
 
     public DeviceEntity copyDevices(String deviceId) {
         DeviceEntity deviceArgs = getDevices(deviceId);
@@ -162,6 +185,11 @@ public class DeviceService {
             for (HeartbeatEntity heartbeatEntity : onlineDevices) {
                 if (deviceEntity.getIp().equals(heartbeatEntity.getInetAddress().getHostAddress())) {
                     deviceEntity.setOnline(true);
+                    deviceEntity.setCPUInfo(heartbeatEntity.getCPUInfo());
+                    deviceEntity.setCPUClock(heartbeatEntity.getCPUClock());
+                    deviceEntity.setCPUUtilization(heartbeatEntity.getCPUUtilization());
+                    deviceEntity.setRAMSize(heartbeatEntity.getRAMSize());
+                    deviceEntity.setFreeRAMSize(heartbeatEntity.getFreeRAMSize());
                     break;
                 }
             }
@@ -178,6 +206,11 @@ public class DeviceService {
                 for (DeviceEntity deviceEntity : deviceEntityList) {
                     if (deviceEntity.getIp().equals(heartbeatEntity.getInetAddress().getHostAddress())) {
                         deviceEntity.setOnline(true);
+                        deviceEntity.setCPUInfo(heartbeatEntity.getCPUInfo());
+                        deviceEntity.setCPUClock(heartbeatEntity.getCPUClock());
+                        deviceEntity.setCPUUtilization(heartbeatEntity.getCPUUtilization());
+                        deviceEntity.setRAMSize(heartbeatEntity.getRAMSize());
+                        deviceEntity.setFreeRAMSize(heartbeatEntity.getFreeRAMSize());
                         heartbeatEntityIterator.remove();
                         break;
                     }
@@ -190,6 +223,11 @@ public class DeviceService {
                 deviceEntity.setIp(heartbeatEntity.getInetAddress().getHostAddress());
                 deviceEntity.setVirtual(true);
                 deviceEntity.setOnline(true);
+                deviceEntity.setCPUInfo(heartbeatEntity.getCPUInfo());
+                deviceEntity.setCPUClock(heartbeatEntity.getCPUClock());
+                deviceEntity.setCPUUtilization(heartbeatEntity.getCPUUtilization());
+                deviceEntity.setRAMSize(heartbeatEntity.getRAMSize());
+                deviceEntity.setFreeRAMSize(heartbeatEntity.getFreeRAMSize());
                 deviceEntityList.add(deviceEntity);
             }
         }

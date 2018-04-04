@@ -69,7 +69,26 @@ public class HeartbeatTask {
         while (!datagramSocket.isClosed()) {
             datagramSocket.receive(datagramPacket);
             // 解析心跳报文信息
+            byte bytes[] = datagramPacket.getData();
+            int pointer = 0;
+            String codeType = new String(bytes, pointer, 4).trim();
+            pointer = pointer + 4;
+            String CPUInfo = new String(bytes, pointer, 64).trim();
+            pointer = pointer + 64;
+            String CPUClock = new String(bytes, pointer, 6).trim();
+            pointer = pointer + 6;
+            String CPUUtilization = new String(bytes, pointer, 4).trim();
+            pointer = pointer + 4;
+            int RAMSize = Integer.parseInt(new String(bytes, pointer, 6).trim());
+            pointer = pointer + 6;
+            int freeRAMSize = Integer.parseInt(new String(bytes, pointer, 6).trim());
+            pointer = pointer + 6;
             HeartbeatEntity heartbeatEntity = new HeartbeatEntity(datagramPacket.getAddress());
+            heartbeatEntity.setCPUInfo(CPUInfo);
+            heartbeatEntity.setCPUClock(CPUClock);
+            heartbeatEntity.setCPUUtilization(CPUUtilization);
+            heartbeatEntity.setRAMSize(RAMSize);
+            heartbeatEntity.setFreeRAMSize(freeRAMSize);
             int index = DeviceService.onlineHeartbeats.indexOf(heartbeatEntity);
             if (index == -1) {
                 // 新发现的设备(向列表中添加)

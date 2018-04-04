@@ -13,6 +13,7 @@ import org.apache.commons.io.FileUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -39,7 +40,7 @@ public class ComponentService {
         this.componentDetailService = componentDetailService;
     }
 
-
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public ComponentEntity saveComponents(ComponentEntity componentArgs, MultipartFile[] componentFiles) throws IOException {
         if (StringUtils.isEmpty(componentArgs.getName())) {
             throw new CustomizeException(NotificationMessage.COMPONENT_NAME_NOT_FOUND);
@@ -161,6 +162,7 @@ public class ComponentService {
     }
 
 
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public ComponentEntity copyComponents(String componentId) throws IOException {
         ComponentEntity componentArgs = getComponents(componentId);
         ComponentEntity componentEntity = new ComponentEntity();
@@ -201,7 +203,7 @@ public class ComponentService {
             basePath = "";
         }
         String componentPath = (applicationConfiguration.getComponentLibraryPath() + basePath + "/" + componentEntity.getId() + "/").replace("//", "/");
-        FileUtils.forceMkdir( new File(componentPath));
+        FileUtils.forceMkdir(new File(componentPath));
         return componentPath;
     }
 
@@ -215,7 +217,7 @@ public class ComponentService {
     }
 
     public boolean hasNameAndVersion(String name, String version, boolean isDeleted) {
-        return componentRepository.findByNameAndVersionAndAndDeleted(name, version, isDeleted) != null;
+        return componentRepository.findByNameAndVersionAndAndDeleted(name, version, isDeleted).size() > 0;
     }
 
     public boolean hasComponent(String componentId) {

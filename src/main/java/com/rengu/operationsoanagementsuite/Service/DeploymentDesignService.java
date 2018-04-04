@@ -56,7 +56,7 @@ public class DeploymentDesignService {
 
     public DeploymentDesignEntity updateDeploymentDesigns(String deploymentDesignId, DeploymentDesignEntity deploymentDesignArgs) {
         DeploymentDesignEntity deploymentDesignEntity = getDeploymentDesigns(deploymentDesignId);
-        if (hasProjectIdAndName(deploymentDesignEntity.getProjectEntity().getId(), deploymentDesignArgs.getName())) {
+        if (!hasProjectIdAndName(deploymentDesignEntity.getProjectEntity().getId(), deploymentDesignArgs.getName())) {
             throw new CustomizeException(NotificationMessage.DEPLOYMENT_DESIGN_EXISTS);
         }
         BeanUtils.copyProperties(deploymentDesignArgs, deploymentDesignEntity, "id", "createTime", "projectEntity", "deploymentDesignDetailEntities");

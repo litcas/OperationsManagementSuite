@@ -102,7 +102,6 @@ public class DeploymentDesignDetailService {
     }
 
     // 按设备id查询
-
     public List<DeploymentDesignDetailEntity> getDeploymentDesignDetailsByDeploymentDesignEntityIdAndDeviceEntityId(String deploymentDesignId, String deviceId) {
         if (!deploymentDesignService.hasDeploymentDesigns(deploymentDesignId)) {
             throw new CustomizeException(NotificationMessage.DEPLOYMENT_DESIGN_NOT_FOUND);

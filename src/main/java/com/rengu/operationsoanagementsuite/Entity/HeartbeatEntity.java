@@ -1,8 +1,5 @@
 package com.rengu.operationsoanagementsuite.Entity;
 
-import com.rengu.operationsoanagementsuite.Configuration.ApplicationConfiguration;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import java.net.InetAddress;
 import java.util.Objects;
 
@@ -10,7 +7,10 @@ public class HeartbeatEntity {
 
     private InetAddress inetAddress;
     private String CPUInfo;
-    private long RAMSize;
+    private String CPUClock;
+    private String CPUUtilization;
+    private int RAMSize;
+    private int freeRAMSize;
     private int count;
 
     public HeartbeatEntity(InetAddress inetAddress) {
@@ -34,12 +34,36 @@ public class HeartbeatEntity {
         this.CPUInfo = CPUInfo;
     }
 
-    public long getRAMSize() {
+    public String getCPUClock() {
+        return CPUClock;
+    }
+
+    public void setCPUClock(String CPUClock) {
+        this.CPUClock = CPUClock;
+    }
+
+    public String getCPUUtilization() {
+        return CPUUtilization;
+    }
+
+    public void setCPUUtilization(String CPUUtilization) {
+        this.CPUUtilization = CPUUtilization;
+    }
+
+    public int getRAMSize() {
         return RAMSize;
     }
 
-    public void setRAMSize(long RAMSize) {
+    public void setRAMSize(int RAMSize) {
         this.RAMSize = RAMSize;
+    }
+
+    public int getFreeRAMSize() {
+        return freeRAMSize;
+    }
+
+    public void setFreeRAMSize(int freeRAMSize) {
+        this.freeRAMSize = freeRAMSize;
     }
 
     public int getCount() {
@@ -61,5 +85,18 @@ public class HeartbeatEntity {
     @Override
     public int hashCode() {
         return Objects.hash(inetAddress);
+    }
+
+    @Override
+    public String toString() {
+        return "HeartbeatEntity{" +
+                "inetAddress=" + inetAddress +
+                ", CPUInfo='" + CPUInfo + '\'' +
+                ", CPUClock='" + CPUClock + '\'' +
+                ", CPUUtilization='" + CPUUtilization + '\'' +
+                ", RAMSize=" + RAMSize +
+                ", freeRAMSize=" + freeRAMSize +
+                ", count=" + count +
+                '}';
     }
 }
