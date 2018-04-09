@@ -8,6 +8,7 @@ import com.rengu.operationsoanagementsuite.Utils.NotificationMessage;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
@@ -36,7 +37,7 @@ public class DeviceService {
         this.asyncTask = asyncTask;
     }
 
-
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public DeviceEntity saveDevices(String projectId, DeviceEntity deviceArgs) {
         if (!projectService.hasProject(projectId)) {
             throw new CustomizeException(NotificationMessage.PROJECT_NOT_FOUND);
@@ -119,6 +120,7 @@ public class DeviceService {
         return asyncTask.getDeviceDisks(id, getDevices(deviceId)).get();
     }
 
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public DeviceEntity copyDevices(String deviceId) {
         DeviceEntity deviceArgs = getDevices(deviceId);
         DeviceEntity deviceEntity = new DeviceEntity();
