@@ -30,7 +30,7 @@ public class DeploymentDesignController {
     // 删除部署设计
     @DeleteMapping(value = "/{deploymentDesignId}")
     public ResultEntity deleteDeploymentDesigns(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deploymentDesignId") String deploymentDesignId) {
-        deploymentDesignService.deleteDeploymentDesigns(deploymentDesignId);
+        deploymentDesignService.deleteDeploymentDesign(deploymentDesignId);
         return ResultUtils.resultBuilder(loginUser, HttpStatus.NO_CONTENT, NotificationMessage.DEPLOYMENT_DESIGN_DELETED);
     }
 

@@ -63,13 +63,11 @@ public class ComponentService {
         return componentRepository.save(componentArgs);
     }
 
-
     public void deleteComponents(String componentId) {
         ComponentEntity componentEntity = getComponents(componentId);
         componentEntity.setDeleted(true);
         componentRepository.save(componentEntity);
     }
-
 
     public ComponentEntity updateComponents(String componentId, String[] removeIds, ComponentEntity componentArgs, MultipartFile[] componentFiles) throws IOException {
         ComponentEntity componentEntity = getComponents(componentId);
@@ -103,11 +101,9 @@ public class ComponentService {
         return componentRepository.save(componentEntity);
     }
 
-
     public List<ComponentEntity> getComponents(boolean isShowHistory) {
         return isShowHistory ? componentRepository.findAll() : componentRepository.findByDeleted(false);
     }
-
 
     public ComponentEntity getComponents(String componentId) {
         if (!hasComponent(componentId)) {
@@ -115,7 +111,6 @@ public class ComponentService {
         }
         return componentRepository.findOne(componentId);
     }
-
 
     public File exportComponents(String componentId) throws IOException {
         ComponentEntity componentEntity = getComponents(componentId);
@@ -134,7 +129,6 @@ public class ComponentService {
             throw new FileNotFoundException(NotificationMessage.CACHE_CREAT_FAILED);
         }
     }
-
 
     public List<ComponentEntity> importComponents(MultipartFile[] multipartFiles) throws IOException, ZipException {
         if (multipartFiles.length == 0) {
@@ -161,7 +155,6 @@ public class ComponentService {
         return componentEntityList;
     }
 
-
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public ComponentEntity copyComponents(String componentId) throws IOException {
         ComponentEntity componentArgs = getComponents(componentId);
@@ -169,10 +162,10 @@ public class ComponentService {
         BeanUtils.copyProperties(componentArgs, componentEntity, "id", "createTime", "name", "filePath", "size", "deleted", "componentDetailEntities");
         // 设置组件名称-自动累加数字
         int i = 1;
-        String name = componentArgs.getName() + "-副本( " + i + ")";
+        String name = componentArgs.getName() + "-副本(" + i + ")";
         while (hasNameAndVersion(name, componentArgs.getVersion(), false)) {
             i = i + 1;
-            name = componentArgs.getName() + "-副本( " + i + ")";
+            name = componentArgs.getName() + "-副本(" + i + ")";
         }
         componentEntity.setName(name);
         componentEntity.setDeployPath(getDeployPath(componentEntity));

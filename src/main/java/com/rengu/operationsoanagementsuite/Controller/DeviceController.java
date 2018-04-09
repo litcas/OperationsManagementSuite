@@ -52,7 +52,7 @@ public class DeviceController {
         return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, deviceService.getDeviceTasks(deviceId));
     }
 
-    // 查询设备进程信息
+    // 查询设备磁盘信息
     @GetMapping(value = "/{deviceId}/disks")
     public ResultEntity getDeviceDisks(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deviceId") String deviceId) throws IOException, ExecutionException, InterruptedException {
         return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, deviceService.getDeviceDisks(deviceId));

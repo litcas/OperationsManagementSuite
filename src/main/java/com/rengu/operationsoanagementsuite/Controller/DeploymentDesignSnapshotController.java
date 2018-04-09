@@ -20,7 +20,7 @@ public class DeploymentDesignSnapshotController {
     // 删除部署设计快照
     @DeleteMapping(value = "/{deploymentdesignsnapshotId}")
     public ResultEntity deleteDeploymentDesignSnapshots(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deploymentdesignsnapshotId") String deploymentdesignsnapshotId) {
-        deploymentDesignSnapshotService.deleteDeploymentDesignSnapshots(deploymentdesignsnapshotId);
+        deploymentDesignSnapshotService.deleteDeploymentDesignSnapshot(deploymentdesignsnapshotId);
         return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, NotificationMessage.DEPLOYMENT_DESIGN_SNAPSHOT_DELETED);
     }
 

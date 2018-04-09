@@ -24,8 +24,8 @@ public class TcpReceiveTask {
 
     // 扫描结果报文标示
     private static final String SCAN_RESULT_TAG = "C102";
-    private static final String TASK_RESULT_TAG = "C103";
-    private static final String DISK_RESULT_TAG = "C102";
+    private static final String TASK_RESULT_TAG = "C105";
+    private static final String DISK_RESULT_TAG = "C106";
     // 引入日志记录类
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final ApplicationConfiguration applicationConfiguration;
@@ -87,17 +87,15 @@ public class TcpReceiveTask {
             stringRedisTemplate.opsForValue().set(id, JsonUtils.getJsonString(scanResultEntity));
         }
         if (messageType.equals(TASK_RESULT_TAG)) {
-            String id = new String(bytes, pointer, 36).trim();
-            pointer = pointer + 36;
+            String id = new String(bytes, pointer, 37).trim();
+            pointer = pointer + 37;
             List<TaskInfoEntity> taskInfoEntityList = new ArrayList<>();
-            while (pointer + 11 + 31 + 8 <= bytes.length) {
-                String pid = new String(bytes, pointer, 11).trim();
-                pointer = pointer + 11;
-                String name = new String(bytes, pointer, 31).trim();
-                pointer = pointer + 31;
-                String priority = new String(bytes, pointer, 7).trim();
-                pointer = pointer + 7;
-                taskInfoEntityList.add(new TaskInfoEntity(pid, name, priority, "喵喵喵"));
+            while (pointer + 5 + 128 + 8 < bytes.length) {
+                String pid = new String(bytes, pointer, 5).trim();
+                pointer = pointer + 5;
+                String name = new String(bytes, pointer, 128).trim();
+                pointer = pointer + 128 + 8;
+                taskInfoEntityList.add(new TaskInfoEntity(pid, name));
             }
             // 序列化进程信息对象
             DeviceTaskEntity deviceTaskEntity = new DeviceTaskEntity();
@@ -106,16 +104,16 @@ public class TcpReceiveTask {
             stringRedisTemplate.opsForValue().set(id, JsonUtils.getJsonString(deviceTaskEntity));
         }
         if (messageType.equals(DISK_RESULT_TAG)) {
-            String id = new String(bytes, pointer, 36).trim();
-            pointer = pointer + 36;
+            String id = new String(bytes, pointer, 37).trim();
+            pointer = pointer + 37;
             List<DiskInfoEntity> diskInfoEntityList = new ArrayList<>();
-            while (pointer + 31 + 11 + 11 <= bytes.length) {
-                String name = new String(bytes, pointer, 31).trim();
-                pointer = pointer + 31;
-                int size = Integer.parseInt(new String(bytes, pointer, 11).trim());
-                pointer = pointer + 11;
-                int usedSize = Integer.parseInt(new String(bytes, pointer, 11).trim());
-                pointer = pointer + 11;
+            while (pointer + 32 + 12 + 12 <= bytes.length) {
+                String name = new String(bytes, pointer, 32).trim().replace("\\", "/");
+                pointer = pointer + 32;
+                double size = Double.parseDouble(new String(bytes, pointer, 12).trim());
+                pointer = pointer + 12;
+                double usedSize = Double.parseDouble(new String(bytes, pointer, 12).trim());
+                pointer = pointer + 12;
                 diskInfoEntityList.add(new DiskInfoEntity(name, size, usedSize));
             }
             // 序列化进程信息对象

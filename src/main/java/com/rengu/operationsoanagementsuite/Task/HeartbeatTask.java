@@ -56,7 +56,7 @@ public class HeartbeatTask {
             heartbeatEntity.setCount(heartbeatEntity.getCount() - 1);
             if (heartbeatEntity.getCount() == 0) {
                 heartbeatEntityIterator.remove();
-                logger.info(heartbeatEntity.getInetAddress().getHostAddress() + "--->已断开服务器连接。");
+                logger.info("<" + heartbeatEntity.getInetAddress().getHostAddress() + ">--->已断开服务器连接。");
             }
         }
     }
@@ -93,7 +93,7 @@ public class HeartbeatTask {
             if (index == -1) {
                 // 新发现的设备(向列表中添加)
                 DeviceService.onlineHeartbeats.add(heartbeatEntity);
-                logger.info(heartbeatEntity.getInetAddress().getHostAddress() + "--->已连线服务器。");
+                logger.info("<" + heartbeatEntity.getInetAddress().getHostAddress() + ">--->已连线服务器。");
             } else {
                 // 已在线的设备
                 DeviceService.onlineHeartbeats.get(DeviceService.onlineHeartbeats.indexOf(heartbeatEntity)).setCount(applicationConfiguration.getDeviceLogoutDelay());

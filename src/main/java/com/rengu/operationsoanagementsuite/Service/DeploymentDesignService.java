@@ -65,7 +65,7 @@ public class DeploymentDesignService {
 
     // 删除部署设计
 
-    public void deleteDeploymentDesigns(String deploymentDesignId) {
+    public void deleteDeploymentDesign(String deploymentDesignId) {
         if (!hasDeploymentDesigns(deploymentDesignId)) {
             throw new CustomizeException(NotificationMessage.DEPLOYMENT_DESIGN_NOT_FOUND);
         }
@@ -196,7 +196,7 @@ public class DeploymentDesignService {
         Map<DeviceEntity, List<DeploymentDesignDetailEntity>> deviceMap = deploymentDesignDetailEntityList.stream().collect(Collectors.groupingBy(DeploymentDesignDetailEntity::getDeviceEntity));
         for (Map.Entry<DeviceEntity, List<DeploymentDesignDetailEntity>> entry : deviceMap.entrySet()) {
             DeviceEntity deviceEntity = deviceService.getDevices(entry.getKey().getId());
-            if (deviceService.isOnline(deviceEntity.getIp())) {
+            if (DeviceService.isOnline(deviceEntity.getIp())) {
                 asyncTask.deployDesign(deviceEntity, entry.getValue());
             }
         }

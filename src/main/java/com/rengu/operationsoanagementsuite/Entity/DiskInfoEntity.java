@@ -3,13 +3,13 @@ package com.rengu.operationsoanagementsuite.Entity;
 public class DiskInfoEntity {
 
     private String name;
-    private int size;
-    private int usedSize;
+    private double size;
+    private double usedSize;
 
     public DiskInfoEntity() {
     }
 
-    public DiskInfoEntity(String name, int size, int usedSize) {
+    public DiskInfoEntity(String name, double size, double usedSize) {
         this.name = name;
         this.size = size;
         this.usedSize = usedSize;
@@ -23,19 +23,19 @@ public class DiskInfoEntity {
         this.name = name;
     }
 
-    public int getSize() {
+    public double getSize() {
         return size;
     }
 
-    public void setSize(int size) {
+    public void setSize(double size) {
         this.size = size;
     }
 
-    public int getUsedSize() {
+    public double getUsedSize() {
         return usedSize;
     }
 
-    public void setUsedSize(int usedSize) {
+    public void setUsedSize(double usedSize) {
         this.usedSize = usedSize;
     }
 }

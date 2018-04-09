@@ -167,7 +167,7 @@ public class DeviceService {
         return deviceEntityList;
     }
 
-    public boolean isOnline(String ip) {
+    public static boolean isOnline(String ip) {
         List<HeartbeatEntity> onlineDevices = new ArrayList<>(onlineHeartbeats);
         if (onlineDevices.size() != 0) {
             for (HeartbeatEntity heartbeatEntity : onlineDevices) {
