@@ -1,7 +1,6 @@
 package com.rengu.operationsoanagementsuite.Service;
 
 import com.rengu.operationsoanagementsuite.Configuration.ApplicationConfiguration;
-import com.rengu.operationsoanagementsuite.Entity.DeployFileEntity;
 import com.rengu.operationsoanagementsuite.Entity.DeploymentDesignEntity;
 import com.rengu.operationsoanagementsuite.Entity.DeploymentDesignSnapshotDetailEntity;
 import com.rengu.operationsoanagementsuite.Entity.DeploymentDesignSnapshotEntity;
@@ -11,24 +10,20 @@ import com.rengu.operationsoanagementsuite.Task.AsyncTask;
 import com.rengu.operationsoanagementsuite.Utils.NotificationMessage;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class DeploymentDesignSnapshotService {
 
     @Autowired
     private AsyncTask asyncTask;
-    @Autowired
-    private StringRedisTemplate stringRedisTemplate;
     @Autowired
     private DeploymentDesignSnapshotRepository deploymentDesignSnapshotRepository;
     @Autowired
@@ -37,12 +32,7 @@ public class DeploymentDesignSnapshotService {
     private DeploymentDesignService deploymentDesignService;
     @Autowired
     private DeploymentDesignDetailService deploymentDesignDetailService;
-    @Autowired
-    private ProjectService projectService;
-    @Autowired
-    private DeviceService deviceService;
 
-    @Transactional
     public DeploymentDesignSnapshotEntity saveDeploymentDesignSnapshots(String deploymentDesignId, DeploymentDesignSnapshotEntity deploymentDesignSnapshotArgs) {
         DeploymentDesignEntity deploymentDesignEntity = deploymentDesignService.getDeploymentDesigns(deploymentDesignId);
         if (hasProjectIdAndName(deploymentDesignEntity.getProjectEntity().getId(), deploymentDesignSnapshotArgs.getName())) {
@@ -55,43 +45,41 @@ public class DeploymentDesignSnapshotService {
         return deploymentDesignSnapshotRepository.save(deploymentDesignSnapshotEntity);
     }
 
-    @Transactional
-    public void deleteDeploymentDesignSnapshots(String deploymentdesignsnapshotId) {
+
+    public void deleteDeploymentDesignSnapshot(String deploymentdesignsnapshotId) {
         if (!hasDeploymentDesignSnapshots(deploymentdesignsnapshotId)) {
             throw new CustomizeException(NotificationMessage.DEPLOYMENT_DESIGN_SNAPSHOT_NOT_FOUND);
         }
         deploymentDesignSnapshotRepository.delete(deploymentdesignsnapshotId);
     }
 
-    @Transactional
+
     public DeploymentDesignSnapshotEntity getDeploymentDesignSnapshots(String deploymentDesignSnapshotId) {
         if (!hasDeploymentDesignSnapshots(deploymentDesignSnapshotId)) {
             throw new ClassCastException(NotificationMessage.DEPLOYMENT_DESIGN_SNAPSHOT_NOT_FOUND);
         }
-        return progressChecker(deploymentDesignSnapshotRepository.findOne(deploymentDesignSnapshotId));
+        return deploymentDesignSnapshotRepository.findOne(deploymentDesignSnapshotId);
     }
 
-    @Transactional
+
     public List<DeploymentDesignSnapshotEntity> getDeploymentDesignSnapshots() {
-        return progressChecker(deploymentDesignSnapshotRepository.findAll());
+        return deploymentDesignSnapshotRepository.findAll();
     }
 
-    @Transactional
+
     public List<DeploymentDesignSnapshotEntity> getDeploymentDesignSnapshotsByProjectId(String projectId) {
-        return progressChecker(deploymentDesignSnapshotRepository.findByProjectEntityId(projectService.getProjects(projectId).getId()));
+        return deploymentDesignSnapshotRepository.findByProjectEntityId(projectId);
     }
 
-    @Transactional
-    public List<DeployFileEntity> deployDeploymentDesignSnapshots(String deploymentdesignsnapshotId) throws IOException, ExecutionException, InterruptedException {
+
+    public void deployDeploymentDesignSnapshots(String deploymentdesignsnapshotId) {
         List<DeploymentDesignSnapshotDetailEntity> deploymentDesignSnapshotDetailEntities = getDeploymentDesignSnapshots(deploymentdesignsnapshotId).getDeploymentDesignSnapshots();
         Map<String, List<DeploymentDesignSnapshotDetailEntity>> ipMap = deploymentDesignSnapshotDetailEntities.stream().collect(Collectors.groupingBy(DeploymentDesignSnapshotDetailEntity::getIp));
-        List<DeployFileEntity> errorList = new ArrayList<>();
         for (Map.Entry<String, List<DeploymentDesignSnapshotDetailEntity>> entry : ipMap.entrySet()) {
-            if (deviceService.isOnline(entry.getKey())) {
-                errorList.addAll(asyncTask.deploySnapshot(deploymentdesignsnapshotId, entry.getKey(), ApplicationConfiguration.deviceTCPPort, entry.getValue()).get());
+            if (DeviceService.isOnline(entry.getKey())) {
+                asyncTask.deploySnapshot(entry.getKey(), ApplicationConfiguration.deviceTCPPort, entry.getValue());
             }
         }
-        return errorList;
     }
 
     public List<DeploymentDesignSnapshotDetailEntity> addDeploymentDesignSnapshotDetails(DeploymentDesignSnapshotEntity deploymentDesignSnapshotEntity, List<DeploymentDesignSnapshotDetailEntity> deploymentDesignSnapshotDetailEntityList) {
@@ -105,22 +93,6 @@ public class DeploymentDesignSnapshotService {
             }
         }
         return deploymentDesignSnapshotDetailEntities;
-    }
-
-    public DeploymentDesignSnapshotEntity progressChecker(DeploymentDesignSnapshotEntity deploymentDesignSnapshotEntity) {
-        if (stringRedisTemplate.hasKey(deploymentDesignSnapshotEntity.getId())) {
-            deploymentDesignSnapshotEntity.setProgress(Double.parseDouble(stringRedisTemplate.opsForValue().get(deploymentDesignSnapshotEntity.getId())));
-        }
-        return deploymentDesignSnapshotEntity;
-    }
-
-    public List<DeploymentDesignSnapshotEntity> progressChecker(List<DeploymentDesignSnapshotEntity> deploymentDesignSnapshotEntityListe) {
-        for (DeploymentDesignSnapshotEntity deploymentDesignSnapshotEntity : deploymentDesignSnapshotEntityListe) {
-            if (stringRedisTemplate.hasKey(deploymentDesignSnapshotEntity.getId())) {
-                deploymentDesignSnapshotEntity.setProgress(Double.parseDouble(stringRedisTemplate.opsForValue().get(deploymentDesignSnapshotEntity.getId())));
-            }
-        }
-        return deploymentDesignSnapshotEntityListe;
     }
 
     public boolean hasDeploymentDesignSnapshots(String deploymentDesignSnapshotId) {

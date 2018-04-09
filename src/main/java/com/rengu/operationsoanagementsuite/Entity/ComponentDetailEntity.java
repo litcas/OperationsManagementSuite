@@ -20,6 +20,7 @@ public class ComponentDetailEntity implements Serializable {
     private String path;
     private String MD5;
     private long size;
+    private String displaySize;
 
     public ComponentDetailEntity() {
     }
@@ -27,6 +28,19 @@ public class ComponentDetailEntity implements Serializable {
     public ComponentDetailEntity(String path, String MD5) {
         this.path = path;
         this.MD5 = MD5;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null || getClass() != object.getClass()) return false;
+        ComponentDetailEntity that = (ComponentDetailEntity) object;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 
     public String getId() {
@@ -53,22 +67,6 @@ public class ComponentDetailEntity implements Serializable {
         this.name = name;
     }
 
-    public String getMD5() {
-        return MD5;
-    }
-
-    public void setMD5(String MD5) {
-        this.MD5 = MD5;
-    }
-
-    public long getSize() {
-        return size;
-    }
-
-    public void setSize(long size) {
-        this.size = size;
-    }
-
     public String getType() {
         return type;
     }
@@ -85,16 +83,27 @@ public class ComponentDetailEntity implements Serializable {
         this.path = path;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ComponentDetailEntity that = (ComponentDetailEntity) o;
-        return Objects.equals(id, that.id);
+    public String getMD5() {
+        return MD5;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
+    public void setMD5(String MD5) {
+        this.MD5 = MD5;
+    }
+
+    public long getSize() {
+        return size;
+    }
+
+    public void setSize(long size) {
+        this.size = size;
+    }
+
+    public String getDisplaySize() {
+        return displaySize;
+    }
+
+    public void setDisplaySize(String displaySize) {
+        this.displaySize = displaySize;
     }
 }

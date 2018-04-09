@@ -17,7 +17,7 @@ public class ApplicationConfiguration {
     private int hearbeatSendPort = 3086;
     private int hearbeatReceivePort = 6004;
     private int tcpReceivePort = 6005;
-    private int deviceLogoutDelay = 5;
+    private int deviceLogoutDelay = 3;
 
     // 组件部署参数
     private int socketTimeout = 1000;

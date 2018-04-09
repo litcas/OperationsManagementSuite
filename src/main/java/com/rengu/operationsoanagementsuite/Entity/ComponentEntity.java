@@ -21,9 +21,23 @@ public class ComponentEntity implements Serializable {
     private String filePath;
     private String deployPath;
     private long size;
+    private String displaySize;
     private boolean deleted = false;
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<ComponentDetailEntity> componentDetailEntities;
+
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null || getClass() != object.getClass()) return false;
+        ComponentEntity that = (ComponentEntity) object;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 
     public String getId() {
         return id;
@@ -89,6 +103,14 @@ public class ComponentEntity implements Serializable {
         this.size = size;
     }
 
+    public String getDisplaySize() {
+        return displaySize;
+    }
+
+    public void setDisplaySize(String displaySize) {
+        this.displaySize = displaySize;
+    }
+
     public boolean isDeleted() {
         return deleted;
     }
@@ -103,18 +125,5 @@ public class ComponentEntity implements Serializable {
 
     public void setComponentDetailEntities(List<ComponentDetailEntity> componentDetailEntities) {
         this.componentDetailEntities = componentDetailEntities;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ComponentEntity that = (ComponentEntity) o;
-        return Objects.equals(id, that.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
     }
 }

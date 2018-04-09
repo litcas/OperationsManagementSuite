@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
@@ -19,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@Transactional
 public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
@@ -51,7 +53,7 @@ public class UserService implements UserDetailsService {
         return userEntity;
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public UserEntity saveUsers(UserEntity userArgs, RoleEntity... roleEntities) {
         // 检查用户名是否存在
         if (StringUtils.isEmpty(userArgs.getUsername())) {
@@ -72,12 +74,10 @@ public class UserService implements UserDetailsService {
         return userRepository.save(userEntity);
     }
 
-    @Transactional
     public UserEntity saveUsers(UserEntity userArgs, boolean isAdmin) {
         return isAdmin ? saveUsers(userArgs, roleService.getRoles(RoleService.USER_ROLE_NAME), roleService.getRoles(RoleService.ADMIN_ROLE_NAME)) : saveUsers(userArgs, roleService.getRoles(RoleService.USER_ROLE_NAME));
     }
 
-    @Transactional
     public void deleteUsers(String userId) {
         if (!hasUser(userId)) {
             throw new CustomizeException(NotificationMessage.USER_NOT_FOUND);
@@ -85,7 +85,6 @@ public class UserService implements UserDetailsService {
         userRepository.delete(userId);
     }
 
-    @Transactional
     public Object changePassword(String userId, UserEntity userArgs) {
         if (StringUtils.isEmpty(userArgs.getPassword())) {
             throw new CustomizeException(NotificationMessage.USER_PASSWORD_NOT_FOUND);
@@ -95,7 +94,6 @@ public class UserService implements UserDetailsService {
         return userRepository.save(userEntity);
     }
 
-    @Transactional
     public Object changePassword(UserEntity loginUser, UserEntity userArgs) {
         if (StringUtils.isEmpty(userArgs.getPassword())) {
             throw new CustomizeException(NotificationMessage.USER_PASSWORD_NOT_FOUND);
@@ -105,13 +103,11 @@ public class UserService implements UserDetailsService {
         return userRepository.save(userEntity);
     }
 
-    @Transactional
     public List<UserEntity> getUsers() {
         return userRepository.findAll();
     }
 
 
-    @Transactional
     public UserEntity getUsers(String userId) {
         if (!hasUser(userId)) {
             throw new CustomizeException(NotificationMessage.USER_NOT_FOUND);

@@ -6,11 +6,11 @@ import com.rengu.operationsoanagementsuite.Repository.RoleRepository;
 import com.rengu.operationsoanagementsuite.Utils.NotificationMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import javax.transaction.Transactional;
-
 @Service
+@Transactional
 public class RoleService {
 
     public static final String USER_ROLE_NAME = "ROLE_USER";
@@ -24,7 +24,7 @@ public class RoleService {
     }
 
     // 保存角色
-    @Transactional
+
     public RoleEntity saveRoles(RoleEntity roleEntity) {
         // 检查角色名称参数是否存在
         if (StringUtils.isEmpty(roleEntity.getName())) {
@@ -38,7 +38,7 @@ public class RoleService {
     }
 
     // 查询角色
-    @Transactional
+
     public RoleEntity getRoles(String name) {
         // 检查角色名称参数是否存在
         if (StringUtils.isEmpty(name)) {

@@ -30,7 +30,7 @@ public class DeploymentDesignController {
     // 删除部署设计
     @DeleteMapping(value = "/{deploymentDesignId}")
     public ResultEntity deleteDeploymentDesigns(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deploymentDesignId") String deploymentDesignId) {
-        deploymentDesignService.deleteDeploymentDesigns(deploymentDesignId);
+        deploymentDesignService.deleteDeploymentDesign(deploymentDesignId);
         return ResultUtils.resultBuilder(loginUser, HttpStatus.NO_CONTENT, NotificationMessage.DEPLOYMENT_DESIGN_DELETED);
     }
 
@@ -134,19 +134,22 @@ public class DeploymentDesignController {
 
     // 部署组件
     @PutMapping(value = "/{deploymentDesignId}/devices/{deviceId}/components/{componentId}/deploy")
-    public ResultEntity deploy(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deploymentDesignId") String deploymentDesignId, @PathVariable(value = "deviceId") String deviceId, @PathVariable(value = "componentId") String componentId) throws IOException, ExecutionException, InterruptedException {
-        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, deploymentDesignService.deploy(deploymentDesignId, deviceId, componentId));
+    public ResultEntity deploy(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deploymentDesignId") String deploymentDesignId, @PathVariable(value = "deviceId") String deviceId, @PathVariable(value = "componentId") String componentId) {
+        deploymentDesignService.deploy(deploymentDesignId, deviceId, componentId);
+        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, "start");
     }
 
     // 部署组件
     @PutMapping(value = "/{deploymentDesignId}/devices/{deviceId}/deploy")
-    public ResultEntity deploy(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deploymentDesignId") String deploymentDesignId, @PathVariable(value = "deviceId") String deviceId) throws IOException, ExecutionException, InterruptedException {
-        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, deploymentDesignService.deploy(deploymentDesignId, deviceId));
+    public ResultEntity deploy(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deploymentDesignId") String deploymentDesignId, @PathVariable(value = "deviceId") String deviceId) {
+        deploymentDesignService.deploy(deploymentDesignId, deviceId);
+        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, "start");
     }
 
     // 部署部署图
     @PutMapping(value = "/{deploymentDesignId}/deploy")
-    public ResultEntity deploy(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deploymentDesignId") String deploymentDesignId) throws IOException, ExecutionException, InterruptedException {
-        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, deploymentDesignService.deploy(deploymentDesignId));
+    public ResultEntity deploy(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deploymentDesignId") String deploymentDesignId) {
+        deploymentDesignService.deploy(deploymentDesignId);
+        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, "start");
     }
 }

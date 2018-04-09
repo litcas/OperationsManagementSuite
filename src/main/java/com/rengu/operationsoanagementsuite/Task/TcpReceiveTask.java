@@ -1,8 +1,7 @@
 package com.rengu.operationsoanagementsuite.Task;
 
 import com.rengu.operationsoanagementsuite.Configuration.ApplicationConfiguration;
-import com.rengu.operationsoanagementsuite.Entity.ComponentDetailEntity;
-import com.rengu.operationsoanagementsuite.Entity.ScanResultEntity;
+import com.rengu.operationsoanagementsuite.Entity.*;
 import com.rengu.operationsoanagementsuite.Utils.JsonUtils;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -25,6 +24,8 @@ public class TcpReceiveTask {
 
     // 扫描结果报文标示
     private static final String SCAN_RESULT_TAG = "C102";
+    private static final String TASK_RESULT_TAG = "C105";
+    private static final String DISK_RESULT_TAG = "C106";
     // 引入日志记录类
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final ApplicationConfiguration applicationConfiguration;
@@ -84,6 +85,42 @@ public class TcpReceiveTask {
             scanResultEntity.setComponentId(componentId);
             scanResultEntity.setOriginalScanResultList(originalScanResultList);
             stringRedisTemplate.opsForValue().set(id, JsonUtils.getJsonString(scanResultEntity));
+        }
+        if (messageType.equals(TASK_RESULT_TAG)) {
+            String id = new String(bytes, pointer, 37).trim();
+            pointer = pointer + 37;
+            List<TaskInfoEntity> taskInfoEntityList = new ArrayList<>();
+            while (pointer + 5 + 128 + 8 < bytes.length) {
+                String pid = new String(bytes, pointer, 5).trim();
+                pointer = pointer + 5;
+                String name = new String(bytes, pointer, 128).trim();
+                pointer = pointer + 128 + 8;
+                taskInfoEntityList.add(new TaskInfoEntity(pid, name));
+            }
+            // 序列化进程信息对象
+            DeviceTaskEntity deviceTaskEntity = new DeviceTaskEntity();
+            deviceTaskEntity.setId(id);
+            deviceTaskEntity.setTaskInfoEntities(taskInfoEntityList);
+            stringRedisTemplate.opsForValue().set(id, JsonUtils.getJsonString(deviceTaskEntity));
+        }
+        if (messageType.equals(DISK_RESULT_TAG)) {
+            String id = new String(bytes, pointer, 37).trim();
+            pointer = pointer + 37;
+            List<DiskInfoEntity> diskInfoEntityList = new ArrayList<>();
+            while (pointer + 32 + 12 + 12 <= bytes.length) {
+                String name = new String(bytes, pointer, 32).trim().replace("\\", "/");
+                pointer = pointer + 32;
+                double size = Double.parseDouble(new String(bytes, pointer, 12).trim());
+                pointer = pointer + 12;
+                double usedSize = Double.parseDouble(new String(bytes, pointer, 12).trim());
+                pointer = pointer + 12;
+                diskInfoEntityList.add(new DiskInfoEntity(name, size, usedSize));
+            }
+            // 序列化进程信息对象
+            DeviceDiskEntity deviceDiskEntity = new DeviceDiskEntity();
+            deviceDiskEntity.setId(id);
+            deviceDiskEntity.setDiskInfoEntities(diskInfoEntityList);
+            stringRedisTemplate.opsForValue().set(id, JsonUtils.getJsonString(deviceDiskEntity));
         }
     }
 }

@@ -10,9 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
-import java.util.concurrent.ExecutionException;
-
 @RestController
 @RequestMapping(value = "/deploymentdesignsnapshots")
 public class DeploymentDesignSnapshotController {
@@ -23,7 +20,7 @@ public class DeploymentDesignSnapshotController {
     // 删除部署设计快照
     @DeleteMapping(value = "/{deploymentdesignsnapshotId}")
     public ResultEntity deleteDeploymentDesignSnapshots(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deploymentdesignsnapshotId") String deploymentdesignsnapshotId) {
-        deploymentDesignSnapshotService.deleteDeploymentDesignSnapshots(deploymentdesignsnapshotId);
+        deploymentDesignSnapshotService.deleteDeploymentDesignSnapshot(deploymentdesignsnapshotId);
         return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, NotificationMessage.DEPLOYMENT_DESIGN_SNAPSHOT_DELETED);
     }
 
@@ -34,14 +31,15 @@ public class DeploymentDesignSnapshotController {
     }
 
     // 查询部署设计快照
-    @GetMapping()
+    @GetMapping
     public ResultEntity getDeploymentDesignSnapshots(@AuthenticationPrincipal UserEntity loginUser) {
         return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, deploymentDesignSnapshotService.getDeploymentDesignSnapshots());
     }
 
     // 部署快照
     @PutMapping(value = "/{deploymentdesignsnapshotId}/deploy")
-    public ResultEntity deployDeploymentDesignSnapshots(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deploymentdesignsnapshotId") String deploymentdesignsnapshotId) throws IOException, ExecutionException, InterruptedException {
-        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, deploymentDesignSnapshotService.deployDeploymentDesignSnapshots(deploymentdesignsnapshotId));
+    public ResultEntity deployDeploymentDesignSnapshots(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deploymentdesignsnapshotId") String deploymentdesignsnapshotId) {
+        deploymentDesignSnapshotService.deployDeploymentDesignSnapshots(deploymentdesignsnapshotId);
+        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, "start");
     }
 }

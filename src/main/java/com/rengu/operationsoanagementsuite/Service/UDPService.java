@@ -1,5 +1,6 @@
 package com.rengu.operationsoanagementsuite.Service;
 
+import com.rengu.operationsoanagementsuite.Entity.DeviceEntity;
 import com.rengu.operationsoanagementsuite.Utils.Utils;
 import org.springframework.stereotype.Service;
 
@@ -45,5 +46,19 @@ public class UDPService {
         String extension = Utils.getString(Arrays.toString(extensions).replace("[", "").replace("]", "").replaceAll("\\s*", ""), 128);
         path = Utils.getString(path, 256);
         sandMessage(ip, port, codeType + id + deviceId + componentId + extension + path);
+    }
+
+    public void sendGetDeviceTasksMessage(String id, DeviceEntity deviceEntity) throws IOException {
+        String codeType = Utils.getFixedLengthString("S105", 4);
+        String type = Utils.getFixedLengthString("1", 1);
+        id = Utils.getFixedLengthString(id, 37);
+        sandMessage(deviceEntity.getIp(), deviceEntity.getUDPPort(), codeType + type + id);
+    }
+
+    public void sendGetDeviceDisksMessage(String id, DeviceEntity deviceEntity) throws IOException {
+        String codeType = Utils.getFixedLengthString("S105", 4);
+        String type = Utils.getFixedLengthString("2", 1);
+        id = Utils.getFixedLengthString(id, 37);
+        sandMessage(deviceEntity.getIp(), deviceEntity.getUDPPort(), codeType + type + id);
     }
 }

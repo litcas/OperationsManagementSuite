@@ -9,6 +9,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -25,27 +26,32 @@ public class DeviceEntity implements Serializable {
     private int UDPPort = ApplicationConfiguration.deviceUDPPort;
     private int TCPPort = ApplicationConfiguration.deviceTCPPort;
     private String deployPath;
+    @ManyToOne
+    private ProjectEntity projectEntity;
+    // 设备基本信息
+    @Transient
+    private String CPUInfo;
+    @Transient
+    private String CPUClock;
+    @Transient
+    private String CPUUtilization;
+    @Transient
+    private int RAMSize;
+    @Transient
+    private int freeRAMSize;
+    // 设备部署信息
     @Transient
     private boolean online = false;
     @Transient
     private boolean virtual = false;
     @Transient
+    private double transferRate;
+    @Transient
     private double progress;
-    @ManyToOne
-    private ProjectEntity projectEntity;
-
-    @Override
-    public boolean equals(Object object) {
-        if (this == object) return true;
-        if (object == null || getClass() != object.getClass()) return false;
-        DeviceEntity that = (DeviceEntity) object;
-        return Objects.equals(id, that.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
+    @Transient
+    private List<DeployLogDetailEntity> errorFileList;
+    @Transient
+    private List<DeployLogDetailEntity> completedFileList;
 
     public String getId() {
         return id;
@@ -111,6 +117,54 @@ public class DeviceEntity implements Serializable {
         this.deployPath = deployPath;
     }
 
+    public ProjectEntity getProjectEntity() {
+        return projectEntity;
+    }
+
+    public void setProjectEntity(ProjectEntity projectEntity) {
+        this.projectEntity = projectEntity;
+    }
+
+    public String getCPUInfo() {
+        return CPUInfo;
+    }
+
+    public void setCPUInfo(String CPUInfo) {
+        this.CPUInfo = CPUInfo;
+    }
+
+    public String getCPUClock() {
+        return CPUClock;
+    }
+
+    public void setCPUClock(String CPUClock) {
+        this.CPUClock = CPUClock;
+    }
+
+    public String getCPUUtilization() {
+        return CPUUtilization;
+    }
+
+    public void setCPUUtilization(String CPUUtilization) {
+        this.CPUUtilization = CPUUtilization;
+    }
+
+    public int getRAMSize() {
+        return RAMSize;
+    }
+
+    public void setRAMSize(int RAMSize) {
+        this.RAMSize = RAMSize;
+    }
+
+    public int getFreeRAMSize() {
+        return freeRAMSize;
+    }
+
+    public void setFreeRAMSize(int freeRAMSize) {
+        this.freeRAMSize = freeRAMSize;
+    }
+
     public boolean isOnline() {
         return online;
     }
@@ -127,6 +181,14 @@ public class DeviceEntity implements Serializable {
         this.virtual = virtual;
     }
 
+    public double getTransferRate() {
+        return transferRate;
+    }
+
+    public void setTransferRate(double transferRate) {
+        this.transferRate = transferRate;
+    }
+
     public double getProgress() {
         return progress;
     }
@@ -135,11 +197,32 @@ public class DeviceEntity implements Serializable {
         this.progress = progress;
     }
 
-    public ProjectEntity getProjectEntity() {
-        return projectEntity;
+    public List<DeployLogDetailEntity> getErrorFileList() {
+        return errorFileList;
     }
 
-    public void setProjectEntity(ProjectEntity projectEntity) {
-        this.projectEntity = projectEntity;
+    public void setErrorFileList(List<DeployLogDetailEntity> errorFileList) {
+        this.errorFileList = errorFileList;
+    }
+
+    public List<DeployLogDetailEntity> getCompletedFileList() {
+        return completedFileList;
+    }
+
+    public void setCompletedFileList(List<DeployLogDetailEntity> completedFileList) {
+        this.completedFileList = completedFileList;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null || getClass() != object.getClass()) return false;
+        DeviceEntity that = (DeviceEntity) object;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

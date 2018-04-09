@@ -38,6 +38,7 @@ public class NotificationMessage {
     // 部署设计详情相关错误信息
     public static final String DEPLOYMENT_DESIGN_DETAIL_NOT_FOUND = "deploymentdesigndetail不存在";
     public static final String DEPLOYMENT_DESIGN_DETAIL_DELETED = "deploymentdesigndetail已删除";
+    public static final String DEPLOYMENT_DESIGN_DETAIL_EXISTS = "deploymentdesigndetail已存在";
 
     // 设备相关错误
     public static final String DEVICE_EXISTS = "device已存在";
@@ -60,5 +61,6 @@ public class NotificationMessage {
     // 通用错误
     public static final String CACHE_CREAT_FAILED = "缓存文件创建失败。";
     public static final String COMPRESS_FAILED = "文件压缩失败。";
-    public static final String DISK_NOT_FOUND = "目标磁盘不存在";
+    public static final String PATH_ERROR = "路径确认信息接收异常";
+    public static final String DEVICE_DEPLOYING = "该设备正在部署";
 }
