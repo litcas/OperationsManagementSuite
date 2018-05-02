@@ -28,17 +28,19 @@ public class DeviceService {
     private final ProjectService projectService;
     private final DeploymentDesignService deploymentDesignService;
     private final AsyncTask asyncTask;
+    private final EventService eventService;
 
     @Autowired
-    public DeviceService(DeviceRepository deviceRepository, ProjectService projectService, DeploymentDesignService deploymentDesignService, AsyncTask asyncTask) {
+    public DeviceService(DeviceRepository deviceRepository, ProjectService projectService, DeploymentDesignService deploymentDesignService, AsyncTask asyncTask, EventService eventService) {
         this.deviceRepository = deviceRepository;
         this.projectService = projectService;
         this.deploymentDesignService = deploymentDesignService;
         this.asyncTask = asyncTask;
+        this.eventService = eventService;
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    public DeviceEntity saveDevices(String projectId, DeviceEntity deviceArgs) {
+    public DeviceEntity saveDevices(UserEntity loginUser, String projectId, DeviceEntity deviceArgs) {
         if (!projectService.hasProject(projectId)) {
             throw new CustomizeException(NotificationMessage.PROJECT_NOT_FOUND);
         }
@@ -52,11 +54,12 @@ public class DeviceService {
         BeanUtils.copyProperties(deviceArgs, deviceEntity, "id", "createTime", "projectEntity");
         deviceEntity.setDeployPath(getDeployPath(deviceArgs));
         deviceEntity.setProjectEntity(projectService.getProjects(projectId));
+        eventService.saveDeviceEvent(loginUser, deviceEntity);
         return deviceRepository.save(deviceEntity);
     }
 
 
-    public void deleteDevices(String deviceId) {
+    public void deleteDevices(UserEntity loginUser, String deviceId) {
         if (!hasDevices(deviceId)) {
             throw new CustomizeException(NotificationMessage.DEVICE_NOT_FOUND);
         }
@@ -66,10 +69,11 @@ public class DeviceService {
         deviceRepository.delete(deviceId);
         // 从部署状态中移除设备部署信息
         AsyncTask.deployStatusEntities.removeIf(deployStatusEntity -> deviceEntity.getIp().equals(deployStatusEntity.getIp()));
+        eventService.deleteDeviceEvent(loginUser, deviceEntity);
     }
 
 
-    public DeviceEntity updateDevices(String deviceId, DeviceEntity deviceArgs) {
+    public DeviceEntity updateDevices(UserEntity loginUser, String deviceId, DeviceEntity deviceArgs) {
         if (StringUtils.isEmpty(deviceArgs.getIp())) {
             throw new CustomizeException(NotificationMessage.DEVICE_IP_NOT_FOUND);
         }
@@ -80,6 +84,7 @@ public class DeviceService {
             }
         }
         BeanUtils.copyProperties(deviceArgs, deviceEntity, "id", "createTime", "projectEntity");
+        eventService.updateDeviceEvent(loginUser, deviceEntity);
         return deviceRepository.save(deviceEntity);
     }
 

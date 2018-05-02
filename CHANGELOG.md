@@ -7,6 +7,14 @@
 ### Fixed
 ### Removed
 
+## 1.3.0 - RELEASE - 2018-5-1
+### Added
+- 添加事件记录表及事件记录模块。
+### Changed
+### Fixed
+- 修复了在修改project时出现的逻辑判断错误。
+### Removed
+
 ## 1.2.0 - RELEASE - 2018-4-9
 ### Added
 - 实现获取目标机进程信息接口

@@ -3,6 +3,7 @@ package com.rengu.operationsoanagementsuite.Service;
 import com.rengu.operationsoanagementsuite.Configuration.ApplicationConfiguration;
 import com.rengu.operationsoanagementsuite.Entity.ComponentDetailEntity;
 import com.rengu.operationsoanagementsuite.Entity.ComponentEntity;
+import com.rengu.operationsoanagementsuite.Entity.UserEntity;
 import com.rengu.operationsoanagementsuite.Exception.CustomizeException;
 import com.rengu.operationsoanagementsuite.Repository.ComponentRepository;
 import com.rengu.operationsoanagementsuite.Utils.CompressUtils;
@@ -32,16 +33,18 @@ public class ComponentService {
     private final ApplicationConfiguration applicationConfiguration;
     private final ComponentRepository componentRepository;
     private final ComponentDetailService componentDetailService;
+    private final EventService eventService;
 
     @Autowired
-    public ComponentService(ApplicationConfiguration applicationConfiguration, ComponentRepository componentRepository, ComponentDetailService componentDetailService) {
+    public ComponentService(ApplicationConfiguration applicationConfiguration, ComponentRepository componentRepository, ComponentDetailService componentDetailService, EventService eventService) {
         this.applicationConfiguration = applicationConfiguration;
         this.componentRepository = componentRepository;
         this.componentDetailService = componentDetailService;
+        this.eventService = eventService;
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    public ComponentEntity saveComponents(ComponentEntity componentArgs, MultipartFile[] componentFiles) throws IOException {
+    public ComponentEntity saveComponents(UserEntity loginUser, ComponentEntity componentArgs, MultipartFile[] componentFiles) throws IOException {
         if (StringUtils.isEmpty(componentArgs.getName())) {
             throw new CustomizeException(NotificationMessage.COMPONENT_NAME_NOT_FOUND);
         }
@@ -60,26 +63,30 @@ public class ComponentService {
             componentArgs.setSize(FileUtils.sizeOfDirectory(new File(componentArgs.getFilePath())));
             componentArgs.setDisplaySize(FileUtils.byteCountToDisplaySize(componentArgs.getSize()));
         }
+        eventService.saveComponentEvent(loginUser, componentArgs);
         return componentRepository.save(componentArgs);
     }
 
-    public void deleteComponents(String componentId) {
+    public void deleteComponents(UserEntity loginUser, String componentId) {
         ComponentEntity componentEntity = getComponents(componentId);
         componentEntity.setDeleted(true);
+        eventService.deleteComponentEvent(loginUser, componentEntity);
         componentRepository.save(componentEntity);
     }
 
-    public ComponentEntity updateComponents(String componentId, String[] removeIds, ComponentEntity componentArgs, MultipartFile[] componentFiles) throws IOException {
+    public ComponentEntity updateComponents(UserEntity loginUser, String componentId, String[] removeIds, ComponentEntity componentArgs, MultipartFile[] componentFiles) throws IOException {
         ComponentEntity componentEntity = getComponents(componentId);
         // 移除组件的实体文件
-        if (removeIds.length != 0) {
-            for (String id : removeIds) {
-                ComponentDetailEntity componentDetailEntity = componentDetailService.getComponentDetails(id);
-                // 组件是否包含该文件
-                if (componentEntity.getComponentDetailEntities().contains(componentDetailEntity)) {
-                    // 删除是否成功
-                    if (new File(componentEntity.getFilePath() + componentDetailEntity.getPath()).delete()) {
-                        componentEntity.getComponentDetailEntities().remove(componentDetailEntity);
+        if (removeIds != null) {
+            if (removeIds.length != 0) {
+                for (String id : removeIds) {
+                    ComponentDetailEntity componentDetailEntity = componentDetailService.getComponentDetails(id);
+                    // 组件是否包含该文件
+                    if (componentEntity.getComponentDetailEntities().contains(componentDetailEntity)) {
+                        // 删除是否成功
+                        if (new File(componentEntity.getFilePath() + componentDetailEntity.getPath()).delete()) {
+                            componentEntity.getComponentDetailEntities().remove(componentDetailEntity);
+                        }
                     }
                 }
             }
@@ -98,6 +105,7 @@ public class ComponentService {
                 componentEntity.setDisplaySize(FileUtils.byteCountToDisplaySize(componentEntity.getSize()));
             }
         }
+        eventService.updateComponentEvent(loginUser, componentEntity);
         return componentRepository.save(componentEntity);
     }
 
@@ -130,7 +138,7 @@ public class ComponentService {
         }
     }
 
-    public List<ComponentEntity> importComponents(MultipartFile[] multipartFiles) throws IOException, ZipException {
+    public List<ComponentEntity> importComponents(UserEntity loginUser, MultipartFile[] multipartFiles) throws IOException, ZipException {
         if (multipartFiles.length == 0) {
             throw new CustomizeException(NotificationMessage.COMPONENT_FILE_NOT_FOUND);
         }
@@ -152,6 +160,7 @@ public class ComponentService {
             componentEntity.setDisplaySize(FileUtils.byteCountToDisplaySize(componentEntity.getSize()));
             componentEntityList.add(componentRepository.save(componentEntity));
         }
+        eventService.importComponentEvent(loginUser, componentEntityList);
         return componentEntityList;
     }
 
