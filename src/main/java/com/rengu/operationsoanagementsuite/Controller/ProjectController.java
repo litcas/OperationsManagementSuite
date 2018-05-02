@@ -34,14 +34,14 @@ public class ProjectController {
     // 删除工程
     @DeleteMapping(value = "/{projectId}")
     public ResultEntity deleteProjects(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "projectId") String projectId) {
-        projectService.deleteProjects(projectId);
+        projectService.deleteProjects(loginUser, projectId);
         return ResultUtils.resultBuilder(loginUser, HttpStatus.NO_CONTENT, NotificationMessage.PROJECT_DELETE);
     }
 
     // 修改工程
     @PatchMapping(value = "/{projectId}")
     public ResultEntity updateProjects(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "projectId") String projectId, ProjectEntity projectArgs) {
-        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, projectService.updateProjects(projectId, projectArgs));
+        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, projectService.updateProjects(loginUser, projectId, projectArgs));
     }
 
     // 查询工程
@@ -77,12 +77,12 @@ public class ProjectController {
     // 保存设备
     @PostMapping(value = "/{projectId}/devices")
     public ResultEntity saveDevices(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "projectId") String projectId, DeviceEntity deviceArgs) {
-        return ResultUtils.resultBuilder(loginUser, HttpStatus.CREATED, deviceService.saveDevices(projectId, deviceArgs));
+        return ResultUtils.resultBuilder(loginUser, HttpStatus.CREATED, deviceService.saveDevices(loginUser, projectId, deviceArgs));
     }
 
     // 查询设备
     @GetMapping(value = "/{projectId}/devices")
-    public ResultEntity saveDevices(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "projectId") String projectId) {
+    public ResultEntity getDevices(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "projectId") String projectId) {
         return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, deviceService.getDevicesByProjectId(projectId));
     }
 }

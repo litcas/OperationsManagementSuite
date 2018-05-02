@@ -30,20 +30,20 @@ public class ComponentController {
     // 保存组件
     @PostMapping
     public ResultEntity saveComponents(@AuthenticationPrincipal UserEntity loginUser, ComponentEntity componentArgs, @RequestParam(value = "componentfiles") MultipartFile[] componentFiles) throws IOException {
-        return ResultUtils.resultBuilder(loginUser, HttpStatus.CREATED, componentService.saveComponents(componentArgs, componentFiles));
+        return ResultUtils.resultBuilder(loginUser, HttpStatus.CREATED, componentService.saveComponents(loginUser, componentArgs, componentFiles));
     }
 
     // 删除组件
     @DeleteMapping(value = "/{componentId}")
     public ResultEntity deleteComponents(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "componentId") String componentId) {
-        componentService.deleteComponents(componentId);
+        componentService.deleteComponents(loginUser, componentId);
         return ResultUtils.resultBuilder(loginUser, HttpStatus.NO_CONTENT, NotificationMessage.COMPONENT_DELETE);
     }
 
     // 修改组件
     @PostMapping(value = "/{componentId}/update")
     public ResultEntity updateComponents(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "componentId") String componentId, @RequestParam(value = "removeIds", required = false) String[] removeIds, ComponentEntity componentArgs, @RequestParam(value = "componentfiles") MultipartFile[] componentFiles) throws IOException {
-        return ResultUtils.resultBuilder(loginUser, HttpStatus.NO_CONTENT, componentService.updateComponents(componentId, removeIds, componentArgs, componentFiles));
+        return ResultUtils.resultBuilder(loginUser, HttpStatus.NO_CONTENT, componentService.updateComponents(loginUser, componentId, removeIds, componentArgs, componentFiles));
     }
 
     // 查询所有组件
@@ -78,7 +78,7 @@ public class ComponentController {
     // 导入组件
     @PostMapping(value = "/import")
     public ResultEntity importComponents(@AuthenticationPrincipal UserEntity loginUser, @RequestParam(value = "importComponents") MultipartFile[] multipartFiles) throws IOException, ZipException {
-        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, componentService.importComponents(multipartFiles));
+        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, componentService.importComponents(loginUser, multipartFiles));
     }
 
     // 复制组件

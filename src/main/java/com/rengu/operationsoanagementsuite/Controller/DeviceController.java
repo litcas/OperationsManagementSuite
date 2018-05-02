@@ -24,14 +24,14 @@ public class DeviceController {
     // 删除设备
     @DeleteMapping(value = "/{deviceId}")
     public ResultEntity deleteDevices(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deviceId") String deviceId) {
-        deviceService.deleteDevices(deviceId);
+        deviceService.deleteDevices(loginUser, deviceId);
         return ResultUtils.resultBuilder(loginUser, HttpStatus.NO_CONTENT, NotificationMessage.DEVICE_DELETED);
     }
 
     // 更新设备
     @PatchMapping(value = "/{deviceId}")
     public ResultEntity updateDevices(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "deviceId") String deviceId, DeviceEntity deviceArgs) {
-        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, deviceService.updateDevices(deviceId, deviceArgs));
+        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, deviceService.updateDevices(loginUser, deviceId, deviceArgs));
     }
 
     // 查询设备

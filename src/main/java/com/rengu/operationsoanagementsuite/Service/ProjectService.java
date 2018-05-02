@@ -24,6 +24,8 @@ public class ProjectService {
 
     @Autowired
     public DeviceRepository deviceRepository;
+    @Autowired
+    private EventService eventService;
 
     @Autowired
     public ProjectService(ProjectRepository projectRepository, DeploymentDesignService deploymentDesignService, DeploymentDesignSnapshotService deploymentDesignSnapshotService) {
@@ -41,11 +43,12 @@ public class ProjectService {
             throw new CustomizeException(NotificationMessage.PROJECT_EXISTS);
         }
         projectArgs.setUserEntity(loginUser);
+        eventService.saveProjectEvent(loginUser, projectArgs);
         return projectRepository.save(projectArgs);
     }
 
 
-    public void deleteProjects(String projectId) {
+    public void deleteProjects(UserEntity loginUser, String projectId) {
         if (!hasProject(projectId)) {
             throw new CustomizeException(NotificationMessage.PROJECT_NOT_FOUND);
         }
@@ -64,17 +67,28 @@ public class ProjectService {
         for (DeploymentDesignSnapshotEntity deploymentDesignSnapshotEntity : deploymentDesignSnapshotService.getDeploymentDesignSnapshotsByProjectId(projectId)) {
             deploymentDesignSnapshotService.deleteDeploymentDesignSnapshot(deploymentDesignSnapshotEntity.getId());
         }
+        eventService.deleteProjectEvent(loginUser, getProjects(projectId));
         projectRepository.delete(projectId);
     }
 
 
-    public ProjectEntity updateProjects(String projectId, ProjectEntity projectArgs) {
+    public ProjectEntity updateProjects(UserEntity loginUser, String projectId, ProjectEntity projectArgs) {
         if (!hasProject(projectId)) {
             throw new CustomizeException(NotificationMessage.PROJECT_NOT_FOUND);
         }
         ProjectEntity projectEntity = projectRepository.findOne(projectId);
-        BeanUtils.copyProperties(projectArgs, projectEntity, "id", "createTime", "name");
-        return projectRepository.save(projectEntity);
+        if (projectArgs.getName().equals(projectEntity.getName())) {
+            BeanUtils.copyProperties(projectArgs, projectEntity, "id", "createTime", "userEntity");
+            eventService.updateProjectEvent(loginUser, projectEntity);
+            return projectRepository.save(projectEntity);
+        } else {
+            if (hasName(projectArgs.getName(), loginUser)) {
+                throw new CustomizeException(NotificationMessage.PROJECT_EXISTS);
+            }
+            BeanUtils.copyProperties(projectArgs, projectEntity, "id", "createTime", "userEntity");
+            eventService.updateProjectEvent(loginUser, projectEntity);
+            return projectRepository.save(projectEntity);
+        }
     }
 
 
