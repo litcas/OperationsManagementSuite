@@ -57,12 +57,11 @@ public class ComponentService {
         componentArgs.setDeployPath(getDeployPath(componentArgs));
         componentArgs.setFilePath(getFilePath(componentArgs, null));
         componentArgs.setSize(FileUtils.sizeOfDirectory(new File(componentArgs.getFilePath())));
-        componentArgs.setDisplaySize(FileUtils.byteCountToDisplaySize(componentArgs.getSize()));
         if (componentFiles.length != 0) {
             componentArgs.setComponentDetailEntities(addComponentDetails(componentArgs, componentDetailService.getComponentDetails(componentArgs, componentFiles)));
             componentArgs.setSize(FileUtils.sizeOfDirectory(new File(componentArgs.getFilePath())));
-            componentArgs.setDisplaySize(FileUtils.byteCountToDisplaySize(componentArgs.getSize()));
         }
+        componentArgs.setDisplaySize(FileUtils.byteCountToDisplaySize(componentArgs.getSize()));
         eventService.saveComponentEvent(loginUser, componentArgs);
         return componentRepository.save(componentArgs);
     }
@@ -102,9 +101,9 @@ public class ComponentService {
             if (componentFiles.length != 0) {
                 componentEntity.setComponentDetailEntities(addComponentDetails(componentEntity, componentDetailService.getComponentDetails(componentEntity, componentFiles)));
                 componentEntity.setSize(FileUtils.sizeOfDirectory(new File(componentEntity.getFilePath())));
-                componentEntity.setDisplaySize(FileUtils.byteCountToDisplaySize(componentEntity.getSize()));
             }
         }
+        componentEntity.setDisplaySize(FileUtils.byteCountToDisplaySize(componentEntity.getSize()));
         eventService.updateComponentEvent(loginUser, componentEntity);
         return componentRepository.save(componentEntity);
     }
@@ -182,8 +181,8 @@ public class ComponentService {
         if (new File(componentArgs.getFilePath()).exists()) {
             componentEntity.setComponentDetailEntities(addComponentDetails(componentEntity, componentDetailService.getComponentDetails(componentEntity, new File(componentArgs.getFilePath()))));
             componentEntity.setSize(FileUtils.sizeOfDirectory(new File(componentEntity.getFilePath())));
-            componentEntity.setDisplaySize(FileUtils.byteCountToDisplaySize(componentEntity.getSize()));
         }
+        componentEntity.setDisplaySize(FileUtils.byteCountToDisplaySize(componentEntity.getSize()));
         return componentRepository.save(componentEntity);
     }
 

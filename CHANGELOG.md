@@ -7,12 +7,13 @@
 ### Fixed
 ### Removed
 
-## 1.3.0 - RELEASE - 2018-5-1
+## 1.3.0 - RELEASE - 2018-5-16
 ### Added
 - 添加事件记录表及事件记录模块。
 ### Changed
 ### Fixed
 - 修复了在修改project时出现的逻辑判断错误。
+- 修复了在修改组件信息时导致的组件尺寸信息消失的问题。
 ### Removed
 
 ## 1.2.0 - RELEASE - 2018-4-9
