@@ -1,5 +1,23 @@
-spring:
-  profiles:
-    active: release
 server:
   display-name: Operations Management Suite
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/OperationsManagementSuiteDB
+    username: rengu
+    password: rengu
+    driver-class-name: com.mysql.jdbc.Driver
+  jpa:
+    hibernate:
+        ddl-auto: update
+    properties:
+        hibernate.format_sql: true
+  http:
+    multipart:
+      max-file-size: 10240MB
+      max-request-size: 10240MB
+  cache:
+    type: redis
+
+logging:
+  file: operationsoanagementsuite.log

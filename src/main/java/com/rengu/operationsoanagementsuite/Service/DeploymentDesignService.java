@@ -56,10 +56,12 @@ public class DeploymentDesignService {
 
     public DeploymentDesignEntity updateDeploymentDesigns(String deploymentDesignId, DeploymentDesignEntity deploymentDesignArgs) {
         DeploymentDesignEntity deploymentDesignEntity = getDeploymentDesigns(deploymentDesignId);
-        if (!hasProjectIdAndName(deploymentDesignEntity.getProjectEntity().getId(), deploymentDesignArgs.getName())) {
-            throw new CustomizeException(NotificationMessage.DEPLOYMENT_DESIGN_EXISTS);
+        if (!deploymentDesignArgs.getName().equals(deploymentDesignEntity.getName()) || !deploymentDesignArgs.getDescription().equals(deploymentDesignEntity.getDescription())) {
+            if (hasProjectIdAndName(deploymentDesignEntity.getProjectEntity().getId(), deploymentDesignArgs.getName())) {
+                throw new CustomizeException(NotificationMessage.DEPLOYMENT_DESIGN_EXISTS);
+            }
+            BeanUtils.copyProperties(deploymentDesignArgs, deploymentDesignEntity, "id", "createTime", "projectEntity", "deploymentDesignDetailEntities");
         }
-        BeanUtils.copyProperties(deploymentDesignArgs, deploymentDesignEntity, "id", "createTime", "projectEntity", "deploymentDesignDetailEntities");
         return deploymentDesignRepository.save(deploymentDesignEntity);
     }
 

@@ -77,13 +77,13 @@ public class DeployLogService {
             }
             if (!StringUtils.isEmpty(startTime) || !StringUtils.isEmpty(endTime)) {
                 if (!StringUtils.isEmpty(startTime) && !StringUtils.isEmpty(endTime)) {
-                    predicateList.add(cb.between(root.get("createTime").as(Date.class), FormatUtils.dateFormat(Long.parseLong(startTime), "yyyy-MM-dd"), FormatUtils.dateFormat(Long.parseLong(endTime), "yyyy-MM-dd")));
+                    predicateList.add(cb.between(root.get("createTime").as(Date.class), FormatUtils.dateFormat(Long.parseLong(startTime), "yyyy-MM-dd HH:mm:ss"), FormatUtils.dateFormat(Long.parseLong(endTime), "yyyy-MM-dd HH:mm:ss")));
                 } else {
                     if (!StringUtils.isEmpty(startTime)) {
-                        predicateList.add(cb.between(root.get("createTime").as(Date.class), FormatUtils.dateFormat(Long.parseLong(startTime), "yyyy-MM-dd"), new Date()));
+                        predicateList.add(cb.between(root.get("createTime").as(Date.class), FormatUtils.dateFormat(Long.parseLong(startTime), "yyyy-MM-dd HH:mm:ss"), new Date()));
                     }
                     if (!StringUtils.isEmpty(endTime)) {
-                        predicateList.add(cb.between(root.get("createTime").as(Date.class), new Date(), FormatUtils.dateFormat(Long.parseLong(endTime), "yyyy-MM-dd")));
+                        predicateList.add(cb.between(root.get("createTime").as(Date.class), new Date(), FormatUtils.dateFormat(Long.parseLong(endTime), "yyyy-MM-dd HH:mm:ss")));
                     }
                 }
             }
