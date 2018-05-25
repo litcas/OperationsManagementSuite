@@ -58,6 +58,13 @@ public class NotificationMessage {
     public static final String DEPLOYMENT_DESIGN_SNAPSHOT_EXISTS = "deploymentdesignsnapshot已存在";
     public static final String DEPLOYMENT_DESIGN_SNAPSHOT_DELETED = "deploymentdesignsnapshot已删除";
 
+    // 舱室设计相关错误
+    public static final String CABIN_NOT_FOUND = "未发现舱室信息";
+    public static final String CABIN_NAME_NOT_FOUND = "未发现舱室名称信息";
+    public static final String CABIN_ID_NOT_FOUND = "未发现舱室ID信息";
+    public static final String CABIN_EXISTS = "舱室已存在";
+    public static final String CABIN_DELETED = "舱室已删除";
+
     // 通用错误
     public static final String CACHE_CREAT_FAILED = "缓存文件创建失败。";
     public static final String COMPRESS_FAILED = "文件压缩失败。";
