@@ -62,6 +62,7 @@ public class NotificationMessage {
     public static final String CABIN_NOT_FOUND = "未发现舱室信息";
     public static final String CABIN_NAME_NOT_FOUND = "未发现舱室名称信息";
     public static final String CABIN_ID_NOT_FOUND = "未发现舱室ID信息";
+    public static final String CABIN_POSITION_NOT_FOUND = "未发现舱室位置信息";
     public static final String CABIN_EXISTS = "舱室已存在";
     public static final String CABIN_DELETED = "舱室已删除";
 

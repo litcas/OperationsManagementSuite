@@ -2,10 +2,7 @@ package com.rengu.operationsoanagementsuite.Entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -21,7 +18,7 @@ public class CabinEntity {
     private String name;
     @ManyToOne
     private ProjectEntity projectEntity;
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     private List<CabinDetailEntity> cabinDetailEntities;
 
     public String getId() {

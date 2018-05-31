@@ -48,9 +48,9 @@ public class CabinController {
         return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, cabinService.getCabin());
     }
 
-    @PutMapping(value = "/{cabinId}/device/{deviceId}")
-    public ResultEntity putDevice(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "cabinId") String cabinId, @PathVariable(value = "deviceId") String deviceId, @RequestParam(value = "name") String name) {
-        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, cabinService.putDevice(cabinId, deviceId, name));
+    @PostMapping(value = "/{cabinId}/device/{deviceId}")
+    public ResultEntity putDevice(@AuthenticationPrincipal UserEntity loginUser, @PathVariable(value = "cabinId") String cabinId, @PathVariable(value = "deviceId") String deviceId, @RequestParam(value = "name") String name, @RequestParam(value = "position") int position) {
+        return ResultUtils.resultBuilder(loginUser, HttpStatus.OK, cabinService.putDevice(cabinId, deviceId, name, position));
     }
 
     @DeleteMapping(value = "/{cabinId}/device/{deviceId}")

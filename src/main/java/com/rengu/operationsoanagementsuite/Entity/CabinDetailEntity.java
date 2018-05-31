@@ -17,6 +17,7 @@ public class CabinDetailEntity {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime = new Date();
     private String name;
+    private int position;
     @OneToOne
     private DeviceEntity deviceEntity;
 
@@ -44,6 +45,14 @@ public class CabinDetailEntity {
         this.name = name;
     }
 
+    public int getPosition() {
+        return position;
+    }
+
+    public void setPosition(int position) {
+        this.position = position;
+    }
+
     public DeviceEntity getDeviceEntity() {
         return deviceEntity;
     }
@@ -62,7 +71,6 @@ public class CabinDetailEntity {
 
     @Override
     public int hashCode() {
-
         return Objects.hash(deviceEntity);
     }
 }
