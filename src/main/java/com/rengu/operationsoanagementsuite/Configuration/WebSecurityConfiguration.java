@@ -3,6 +3,7 @@ package com.rengu.operationsoanagementsuite.Configuration;
 import com.rengu.operationsoanagementsuite.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -32,6 +33,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         // 启用http basic验证
         http.httpBasic();
+        http.authorizeRequests().antMatchers(HttpMethod.POST, "/users").permitAll();
         // 请求全部需要鉴权认证
         http.authorizeRequests().anyRequest().authenticated();
     }

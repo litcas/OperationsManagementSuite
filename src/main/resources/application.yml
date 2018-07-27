@@ -10,8 +10,6 @@ spring:
   jpa:
     hibernate:
         ddl-auto: update
-    properties:
-        hibernate.format_sql: true
   http:
     multipart:
       max-file-size: 10240MB

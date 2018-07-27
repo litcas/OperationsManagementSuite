@@ -139,6 +139,8 @@ public class AsyncTask {
                         componentFile.setMD5(scanResult.getMD5());
                         componentFile.setPath(scanResult.getPath());
                         unknownFiles.add(componentFile);
+                        logger.info("未知文件：" + componentFile.getPath() + "-标准MD5：" + componentFile.getMD5());
+
                     }
                 }
                 scanResultEntity.setCorrectComponentFiles(correctComponentFiles);
@@ -233,8 +235,9 @@ public class AsyncTask {
                         }
                         // 发送文件实体
                         IOUtils.copy(new FileInputStream(componentEntity.getFilePath() + componentDetailEntity.getPath()), dataOutputStream);
+                        dataOutputStream.flush();
                         // 单个文件发送结束标志d
-                        dataOutputStream.write(recvEndFlag.getBytes());
+//                        dataOutputStream.write(recvEndFlag.getBytes());
                         // 接收结束标志回复
                         int endRetryCount = 0;
                         while (true) {

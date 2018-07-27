@@ -6,6 +6,7 @@ import com.rengu.operationsoanagementsuite.Service.DeviceService;
 import com.rengu.operationsoanagementsuite.Service.UDPService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -96,7 +97,8 @@ public class HeartbeatTask {
                 logger.info("<" + heartbeatEntity.getInetAddress().getHostAddress() + ">--->已连线服务器。");
             } else {
                 // 已在线的设备
-                DeviceService.onlineHeartbeats.get(DeviceService.onlineHeartbeats.indexOf(heartbeatEntity)).setCount(applicationConfiguration.getDeviceLogoutDelay());
+                heartbeatEntity.setCount(applicationConfiguration.getDeviceLogoutDelay());
+                BeanUtils.copyProperties(heartbeatEntity, DeviceService.onlineHeartbeats.get(index));
             }
         }
     }
